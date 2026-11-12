@@ -1,0 +1,402 @@
+/* ==========================================================================
+   style.css — la feuille de style unique du site
+   --------------------------------------------------------------------------
+   Pourquoi un seul fichier CSS ? Toutes les pages partagent la même apparence :
+   on modifie une couleur ici, et elle change partout.
+
+   Sommaire :
+     1. Variables (couleurs, espacements)
+     2. Base (texte, liens, titres)
+     3. En-tête et pied de page
+     4. Mise en page générale
+     5. Cartes (options et modules)
+     6. Boutons et formulaires
+     7. Quiz
+     8. Pages de module (cours, animation, calculateur)
+     9. Tableau de bord
+   ========================================================================== */
+
+/* 1. VARIABLES -------------------------------------------------------------
+   Une variable CSS s'écrit --nom et s'utilise avec var(--nom).
+   Pour changer l'identité visuelle du site, il suffit de modifier ce bloc. */
+:root {
+  --fond: #f5f4f0;
+  --surface: #ffffff;
+  --texte: #1b1e23;
+  --texte-doux: #5a606b;
+  --bordure: #d9d6ce;
+  --accent: #0b5cad;          /* couleur principale (liens, boutons) */
+  --accent-texte: #ffffff;    /* texte posé sur la couleur principale */
+  --accent-pale: #e3eefa;
+  --juste: #17703f;
+  --juste-pale: #dff3e6;
+  --faux: #b3261e;
+  --faux-pale: #fbe4e2;
+  --rayon: 10px;
+  --largeur-max: 60rem;
+}
+
+/* Une couleur d'accent par option : la page prend la couleur de son option
+   grâce à l'attribut data-option écrit sur la balise <body>. */
+body[data-option="tiee"]  { --accent: #0b5cad; --accent-pale: #e3eefa; }
+body[data-option="image"] { --accent: #a2400c; --accent-pale: #fbeadf; }
+
+/* Thème sombre automatique : si l'appareil de l'élève est réglé en mode sombre,
+   on remplace simplement les valeurs des variables. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fond: #14161a;
+    --surface: #1e2127;
+    --texte: #ebe9e4;
+    --texte-doux: #a3a9b4;
+    --bordure: #363a43;
+    --accent: #6fb1f5;
+    --accent-texte: #0d1620;
+    --accent-pale: #1c2d40;
+    --juste: #6fd49a;
+    --juste-pale: #17301f;
+    --faux: #ff9087;
+    --faux-pale: #3a1b19;
+  }
+  body[data-option="tiee"]  { --accent: #6fb1f5; --accent-pale: #1c2d40; }
+  body[data-option="image"] { --accent: #f5a26b; --accent-pale: #3a2618; }
+}
+
+/* 2. BASE ------------------------------------------------------------------ */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fond);
+  color: var(--texte);
+  /* Polices déjà installées sur l'appareil : rien à télécharger, donc un site
+     rapide et aucune donnée envoyée à un service de polices externe. */
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+h1, h2, h3 { line-height: 1.2; text-wrap: balance; }
+h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+h2 { font-size: 1.45rem; margin: 2.5rem 0 0.75rem; }
+h3 { font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
+p  { margin: 0 0 1rem; max-width: 68ch; }
+
+a { color: var(--accent); }
+a:hover { text-decoration-thickness: 2px; }
+
+/* Contour bien visible pour celles et ceux qui naviguent au clavier. */
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.discret { color: var(--texte-doux); font-size: 0.95rem; }
+.cache { display: none !important; }
+
+/* 3. EN-TÊTE ET PIED DE PAGE ----------------------------------------------- */
+.entete-contenu {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+  max-width: var(--largeur-max);
+  margin: 0 auto;
+  padding: 0.75rem 1rem;
+}
+
+.logo {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--texte);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+.logo span { color: var(--texte-doux); font-weight: 500; }
+
+.navigation { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; }
+.navigation a { color: var(--texte); text-decoration: none; font-weight: 600; padding: 0.25rem 0; }
+.navigation a:hover { text-decoration: underline; }
+
+.zone-compte {
+  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  font-size: 0.95rem;
+}
+
+/* La « mire de barres » sous l'en-tête : un clin d'œil à l'audiovisuel,
+   dessinée uniquement avec un dégradé CSS (aucune image à charger). */
+.mire {
+  height: 6px;
+  background: linear-gradient(to right,
+    #c0c0c0 0 14.28%, #c0c000 0 28.57%, #00c0c0 0 42.85%, #00c000 0 57.14%,
+    #c000c0 0 71.42%, #c00000 0 85.71%, #0000c0 0);
+}
+
+#pied {
+  max-width: var(--largeur-max);
+  margin: 4rem auto 0;
+  padding: 1.5rem 1rem 2.5rem;
+  border-top: 1px solid var(--bordure);
+  color: var(--texte-doux);
+  font-size: 0.9rem;
+}
+
+/* 4. MISE EN PAGE GÉNÉRALE ------------------------------------------------- */
+main {
+  max-width: var(--largeur-max);
+  margin: 0 auto;
+  padding: 2rem 1rem 0;
+}
+
+.chapeau { font-size: 1.15rem; color: var(--texte-doux); }
+
+.fil-ariane { font-size: 0.95rem; margin-bottom: 1rem; }
+
+.etiquette {
+  display: inline-block;
+  padding: 0.1rem 0.6rem;
+  border-radius: 99px;
+  background: var(--accent-pale);
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+.etiquette-neutre { background: var(--bordure); color: var(--texte); }
+
+.avertissement {
+  border: 1px solid var(--bordure);
+  border-left: 5px solid #c98a00;
+  background: var(--surface);
+  border-radius: var(--rayon);
+  padding: 0.9rem 1.1rem;
+  margin: 1.5rem 0;
+}
+.avertissement p:last-child { margin-bottom: 0; }
+
+/* 5. CARTES ---------------------------------------------------------------- */
+/* La grille s'adapte toute seule : autant de colonnes de 17rem minimum que
+   la largeur de l'écran le permet (une seule colonne sur téléphone). */
+.grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(17rem, 100%), 1fr));
+  gap: 1rem;
+  padding: 0;
+  margin: 1rem 0;
+  list-style: none;
+}
+
+/* Variante : les éléments se partagent toute la largeur (auto-fit au lieu de
+   auto-fill). Utilisée pour les deux cartes d'option de l'accueil et pour
+   les deux images « avant / après » des modules. */
+.grille-etiree { grid-template-columns: repeat(auto-fit, minmax(min(17rem, 100%), 1fr)); }
+.avant-apres { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+.carte {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon);
+  padding: 1.25rem;
+}
+.carte h3 { margin: 0; font-size: 1.15rem; }
+.carte p { margin: 0; color: var(--texte-doux); font-size: 0.98rem; }
+.carte .bouton { margin-top: auto; align-self: flex-start; }
+.carte-etiquettes { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.carte-progression { font-size: 0.9rem; font-weight: 600; color: var(--juste); }
+.carte-indisponible { opacity: 0.65; }
+
+/* Grandes cartes de la page d'accueil (une par option). */
+.carte-option {
+  text-decoration: none;
+  color: var(--texte);
+  border-top: 6px solid var(--couleur-option);
+  padding: 1.5rem;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.carte-option:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgb(0 0 0 / 0.12); }
+.carte-option h2 { margin: 0; font-size: 1.7rem; }
+.carte-option .suite { margin-top: 0.5rem; font-weight: 700; color: var(--couleur-option); }
+.carte-option.tiee  { --couleur-option: #0b5cad; }
+.carte-option.image { --couleur-option: #a2400c; }
+@media (prefers-color-scheme: dark) {
+  .carte-option.tiee  { --couleur-option: #6fb1f5; }
+  .carte-option.image { --couleur-option: #f5a26b; }
+}
+
+.etapes { padding-left: 1.2rem; }
+.etapes li { margin-bottom: 0.4rem; max-width: 65ch; }
+
+/* 6. BOUTONS ET FORMULAIRES ------------------------------------------------ */
+.bouton {
+  display: inline-block;
+  padding: 0.6rem 1.1rem;
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-texte);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+.bouton:hover { filter: brightness(1.1); }
+.bouton[disabled] { opacity: 0.5; cursor: not-allowed; }
+.bouton-secondaire { background: transparent; color: var(--accent); }
+.bouton-petit { padding: 0.25rem 0.7rem; font-size: 0.9rem; }
+
+.formulaire {
+  display: grid;
+  gap: 1rem;
+  max-width: 26rem;
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon);
+  padding: 1.5rem;
+}
+.formulaire h2 { margin: 0; }
+.champ { display: grid; gap: 0.3rem; font-weight: 600; }
+.champ input, .champ select, .reglages select {
+  font: inherit;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+  background: var(--fond);
+  color: var(--texte);
+}
+.message { margin: 0; font-weight: 600; }
+.message-erreur { color: var(--faux); }
+.message-succes { color: var(--juste); }
+.lien-bouton {
+  border: 0; padding: 0; background: none; font: inherit;
+  color: var(--accent); text-decoration: underline; cursor: pointer;
+}
+
+/* 7. QUIZ ------------------------------------------------------------------ */
+.quiz {
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon);
+  padding: 1.5rem;
+}
+.quiz-avancement { display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--texte-doux); font-weight: 600; }
+.quiz-barre { height: 6px; border-radius: 3px; background: var(--bordure); margin: 0.4rem 0 1.25rem; overflow: hidden; }
+.quiz-barre div { height: 100%; background: var(--accent); transition: width 0.3s; }
+.quiz-question { font-size: 1.2rem; font-weight: 700; margin: 0 0 1rem; }
+.quiz-reponses { display: grid; gap: 0.6rem; }
+
+.quiz-reponse {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--bordure);
+  border-radius: 8px;
+  background: var(--fond);
+  color: var(--texte);
+  font: inherit;
+  cursor: pointer;
+}
+.quiz-reponse:hover:not([disabled]) { border-color: var(--accent); }
+.quiz-reponse[disabled] { cursor: default; }
+/* On ne compte pas uniquement sur la couleur : un symbole ✓ ou ✗ est aussi
+   ajouté devant le texte, utile pour les personnes daltoniennes. */
+.quiz-reponse.juste { border-color: var(--juste); background: var(--juste-pale); font-weight: 700; }
+.quiz-reponse.faux  { border-color: var(--faux);  background: var(--faux-pale); }
+.quiz-reponse.juste::before { content: "✓  "; color: var(--juste); }
+.quiz-reponse.faux::before  { content: "✗  "; color: var(--faux); }
+
+.quiz-explication {
+  margin: 1rem 0;
+  padding: 0.9rem 1rem;
+  border-radius: 8px;
+  background: var(--accent-pale);
+}
+.quiz-explication p { margin: 0; }
+.quiz-explication strong { display: block; margin-bottom: 0.2rem; }
+
+.quiz-score { font-size: 2.4rem; font-weight: 800; margin: 0; letter-spacing: -0.02em; }
+.quiz-erreurs { padding-left: 1.2rem; }
+.quiz-erreurs li { margin-bottom: 0.75rem; }
+.quiz-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.25rem; }
+
+/* 8. PAGES DE MODULE ------------------------------------------------------- */
+.sommaire {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 1.5rem 0;
+  list-style: none;
+}
+.sommaire a {
+  display: block;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--bordure);
+  border-radius: 99px;
+  background: var(--surface);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.cours {
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon);
+  padding: 0.5rem 1.5rem 1rem;
+}
+.cours li { margin-bottom: 0.35rem; max-width: 68ch; }
+.formule {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: var(--accent-pale);
+  font-weight: 600;
+  overflow-x: auto;
+}
+
+/* Les tableaux larges défilent horizontalement sur téléphone au lieu de
+   faire déborder toute la page. */
+.tableau-defilant { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.97rem; }
+th, td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--bordure); text-align: left; vertical-align: top; }
+th { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--texte-doux); }
+td.nombre, th.nombre { text-align: right; font-variant-numeric: tabular-nums; }
+
+.atelier {
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon);
+  padding: 1.25rem;
+}
+.atelier canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  background: #101216;   /* fond sombre fixe : les schémas sont dessinés pour lui */
+}
+.atelier figure { margin: 0 0 1rem; }
+.atelier figcaption { font-size: 0.9rem; color: var(--texte-doux); margin-top: 0.4rem; }
+
+.choix { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 1rem; }
+.choix .bouton[aria-pressed="false"] { background: transparent; color: var(--accent); }
+
+.reglages { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+.reglages label { display: grid; gap: 0.25rem; font-weight: 600; font-size: 0.95rem; }
+
+.resultat-debit { font-size: 2rem; font-weight: 800; margin: 0; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.jauge { height: 14px; border-radius: 7px; background: var(--bordure); overflow: hidden; margin: 0.5rem 0; }
+.jauge div { height: 100%; background: var(--accent); transition: width 0.3s; }
+
+/* 9. TABLEAU DE BORD ------------------------------------------------------- */
+.chiffres { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.chiffre { background: var(--surface); border: 1px solid var(--bordure); border-radius: var(--rayon); padding: 1rem 1.25rem; }
+.chiffre strong { display: block; font-size: 2rem; letter-spacing: -0.02em; }
+.chiffre span { color: var(--texte-doux); font-size: 0.95rem; }
+
+/* Respect du réglage « réduire les animations » du système. */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}

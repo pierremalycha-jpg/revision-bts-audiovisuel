@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ma progression — Révision BTS Audiovisuel</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body data-racine="">
+
+  <header id="entete"></header>
+
+  <main>
+    <p class="fil-ariane"><a href="index.html">Accueil</a> › Ma progression</p>
+    <h1>Ma progression</h1>
+
+    <!-- Indique d'où viennent les données : compte en ligne ou cet appareil -->
+    <p id="origine-donnees" class="chapeau">Chargement…</p>
+
+    <!-- Trois chiffres clés, remplis par js/page-tableau-de-bord.js -->
+    <div class="chiffres">
+      <div class="chiffre"><strong id="chiffre-modules">–</strong><span>modules commencés</span></div>
+      <div class="chiffre"><strong id="chiffre-moyenne">–</strong><span>moyenne des meilleurs scores</span></div>
+      <div class="chiffre"><strong id="chiffre-tentatives">–</strong><span>quiz terminés</span></div>
+    </div>
+
+    <h2>Détail par module</h2>
+    <div class="tableau-defilant">
+      <table>
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Épreuve</th>
+            <th class="nombre">Meilleur score</th>
+            <th class="nombre">Dernier score</th>
+            <th class="nombre">Essais</th>
+            <th>Dernière révision</th>
+          </tr>
+        </thead>
+        <tbody id="lignes-progression"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <footer id="pied"></footer>
+
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/suivi.js"></script>
+  <script src="js/commun.js"></script>
+  <script src="js/catalogue.js"></script>
+  <script src="js/page-tableau-de-bord.js"></script>
+</body>
+</html>

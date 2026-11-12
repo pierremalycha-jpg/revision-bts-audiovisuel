@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Connexion — Révision BTS Audiovisuel</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body data-racine="">
+
+  <header id="entete"></header>
+
+  <main>
+    <p class="fil-ariane"><a href="index.html">Accueil</a> › Connexion</p>
+    <h1>Mon compte</h1>
+
+    <!-- Les quatre blocs ci-dessous portent la classe « cache » (invisible).
+         js/page-connexion.js affiche celui qui correspond à la situation. -->
+
+    <!-- 1. Firebase n'est pas encore configuré -->
+    <div id="bloc-mode-local" class="avertissement cache">
+      <p><strong>Les comptes ne sont pas encore activés.</strong></p>
+      <p>Le site fonctionne en mode local : ta progression est gardée sur cet appareil. Tu peux réviser normalement.</p>
+    </div>
+
+    <!-- 2. L'élève est déjà connecté -->
+    <div id="bloc-connecte" class="cache">
+      <p class="chapeau">Tu es connecté·e.</p>
+      <a class="bouton" href="tableau-de-bord.html">Voir ma progression</a>
+    </div>
+
+    <!-- 3. Formulaire de connexion -->
+    <form id="formulaire-connexion" class="formulaire cache">
+      <h2>Se connecter</h2>
+      <label class="champ">Adresse e-mail
+        <input type="email" id="connexion-email" autocomplete="email" required>
+      </label>
+      <label class="champ">Mot de passe
+        <input type="password" id="connexion-mot-de-passe" autocomplete="current-password" required>
+      </label>
+      <p id="connexion-message" class="message" aria-live="polite"></p>
+      <button class="bouton" type="submit">Se connecter</button>
+      <p class="discret">
+        <button class="lien-bouton" type="button" id="lien-mot-de-passe-oublie">Mot de passe oublié ?</button><br>
+        Pas encore de compte ?
+        <button class="lien-bouton" type="button" id="lien-vers-inscription">Créer un compte</button>
+      </p>
+    </form>
+
+    <!-- 4. Formulaire de création de compte -->
+    <form id="formulaire-inscription" class="formulaire cache">
+      <h2>Créer un compte</h2>
+      <label class="champ">Prénom
+        <input type="text" id="inscription-prenom" autocomplete="given-name" maxlength="40" required>
+      </label>
+      <label class="champ">Option
+        <select id="inscription-option" required>
+          <option value="tiee">TIEE</option>
+          <option value="image">IMAGE</option>
+        </select>
+      </label>
+      <label class="champ">Adresse e-mail
+        <input type="email" id="inscription-email" autocomplete="email" required>
+      </label>
+      <label class="champ">Mot de passe (6 caractères minimum)
+        <input type="password" id="inscription-mot-de-passe" autocomplete="new-password" minlength="6" required>
+      </label>
+      <p id="inscription-message" class="message" aria-live="polite"></p>
+      <button class="bouton" type="submit">Créer mon compte</button>
+      <p class="discret">
+        Déjà un compte ?
+        <button class="lien-bouton" type="button" id="lien-vers-connexion">Se connecter</button>
+      </p>
+    </form>
+  </main>
+
+  <footer id="pied"></footer>
+
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/suivi.js"></script>
+  <script src="js/commun.js"></script>
+  <script src="js/page-connexion.js"></script>
+</body>
+</html>

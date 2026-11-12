@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Le signal vidéo numérique — Révision BTS Audiovisuel</title>
+  <!-- « ../../ » remonte de deux dossiers : modules/tes-signal-video-numerique/ → racine -->
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+
+<!-- data-racine : chemin vers la racine du site (utilisé par js/commun.js)
+     data-module : identifiant du module, IDENTIQUE à celui de js/catalogue.js -->
+<body data-racine="../../" data-module="tes-signal-video-numerique">
+
+  <header id="entete"></header>
+
+  <main>
+    <p class="fil-ariane"><a href="../../index.html">Accueil</a> › <a href="../../tiee.html">Option TIEE</a> › Module</p>
+    <span class="etiquette">TES</span>
+    <h1>Le signal vidéo numérique : 4:4:4, 4:2:2, 4:2:0</h1>
+    <p class="chapeau">Comprendre comment une image est numérisée, pourquoi on allège la couleur, et ce que cela change pour le débit.</p>
+
+    <ul class="sommaire">
+      <li><a href="#cours">1. Rappel de cours</a></li>
+      <li><a href="#animation">2. Animation</a></li>
+      <li><a href="#calculateur">3. Calculateur de débit</a></li>
+      <li><a href="#quiz-titre">4. Quiz</a></li>
+    </ul>
+
+    <!-- ===================== 1. RAPPEL DE COURS ===================== -->
+    <h2 id="cours">1. Rappel de cours</h2>
+    <div class="cours">
+
+      <h3>Numériser un signal : deux opérations</h3>
+      <ul>
+        <li><strong>L'échantillonnage</strong> : on mesure le signal à intervalles réguliers. Le nombre de mesures par seconde est la fréquence d'échantillonnage. D'après le théorème de Shannon, elle doit valoir au moins le double de la fréquence la plus élevée du signal.</li>
+        <li><strong>La quantification</strong> : chaque mesure est arrondie à un niveau, codé sur un nombre de bits fixe. Avec <em>n</em> bits, on dispose de 2<sup>n</sup> niveaux : 256 niveaux en 8 bits, 1 024 en 10 bits.</li>
+      </ul>
+
+      <h3>Les composantes Y, Cb, Cr</h3>
+      <ul>
+        <li><strong>Y</strong> est la luminance : l'image en noir et blanc, qui porte les détails.</li>
+        <li><strong>Cb</strong> et <strong>Cr</strong> forment la chrominance : deux signaux de différence de couleur (bleu − Y et rouge − Y).</li>
+        <li>L'œil distingue moins bien les détails de couleur que les détails de lumière. On peut donc transmettre moins d'échantillons de chrominance sans que l'image paraisse dégradée : c'est le <strong>sous-échantillonnage de la chrominance</strong>.</li>
+      </ul>
+
+      <h3>Les structures d'échantillonnage</h3>
+      <div class="tableau-defilant">
+        <table>
+          <thead>
+            <tr><th>Structure</th><th>Chrominance</th><th class="nombre">Échantillons par pixel</th><th>Exemples d'usage</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>4:4:4</strong></td><td>Complète : une par pixel</td><td class="nombre">3</td><td>Étalonnage, effets visuels, incrustation exigeante</td></tr>
+            <tr><td><strong>4:2:2</strong></td><td>Divisée par 2 horizontalement</td><td class="nombre">2</td><td>Production et régie (liaisons SDI)</td></tr>
+            <tr><td><strong>4:2:0</strong></td><td>Divisée par 2 horizontalement et verticalement</td><td class="nombre">1,5</td><td>Diffusion, streaming, nombreuses caméras légères</td></tr>
+            <tr><td><strong>4:1:1</strong></td><td>Divisée par 4 horizontalement</td><td class="nombre">1,5</td><td>Certains formats DV</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Calculer un débit non compressé</h3>
+      <p class="formule">Débit (bit/s) = pixels par ligne × lignes × images par seconde × bits par échantillon × échantillons par pixel</p>
+      <p><strong>Exemple</strong> — 1920 × 1080, 25 images/s, 10 bits, 4:2:2 :<br>
+        1920 × 1080 × 25 × 10 × 2 = 1 036 800 000 bit/s, soit environ <strong>1,04 Gbit/s</strong> pour l'image seule.</p>
+      <p>Une liaison HD-SDI transporte 1,485 Gbit/s : ce débit est plus élevé car il inclut aussi les intervalles de suppression, qui servent notamment à acheminer l'audio embarqué et des données auxiliaires.</p>
+    </div>
+
+    <!-- ===================== 2. ANIMATION ===================== -->
+    <h2 id="animation">2. Animation : que devient la couleur ?</h2>
+    <p>Choisis une structure et observe à la fois où sont prélevés les échantillons, et l'effet sur une image test.</p>
+
+    <div class="atelier">
+      <!-- Les boutons sont créés par animation.js, un par structure -->
+      <div class="choix" id="choix-structure" role="group" aria-label="Structure d'échantillonnage"></div>
+      <p id="description-structure" aria-live="polite"></p>
+
+      <figure>
+        <!-- role="img" + aria-label : décrit le schéma aux lecteurs d'écran -->
+        <canvas id="canvas-grille" width="960" height="480" role="img" aria-label="Schéma des échantillons"></canvas>
+        <figcaption>Un bloc de 8 × 4 pixels. Disque gris : échantillon de luminance (Y). Anneau bleu et rouge : échantillon de chrominance (Cb et Cr). Chaque cadre regroupe les pixels qui partagent la même chrominance.</figcaption>
+      </figure>
+
+      <div class="avant-apres">
+        <figure>
+          <canvas id="canvas-original" width="480" height="240" role="img" aria-label="Image test d'origine"></canvas>
+          <figcaption>Image test d'origine (16 × 8 pixels, agrandie).</figcaption>
+        </figure>
+        <figure>
+          <canvas id="canvas-resultat" width="480" height="240" role="img" aria-label="Image test après sous-échantillonnage"></canvas>
+          <figcaption id="legende-resultat">Après sous-échantillonnage.</figcaption>
+        </figure>
+      </div>
+      <p class="discret">L'image test contient, de gauche à droite : des rayures verticales d'un pixel, des rayures horizontales d'un pixel, puis deux lignes fines en diagonale. Ce sont les cas les plus défavorables : sur une image réelle, la perte est bien plus discrète.</p>
+
+      <button class="bouton bouton-secondaire" type="button" id="bouton-defilement">▶ Faire défiler les structures</button>
+    </div>
+
+    <!-- ===================== 3. CALCULATEUR ===================== -->
+    <h2 id="calculateur">3. Calculateur de débit non compressé</h2>
+    <p>Change les réglages pour voir leur poids sur le débit. La structure est celle choisie dans l'animation ci-dessus.</p>
+
+    <div class="atelier">
+      <div class="reglages">
+        <label>Définition
+          <select id="reglage-definition">
+            <option value="720x576">720 × 576 (SD)</option>
+            <option value="1280x720">1280 × 720 (HD)</option>
+            <option value="1920x1080" selected>1920 × 1080 (HD)</option>
+            <option value="3840x2160">3840 × 2160 (UHD)</option>
+          </select>
+        </label>
+        <label>Cadence
+          <select id="reglage-cadence">
+            <option value="24">24 images/s</option>
+            <option value="25" selected>25 images/s</option>
+            <option value="30">30 images/s</option>
+            <option value="50">50 images/s</option>
+            <option value="60">60 images/s</option>
+          </select>
+        </label>
+        <label>Quantification
+          <select id="reglage-bits">
+            <option value="8">8 bits</option>
+            <option value="10" selected>10 bits</option>
+            <option value="12">12 bits</option>
+          </select>
+        </label>
+      </div>
+
+      <div aria-live="polite">
+        <p class="resultat-debit" id="resultat-debit"></p>
+        <p id="resultat-formule" class="discret"></p>
+        <div class="jauge" aria-hidden="true"><div id="jauge-debit"></div></div>
+        <p id="resultat-comparaison"></p>
+      </div>
+    </div>
+
+    <!-- ===================== 4. QUIZ ===================== -->
+    <h2 id="quiz-titre">4. Quiz</h2>
+    <div id="quiz"></div>
+  </main>
+
+  <footer id="pied"></footer>
+
+  <!-- Scripts communs à tout le site (même ordre que sur les autres pages) -->
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="../../js/firebase-config.js"></script>
+  <script src="../../js/suivi.js"></script>
+  <script src="../../js/commun.js"></script>
+  <script src="../../js/quiz.js"></script>
+
+  <!-- Scripts propres à ce module -->
+  <script src="questions.js"></script>
+  <script src="animation.js"></script>
+  <script>
+    // Lance le quiz avec les questions de questions.js.
+    demarrerQuiz({
+      conteneur: "#quiz",
+      moduleId: document.body.dataset.module,
+      questions: QUESTIONS
+    });
+  </script>
+</body>
+</html>

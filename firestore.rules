@@ -1,0 +1,30 @@
+// ============================================================================
+// firestore.rules — les règles de sécurité de la base de données
+// ----------------------------------------------------------------------------
+// CE FICHIER N'EST PAS LU PAR LE SITE. C'est une copie de référence : son
+// contenu doit être collé dans la console Firebase
+// (Firestore Database > onglet « Règles » > Publier).
+//
+// Ce sont ces règles qui protègent les données, pas le secret des clés.
+// Principe : chaque élève connecté peut lire et écrire UNIQUEMENT ses propres
+// données. Tout ce qui n'est pas explicitement autorisé ici est refusé.
+// ============================================================================
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // La fiche d'un élève : utilisateurs/{son identifiant}
+    match /utilisateurs/{identifiant} {
+      // request.auth.uid = l'identifiant de la personne connectée.
+      // On exige qu'il soit identique à celui de la fiche demandée.
+      allow read, write: if request.auth != null && request.auth.uid == identifiant;
+
+      // Sa progression : utilisateurs/{son identifiant}/progression/{module}
+      match /progression/{module} {
+        allow read, write: if request.auth != null && request.auth.uid == identifiant;
+      }
+    }
+  }
+}

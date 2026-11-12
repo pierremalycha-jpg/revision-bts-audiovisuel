@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Option TIEE — Révision BTS Audiovisuel</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<!-- data-option="tiee" : indique à js/page-option.js quels modules afficher,
+     et à css/style.css quelle couleur d'accent utiliser. -->
+<body data-racine="" data-option="tiee">
+
+  <header id="entete"></header>
+
+  <main>
+    <p class="fil-ariane"><a href="index.html">Accueil</a> › Option TIEE</p>
+    <h1>Option TIEE</h1>
+    <p class="chapeau">Tous les modules de révision de l'option, classés par épreuve.</p>
+
+    <!-- La liste est construite par js/page-option.js à partir de js/catalogue.js.
+         Pour ajouter un module, on ne touche pas à cette page : on complète le catalogue. -->
+    <div id="liste-modules">
+      <p class="discret">Chargement des modules…</p>
+    </div>
+  </main>
+
+  <footer id="pied"></footer>
+
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/suivi.js"></script>
+  <script src="js/commun.js"></script>
+  <script src="js/catalogue.js"></script>
+  <script src="js/page-option.js"></script>
+</body>
+</html>
