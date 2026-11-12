@@ -9,6 +9,8 @@ Chaque notion a sa propre **application de révision**. Les pages des options pr
 
 La progression des étudiants est enregistrée avec Firebase. Le site est hébergé gratuitement avec GitHub Pages.
 
+**Site en ligne :** <https://pierremalycha-jpg.github.io/revision-bts-audiovisuel/>
+
 > **Première installation ?** Suis [GUIDE-INSTALLATION.md](GUIDE-INSTALLATION.md).
 > **Créer une application ?** Suis [docs/CHARTE-APPLICATIONS.md](docs/CHARTE-APPLICATIONS.md).
 
