@@ -1,402 +1,779 @@
 /* ==========================================================================
-   style.css — la feuille de style unique du site
+   style.css — l'identité visuelle de toute la plateforme
    --------------------------------------------------------------------------
-   Pourquoi un seul fichier CSS ? Toutes les pages partagent la même apparence :
-   on modifie une couleur ici, et elle change partout.
+   Direction artistique reprise de l'application de photométrie, qui sert de
+   RÉFÉRENCE pour toutes les applications : fond gris très clair, surfaces
+   blanches arrondies, bleu système pour les actions, dégradé « spectre »
+   (orange → rose → violet → bleu) pour les titres forts, mode sombre complet.
+
+   Ce fichier est chargé par TOUTES les pages (accueil, options, progression,
+   connexion, et les applications construites avec le kit). Les composants
+   propres aux applications (menu latéral, notions, labos, évaluation) sont
+   dans css/application.css.
 
    Sommaire :
-     1. Variables (couleurs, espacements)
-     2. Base (texte, liens, titres)
-     3. En-tête et pied de page
-     4. Mise en page générale
-     5. Cartes (options et modules)
-     6. Boutons et formulaires
-     7. Quiz
-     8. Pages de module (cours, animation, calculateur)
-     9. Tableau de bord
+     1. Couleurs et mesures (variables) — thème clair et thème sombre
+     2. Base (texte, titres, liens)
+     3. Éléments typographiques (sur-titre, grand titre, dégradé)
+     4. En-tête, barre spectrale et pied de page
+     5. Boutons, contrôles segmentés, champs, curseurs
+     6. Cartes, notes, étiquettes, formules
+     7. Accueil : héros, cartes d'option, étapes
+     8. Pages d'option : la grille d'applications (icônes)
+     9. Progression (tableau de bord) et connexion
+    10. Animations (apparition, entrée des icônes) et mouvement réduit
    ========================================================================== */
 
-/* 1. VARIABLES -------------------------------------------------------------
-   Une variable CSS s'écrit --nom et s'utilise avec var(--nom).
-   Pour changer l'identité visuelle du site, il suffit de modifier ce bloc. */
-:root {
-  --fond: #f5f4f0;
-  --surface: #ffffff;
-  --texte: #1b1e23;
-  --texte-doux: #5a606b;
-  --bordure: #d9d6ce;
-  --accent: #0b5cad;          /* couleur principale (liens, boutons) */
-  --accent-texte: #ffffff;    /* texte posé sur la couleur principale */
-  --accent-pale: #e3eefa;
-  --juste: #17703f;
-  --juste-pale: #dff3e6;
-  --faux: #b3261e;
-  --faux-pale: #fbe4e2;
-  --rayon: 10px;
-  --largeur-max: 60rem;
+/* 1. VARIABLES ---------------------------------------------------------------
+   Le thème est choisi par l'attribut data-theme de la balise <html>
+   ("light" ou "dark"), posé par js/theme.js avant l'affichage de la page. */
+:root,
+:root[data-theme="light"] {
+  --bg: #f5f5f7;            /* fond de page */
+  --panel: #ffffff;         /* surface des cartes */
+  --panel2: #f5f5f7;        /* surface secondaire (dans une carte) */
+  --panel3: #e8e8ed;        /* surface tertiaire (pastilles, rails) */
+  --line: #e5e5ea;
+  --line2: #d2d2d7;
+  --cardline: rgba(0, 0, 0, .07);
+  --text: #1d1d1f;
+  --muted: #6e6e73;
+  --faint: #86868b;
+  --accent: #0071e3;        /* bleu des actions */
+  --accent2: #0066cc;       /* bleu des liens */
+  --ok: #248a3d;
+  --warn: #c35a00;
+  --bad: #d70015;
+  --eyebrow: #6e6e73;
+  --hover: rgba(0, 0, 0, .045);
+  --sel: rgba(0, 0, 0, .065);
+  --seg: #e8e8ed;
+  --segon: #ffffff;
+  --field: #ffffff;
+  --fieldline: #d2d2d7;
+  --track: #d9d9de;
+  --ringbg: #e8e8ed;
+  --glass: rgba(251, 251, 253, .8);
+  --glassline: rgba(0, 0, 0, .08);
+  --soft-blue: rgba(0, 113, 227, .07);
+  --soft-orange: rgba(255, 149, 0, .09);
+  --soft-green: rgba(52, 199, 89, .11);
+  --soft-red: rgba(255, 59, 48, .08);
+  --sh1: 0 1px 2px rgba(0, 0, 0, .04), 0 4px 18px rgba(0, 0, 0, .045);
+  --sh2: 0 2px 6px rgba(0, 0, 0, .05), 0 18px 44px rgba(0, 0, 0, .1);
+  --stage: #0b0c0e;         /* fond des scènes et animations (sombre dans les deux thèmes) */
+
+  /* Le dégradé « spectre » : la signature visuelle de la plateforme */
+  --spectre: linear-gradient(90deg, #ff9500 0%, #ff2d55 30%, #af52de 62%, #007aff 100%);
+  --spectre-v: linear-gradient(#ff9500, #ff2d55, #af52de, #007aff);
+
+  --radius: 20px;
+  --ease: cubic-bezier(.25, .8, .25, 1);
+  --spring: cubic-bezier(.2, .9, .25, 1.15);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI Variable Text", "Segoe UI", Inter, Roboto, Arial, sans-serif;
+  --font-d: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", "Segoe UI Variable Display", "Segoe UI", Inter, Roboto, Arial, sans-serif;
+  --mono: "SF Mono", ui-monospace, Menlo, Consolas, "Cascadia Mono", "DejaVu Sans Mono", monospace;
+  --largeur-max: 1180px;
+  color-scheme: light;
 }
 
-/* Une couleur d'accent par option : la page prend la couleur de son option
-   grâce à l'attribut data-option écrit sur la balise <body>. */
-body[data-option="tiee"]  { --accent: #0b5cad; --accent-pale: #e3eefa; }
-body[data-option="image"] { --accent: #a2400c; --accent-pale: #fbeadf; }
-
-/* Thème sombre automatique : si l'appareil de l'élève est réglé en mode sombre,
-   on remplace simplement les valeurs des variables. */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --fond: #14161a;
-    --surface: #1e2127;
-    --texte: #ebe9e4;
-    --texte-doux: #a3a9b4;
-    --bordure: #363a43;
-    --accent: #6fb1f5;
-    --accent-texte: #0d1620;
-    --accent-pale: #1c2d40;
-    --juste: #6fd49a;
-    --juste-pale: #17301f;
-    --faux: #ff9087;
-    --faux-pale: #3a1b19;
-  }
-  body[data-option="tiee"]  { --accent: #6fb1f5; --accent-pale: #1c2d40; }
-  body[data-option="image"] { --accent: #f5a26b; --accent-pale: #3a2618; }
+:root[data-theme="dark"] {
+  --bg: #000000;
+  --panel: #1c1c1e;
+  --panel2: #2c2c2e;
+  --panel3: #3a3a3c;
+  --line: #2c2c2e;
+  --line2: #48484a;
+  --cardline: rgba(255, 255, 255, .08);
+  --text: #f5f5f7;
+  --muted: #a1a1a6;
+  --faint: #7c7c80;
+  --accent: #2997ff;
+  --accent2: #2997ff;
+  --ok: #30d158;
+  --warn: #ff9f0a;
+  --bad: #ff453a;
+  --eyebrow: #a1a1a6;
+  --hover: rgba(255, 255, 255, .07);
+  --sel: rgba(255, 255, 255, .11);
+  --seg: #2c2c2e;
+  --segon: #636366;
+  --field: #1c1c1e;
+  --fieldline: #48484a;
+  --track: #48484a;
+  --ringbg: #2c2c2e;
+  --glass: rgba(22, 22, 23, .8);
+  --glassline: rgba(255, 255, 255, .08);
+  --soft-blue: rgba(41, 151, 255, .1);
+  --soft-orange: rgba(255, 159, 10, .1);
+  --soft-green: rgba(48, 209, 88, .13);
+  --soft-red: rgba(255, 69, 58, .13);
+  --sh1: 0 0 0 1px rgba(255, 255, 255, .04);
+  --sh2: 0 0 0 1px rgba(255, 255, 255, .06), 0 24px 60px rgba(0, 0, 0, .6);
+  color-scheme: dark;
 }
 
-/* 2. BASE ------------------------------------------------------------------ */
-* { box-sizing: border-box; }
+/* 2. BASE ------------------------------------------------------------------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
-  background: var(--fond);
-  color: var(--texte);
-  /* Polices déjà installées sur l'appareil : rien à télécharger, donc un site
-     rapide et aucune donnée envoyée à un service de polices externe. */
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  font-size: 1.0625rem;
-  line-height: 1.6;
-}
-
-h1, h2, h3 { line-height: 1.2; text-wrap: balance; }
-h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); margin: 0 0 0.5rem; letter-spacing: -0.02em; }
-h2 { font-size: 1.45rem; margin: 2.5rem 0 0.75rem; }
-h3 { font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
-p  { margin: 0 0 1rem; max-width: 68ch; }
-
-a { color: var(--accent); }
-a:hover { text-decoration-thickness: 2px; }
-
-/* Contour bien visible pour celles et ceux qui naviguent au clavier. */
-:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-
-.discret { color: var(--texte-doux); font-size: 0.95rem; }
-.cache { display: none !important; }
-
-/* 3. EN-TÊTE ET PIED DE PAGE ----------------------------------------------- */
-.entete-contenu {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 1.5rem;
-  max-width: var(--largeur-max);
-  margin: 0 auto;
-  padding: 0.75rem 1rem;
-}
-
-.logo {
-  font-weight: 800;
-  font-size: 1.1rem;
-  color: var(--texte);
-  text-decoration: none;
-  letter-spacing: -0.01em;
-}
-.logo span { color: var(--texte-doux); font-weight: 500; }
-
-.navigation { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; }
-.navigation a { color: var(--texte); text-decoration: none; font-weight: 600; padding: 0.25rem 0; }
-.navigation a:hover { text-decoration: underline; }
-
-.zone-compte {
-  margin-left: auto;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 0.75rem;
-  font-size: 0.95rem;
-}
-
-/* La « mire de barres » sous l'en-tête : un clin d'œil à l'audiovisuel,
-   dessinée uniquement avec un dégradé CSS (aucune image à charger). */
-.mire {
-  height: 6px;
-  background: linear-gradient(to right,
-    #c0c0c0 0 14.28%, #c0c000 0 28.57%, #00c0c0 0 42.85%, #00c000 0 57.14%,
-    #c000c0 0 71.42%, #c00000 0 85.71%, #0000c0 0);
-}
-
-#pied {
-  max-width: var(--largeur-max);
-  margin: 4rem auto 0;
-  padding: 1.5rem 1rem 2.5rem;
-  border-top: 1px solid var(--bordure);
-  color: var(--texte-doux);
-  font-size: 0.9rem;
-}
-
-/* 4. MISE EN PAGE GÉNÉRALE ------------------------------------------------- */
-main {
-  max-width: var(--largeur-max);
-  margin: 0 auto;
-  padding: 2rem 1rem 0;
-}
-
-.chapeau { font-size: 1.15rem; color: var(--texte-doux); }
-
-.fil-ariane { font-size: 0.95rem; margin-bottom: 1rem; }
-
-.etiquette {
-  display: inline-block;
-  padding: 0.1rem 0.6rem;
-  border-radius: 99px;
-  background: var(--accent-pale);
-  color: var(--accent);
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-}
-.etiquette-neutre { background: var(--bordure); color: var(--texte); }
-
-.avertissement {
-  border: 1px solid var(--bordure);
-  border-left: 5px solid #c98a00;
-  background: var(--surface);
-  border-radius: var(--rayon);
-  padding: 0.9rem 1.1rem;
-  margin: 1.5rem 0;
-}
-.avertissement p:last-child { margin-bottom: 0; }
-
-/* 5. CARTES ---------------------------------------------------------------- */
-/* La grille s'adapte toute seule : autant de colonnes de 17rem minimum que
-   la largeur de l'écran le permet (une seule colonne sur téléphone). */
-.grille {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(17rem, 100%), 1fr));
-  gap: 1rem;
-  padding: 0;
-  margin: 1rem 0;
-  list-style: none;
-}
-
-/* Variante : les éléments se partagent toute la largeur (auto-fit au lieu de
-   auto-fill). Utilisée pour les deux cartes d'option de l'accueil et pour
-   les deux images « avant / après » des modules. */
-.grille-etiree { grid-template-columns: repeat(auto-fit, minmax(min(17rem, 100%), 1fr)); }
-.avant-apres { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-
-.carte {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  background: var(--surface);
-  border: 1px solid var(--bordure);
-  border-radius: var(--rayon);
-  padding: 1.25rem;
-}
-.carte h3 { margin: 0; font-size: 1.15rem; }
-.carte p { margin: 0; color: var(--texte-doux); font-size: 0.98rem; }
-.carte .bouton { margin-top: auto; align-self: flex-start; }
-.carte-etiquettes { display: flex; flex-wrap: wrap; gap: 0.35rem; }
-.carte-progression { font-size: 0.9rem; font-weight: 600; color: var(--juste); }
-.carte-indisponible { opacity: 0.65; }
-
-/* Grandes cartes de la page d'accueil (une par option). */
-.carte-option {
-  text-decoration: none;
-  color: var(--texte);
-  border-top: 6px solid var(--couleur-option);
-  padding: 1.5rem;
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-.carte-option:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgb(0 0 0 / 0.12); }
-.carte-option h2 { margin: 0; font-size: 1.7rem; }
-.carte-option .suite { margin-top: 0.5rem; font-weight: 700; color: var(--couleur-option); }
-.carte-option.tiee  { --couleur-option: #0b5cad; }
-.carte-option.image { --couleur-option: #a2400c; }
-@media (prefers-color-scheme: dark) {
-  .carte-option.tiee  { --couleur-option: #6fb1f5; }
-  .carte-option.image { --couleur-option: #f5a26b; }
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.5 var(--font);
+  letter-spacing: -.011em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-.etapes { padding-left: 1.2rem; }
-.etapes li { margin-bottom: 0.4rem; max-width: 65ch; }
+main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--largeur-max);
+  margin: 0 auto;
+  padding: 28px 24px 64px;
+}
 
-/* 6. BOUTONS ET FORMULAIRES ------------------------------------------------ */
-.bouton {
-  display: inline-block;
-  padding: 0.6rem 1.1rem;
-  border: 2px solid var(--accent);
-  border-radius: 8px;
-  background: var(--accent);
-  color: var(--accent-texte);
-  font: inherit;
+h1, h2, h3, h4 {
+  font-family: var(--font-d);
   font-weight: 700;
-  text-decoration: none;
-  cursor: pointer;
+  letter-spacing: -.022em;
+  line-height: 1.15;
+  margin: 0 0 .5em;
 }
-.bouton:hover { filter: brightness(1.1); }
-.bouton[disabled] { opacity: 0.5; cursor: not-allowed; }
-.bouton-secondaire { background: transparent; color: var(--accent); }
-.bouton-petit { padding: 0.25rem 0.7rem; font-size: 0.9rem; }
+h1 { font-size: clamp(2rem, 4vw, 2.8rem); letter-spacing: -.03em; }
+h2 { font-size: clamp(1.5rem, 2.4vw, 2rem); margin-top: 1.6em; }
+h3 { font-size: 1.15rem; font-weight: 650; letter-spacing: -.015em; }
+p { margin: 0 0 .8em; }
+ul, ol { margin: .2em 0 .9em; padding-left: 1.3em; }
+li { margin: .2em 0; }
+b, strong { font-weight: 600; }
+a { color: var(--accent2); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono { font-family: var(--mono); font-size: .92em; }
+img, svg, canvas { max-width: 100%; }
+::selection { background: rgba(0, 113, 227, .22); }
+svg.ico { width: 1em; height: 1em; vertical-align: -.14em; flex: none; }
 
-.formulaire {
-  display: grid;
-  gap: 1rem;
-  max-width: 26rem;
-  background: var(--surface);
-  border: 1px solid var(--bordure);
-  border-radius: var(--rayon);
-  padding: 1.5rem;
-}
-.formulaire h2 { margin: 0; }
-.champ { display: grid; gap: 0.3rem; font-weight: 600; }
-.champ input, .champ select, .reglages select {
-  font: inherit;
-  padding: 0.55rem 0.7rem;
-  border: 1px solid var(--bordure);
-  border-radius: 8px;
-  background: var(--fond);
-  color: var(--texte);
-}
-.message { margin: 0; font-weight: 600; }
-.message-erreur { color: var(--faux); }
-.message-succes { color: var(--juste); }
-.lien-bouton {
-  border: 0; padding: 0; background: none; font: inherit;
-  color: var(--accent); text-decoration: underline; cursor: pointer;
-}
+/* Le focus clavier reste toujours visible : indispensable pour naviguer sans souris. */
+:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(0, 113, 227, .35); border-radius: 8px; }
 
-/* 7. QUIZ ------------------------------------------------------------------ */
-.quiz {
-  background: var(--surface);
-  border: 1px solid var(--bordure);
-  border-radius: var(--rayon);
-  padding: 1.5rem;
-}
-.quiz-avancement { display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--texte-doux); font-weight: 600; }
-.quiz-barre { height: 6px; border-radius: 3px; background: var(--bordure); margin: 0.4rem 0 1.25rem; overflow: hidden; }
-.quiz-barre div { height: 100%; background: var(--accent); transition: width 0.3s; }
-.quiz-question { font-size: 1.2rem; font-weight: 700; margin: 0 0 1rem; }
-.quiz-reponses { display: grid; gap: 0.6rem; }
+.muted, .discret { color: var(--muted); }
+.small { font-size: .86rem; }
+.cache, [hidden] { display: none !important; }
+.num { font-variant-numeric: tabular-nums; }
 
-.quiz-reponse {
-  text-align: left;
-  padding: 0.75rem 1rem;
-  border: 2px solid var(--bordure);
-  border-radius: 8px;
-  background: var(--fond);
-  color: var(--texte);
-  font: inherit;
-  cursor: pointer;
-}
-.quiz-reponse:hover:not([disabled]) { border-color: var(--accent); }
-.quiz-reponse[disabled] { cursor: default; }
-/* On ne compte pas uniquement sur la couleur : un symbole ✓ ou ✗ est aussi
-   ajouté devant le texte, utile pour les personnes daltoniennes. */
-.quiz-reponse.juste { border-color: var(--juste); background: var(--juste-pale); font-weight: 700; }
-.quiz-reponse.faux  { border-color: var(--faux);  background: var(--faux-pale); }
-.quiz-reponse.juste::before { content: "✓  "; color: var(--juste); }
-.quiz-reponse.faux::before  { content: "✗  "; color: var(--faux); }
-
-.quiz-explication {
-  margin: 1rem 0;
-  padding: 0.9rem 1rem;
-  border-radius: 8px;
-  background: var(--accent-pale);
-}
-.quiz-explication p { margin: 0; }
-.quiz-explication strong { display: block; margin-bottom: 0.2rem; }
-
-.quiz-score { font-size: 2.4rem; font-weight: 800; margin: 0; letter-spacing: -0.02em; }
-.quiz-erreurs { padding-left: 1.2rem; }
-.quiz-erreurs li { margin-bottom: 0.75rem; }
-.quiz-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.25rem; }
-
-/* 8. PAGES DE MODULE ------------------------------------------------------- */
-.sommaire {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding: 0;
-  margin: 1.5rem 0;
-  list-style: none;
-}
-.sommaire a {
+/* 3. TYPOGRAPHIE ------------------------------------------------------------ */
+.eyebrow, .kicker {
   display: block;
-  padding: 0.4rem 0.9rem;
-  border: 1px solid var(--bordure);
-  border-radius: 99px;
-  background: var(--surface);
-  text-decoration: none;
+  font-size: .9rem;
   font-weight: 600;
-  font-size: 0.95rem;
+  letter-spacing: -.005em;
+  color: var(--eyebrow);
+  margin-bottom: .4em;
 }
 
-.cours {
-  background: var(--surface);
-  border: 1px solid var(--bordure);
-  border-radius: var(--rayon);
-  padding: 0.5rem 1.5rem 1rem;
+/* Le très grand titre des héros (accueil, options, applications) */
+.display {
+  font-size: clamp(2.6rem, 6vw, 4.6rem);
+  line-height: 1.03;
+  letter-spacing: -.04em;
+  font-weight: 700;
+  margin: .1em 0 .35em;
 }
-.cours li { margin-bottom: 0.35rem; max-width: 68ch; }
-.formule {
-  padding: 0.75rem 1rem;
+
+/* Texte en dégradé spectral */
+.grad {
+  background: var(--spectre);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.lead, .chapeau {
+  font-size: clamp(1.06rem, 1.5vw, 1.25rem);
+  line-height: 1.45;
+  color: var(--muted);
+  max-width: 40em;
+}
+.lead b, .chapeau b { color: var(--text); }
+
+.fil-ariane { font-size: .86rem; color: var(--muted); margin: 0 0 18px; }
+.fil-ariane a { color: var(--muted); }
+.fil-ariane a:hover { color: var(--text); }
+
+.sec-hd { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin: 56px 0 18px; }
+.sec-hd h2 { margin: 0; }
+.sec-hd p { margin: 0; max-width: 40em; }
+.sec-t { font-size: clamp(1.6rem, 2.4vw, 2.1rem); }
+
+/* 4. EN-TÊTE ------------------------------------------------------------------
+   Barre « verre dépoli » collée en haut, puis une fine barre aux couleurs du
+   spectre (rappel de la mire et du dégradé de la photométrie). */
+#entete {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--glass);
+  -webkit-backdrop-filter: saturate(180%) blur(18px);
+  backdrop-filter: saturate(180%) blur(18px);
+  border-bottom: 1px solid var(--glassline);
+}
+.entete-contenu {
+  max-width: var(--largeur-max);
+  margin: 0 auto;
+  min-height: 58px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  font-family: var(--font-d);
+  font-size: 1.02rem;
+  font-weight: 650;
+  letter-spacing: -.02em;
+  white-space: nowrap;
+}
+.logo:hover { text-decoration: none; opacity: .75; }
+.logo span { color: var(--muted); font-weight: 500; }
+
+/* Le disque spectral : la « marque » de la plateforme, identique à celle de la photométrie */
+.brand-mark {
+  position: relative;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: conic-gradient(from 200deg, #ff9500, #ffcc00, #34c759, #00c7be, #007aff, #5856d6, #af52de, #ff2d55, #ff9500);
+}
+.brand-mark::after { content: ""; position: absolute; inset: 6.5px; border-radius: 50%; background: var(--bg); }
+
+.navigation { display: flex; gap: 2px; flex: 1; justify-content: center; }
+.navigation a {
+  padding: 7px 14px;
+  border-radius: 980px;
+  color: var(--muted);
+  font-size: .9rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background .25s var(--ease), color .2s;
+}
+.navigation a:hover { background: var(--hover); color: var(--text); text-decoration: none; }
+.navigation a[aria-current="page"] { background: var(--text); color: var(--bg); }
+
+.zone-compte { display: flex; align-items: center; gap: 8px; font-size: .86rem; white-space: nowrap; }
+.bouton-theme {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background .2s, color .2s;
+}
+.bouton-theme:hover { background: var(--hover); color: var(--text); }
+
+/* Barre spectrale sous l'en-tête */
+.mire { height: 3px; background: var(--spectre); opacity: .9; }
+
+#pied {
+  width: 100%;
+  max-width: var(--largeur-max);
+  margin: 0 auto;
+  padding: 18px 24px 28px;
+  border-top: 1px solid var(--line);
+  color: var(--faint);
+  font-size: .8rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* 5. BOUTONS ET CONTRÔLES -------------------------------------------------------
+   Deux familles de noms coexistent : .bouton (pages de la plateforme) et .btn
+   (applications, comme dans la photométrie). Elles partagent le même dessin. */
+.bouton, .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 980px;
+  padding: 9px 18px;
+  background: var(--panel3);
+  color: var(--text);
+  font: inherit;
+  font-size: .92rem;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .2s, transform .15s var(--ease), opacity .2s, box-shadow .2s;
+}
+.bouton:hover, .btn:hover { background: var(--line2); text-decoration: none; }
+.bouton:active, .btn:active { transform: scale(.96); }
+.bouton:disabled, .btn:disabled { opacity: .4; cursor: default; transform: none; }
+
+/* Bouton principal : bleu plein */
+.bouton, .btn.primary { background: var(--accent); color: #fff; font-weight: 600; }
+.bouton:hover, .btn.primary:hover { background: var(--accent); opacity: .88; }
+
+.bouton-secondaire, .btn { background: var(--panel3); color: var(--text); font-weight: 500; }
+.bouton.bouton-secondaire:hover { background: var(--line2); opacity: 1; }
+.bouton-petit, .btn.small { padding: 5px 12px; font-size: .82rem; }
+.btn.big { font-size: 1rem; font-weight: 600; padding: 12px 24px; }
+.btn.ghost { background: none; color: var(--accent); }
+.btn.ghost:hover { background: var(--soft-blue); }
+.btn.danger { color: var(--bad); }
+
+.lien-bouton, .linkbtn {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--accent2);
+  font: inherit;
+  cursor: pointer;
+}
+.lien-bouton:hover, .linkbtn:hover { text-decoration: underline; }
+
+.btnrow { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+/* Contrôle segmenté (style iOS) : une pastille blanche glisse sous le choix actif */
+.seg {
+  position: relative;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 2px;
+  background: var(--seg);
+  border-radius: 10px;
+}
+.seg button {
+  position: relative;
+  z-index: 1;
+  border: 0;
   border-radius: 8px;
-  background: var(--accent-pale);
+  background: none;
+  color: var(--text);
+  padding: 6px 13px;
+  font: inherit;
+  font-size: .86rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .25s var(--ease), color .2s;
+}
+.seg button:hover { background: var(--hover); }
+.seg button.on, .seg button[aria-pressed="true"] {
+  background: var(--segon);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .12), 0 0 0 .5px rgba(0, 0, 0, .04);
+}
+.seg.glisse button.on, .seg.glisse button[aria-pressed="true"] { background: transparent; box-shadow: none; }
+.seg-th {
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  top: 0;
+  border-radius: 8px;
+  background: var(--segon);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .12), 0 0 0 .5px rgba(0, 0, 0, .04);
+  pointer-events: none;
+  transition: left .34s var(--spring), top .34s var(--spring), width .34s var(--spring), height .34s var(--spring);
+}
+
+.chip {
+  border: 0;
+  border-radius: 980px;
+  background: var(--panel2);
+  color: var(--text);
+  padding: 6px 14px;
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .2s, transform .15s;
+}
+.chip:hover { background: var(--panel3); }
+.chip.on { background: var(--text); color: var(--bg); font-weight: 600; }
+
+/* Champs de saisie */
+select, input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="search"], textarea {
+  width: 100%;
+  min-width: 0;
+  background: var(--field);
+  color: var(--text);
+  border: 1px solid var(--fieldline);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font: inherit;
+  font-size: .95rem;
+  transition: border-color .2s, box-shadow .2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+select {
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5 6 6l4.5-4.5' fill='none' stroke='%238e8e93' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 10px 7px;
+}
+select:focus, input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(0, 113, 227, .18); }
+
+/* Curseurs : piste fine remplie de bleu jusqu'au pouce (la variable --p est
+   mise à jour par js/application.js ; sans elle, la piste reste grise). */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  --p: 50%;
+}
+input[type="range"]:focus { box-shadow: none; }
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent) 0 var(--p), var(--track) var(--p) 100%);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -8px;
+  border-radius: 50%;
+  background: #fff;
+  border: .5px solid rgba(0, 0, 0, .06);
+  box-shadow: 0 .5px 4px rgba(0, 0, 0, .18), 0 4px 10px rgba(0, 0, 0, .12);
+  transition: transform .15s var(--ease);
+}
+input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.12); }
+input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px rgba(0, 113, 227, .3), 0 .5px 4px rgba(0, 0, 0, .18); }
+input[type="range"]::-moz-range-track { height: 4px; border-radius: 2px; background: var(--track); }
+input[type="range"]::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--accent); }
+input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #fff; border: .5px solid rgba(0, 0, 0, .06); box-shadow: 0 .5px 4px rgba(0, 0, 0, .18), 0 4px 10px rgba(0, 0, 0, .12); }
+
+/* 6. CARTES ET PETITS COMPOSANTS --------------------------------------------- */
+.carte, .card {
+  background: var(--panel);
+  border: 1px solid var(--cardline);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+}
+.card h3 { margin-bottom: .45em; }
+
+.grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; padding: 0; margin: 0; list-style: none; }
+.grille-etiree { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.grid { display: grid; gap: 16px; }
+.g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.note { background: var(--panel2); border-radius: 14px; padding: 12px 15px; font-size: .94rem; }
+.note.info { background: var(--soft-blue); }
+.note.ok { background: var(--soft-green); }
+.note.warn { background: var(--soft-orange); }
+.note.bad { background: var(--soft-red); }
+
+.etiquette, .pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 980px;
+  padding: 3px 10px;
+  font-size: .78rem;
+  font-weight: 600;
+  background: var(--soft-blue);
+  color: var(--accent2);
+  white-space: nowrap;
+}
+.etiquette-neutre { background: var(--panel3); color: var(--muted); }
+.pill.ok { background: var(--soft-green); color: var(--ok); }
+.pill.warn { background: var(--soft-orange); color: var(--warn); }
+
+.formula, .formule {
+  font-family: var(--mono);
+  background: var(--panel2);
+  border-radius: 12px;
+  padding: 11px 15px;
+  margin: 8px 0 12px;
   font-weight: 600;
   overflow-x: auto;
 }
 
-/* Les tableaux larges défilent horizontalement sur téléphone au lieu de
-   faire déborder toute la page. */
-.tableau-defilant { overflow-x: auto; }
-table { border-collapse: collapse; width: 100%; font-size: 0.97rem; }
-th, td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--bordure); text-align: left; vertical-align: top; }
-th { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--texte-doux); }
-td.nombre, th.nombre { text-align: right; font-variant-numeric: tabular-nums; }
+table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+th, td { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+th { color: var(--muted); font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.nombre { text-align: right; font-variant-numeric: tabular-nums; }
+.tableau-defilant, .tablewrap { overflow-x: auto; }
 
-.atelier {
-  background: var(--surface);
-  border: 1px solid var(--bordure);
-  border-radius: var(--rayon);
-  padding: 1.25rem;
+/* Anneau de progression (SVG dessiné par js/applications.js) */
+.pring { display: block; flex: none; }
+.pring .pr-bg { fill: none; stroke: var(--ringbg); }
+.pring .pr-fg { fill: none; stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset 1s var(--ease); }
+.pring.ok .pr-fg { stroke: var(--ok); }
+
+/* 7. ACCUEIL ----------------------------------------------------------------- */
+.hero { padding: 34px 0 10px; }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 48px; align-items: center; }
+.credit {
+  font-size: .96rem;
+  color: var(--muted);
+  margin: 22px 0 0;
+  padding-left: 14px;
+  border-left: 3px solid;
+  border-image: var(--spectre-v) 1;
 }
-.atelier canvas {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 6px;
-  background: #101216;   /* fond sombre fixe : les schémas sont dessinés pour lui */
+.credit b { color: var(--text); }
+
+/* Les deux grandes cartes d'option */
+.options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 34px; }
+.carte-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 250px;
+  padding: 28px 30px;
+  border-radius: 28px;
+  background: var(--panel);
+  border: 1px solid var(--cardline);
+  color: var(--text);
+  overflow: hidden;
+  transition: transform .35s var(--ease), box-shadow .35s var(--ease);
 }
-.atelier figure { margin: 0 0 1rem; }
-.atelier figcaption { font-size: 0.9rem; color: var(--texte-doux); margin-top: 0.4rem; }
+.carte-option:hover { transform: translateY(-4px); box-shadow: var(--sh2); text-decoration: none; }
+.carte-option:active { transform: scale(.99); }
+.carte-option::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: var(--grad-option, var(--spectre)); }
+.carte-option h2 { margin: 0; font-size: clamp(2rem, 3.4vw, 2.6rem); letter-spacing: -.035em; }
+.carte-option p { color: var(--muted); margin: 0; max-width: 30em; }
+.carte-option .suite { margin-top: auto; color: var(--accent); font-weight: 600; font-size: .95rem; }
+.carte-option.tiee { --grad-option: linear-gradient(90deg, #007aff, #00c7be, #34c759); }
+.carte-option.image { --grad-option: linear-gradient(90deg, #ff9500, #ff2d55, #af52de); }
 
-.choix { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 1rem; }
-.choix .bouton[aria-pressed="false"] { background: transparent; color: var(--accent); }
+/* Aperçu des icônes d'applications dans la carte d'option (comme un dock) */
+.dock { display: flex; gap: 8px; margin: 6px 0 4px; min-height: 46px; }
+.dock .app-ic { width: 46px; height: 46px; border-radius: 12px; font-size: 22px; box-shadow: 0 4px 12px rgba(0, 0, 0, .12); }
+.dock .dock-vide { width: 46px; height: 46px; border-radius: 12px; border: 1.5px dashed var(--line2); }
 
-.reglages { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
-.reglages label { display: grid; gap: 0.25rem; font-weight: 600; font-size: 0.95rem; }
+/* Les quatre étapes d'une application, présentées sur l'accueil */
+.etapes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; list-style: none; padding: 0; counter-reset: etape; }
+.etapes li { background: var(--panel); border: 1px solid var(--cardline); border-radius: 20px; padding: 20px; margin: 0; }
+.etapes .ico-etape {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+.etapes b { display: block; font-family: var(--font-d); font-size: 1.08rem; letter-spacing: -.015em; margin-bottom: 4px; }
+.etapes p { margin: 0; color: var(--muted); font-size: .92rem; }
 
-.resultat-debit { font-size: 2rem; font-weight: 800; margin: 0; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-.jauge { height: 14px; border-radius: 7px; background: var(--bordure); overflow: hidden; margin: 0.5rem 0; }
-.jauge div { height: 100%; background: var(--accent); transition: width 0.3s; }
+/* 8. PAGES D'OPTION : LA GRILLE D'APPLICATIONS ------------------------------------
+   Chaque application est une icône arrondie (comme sur un téléphone), avec son
+   nom, une ligne de description et sa progression. */
+.option-hero { padding: 26px 0 0; }
+.option-hero .display { font-size: clamp(2.4rem, 5.4vw, 4rem); }
+.resume-option { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.resume-option span { background: var(--panel); border: 1px solid var(--cardline); border-radius: 980px; padding: 6px 14px; font-size: .86rem; color: var(--muted); font-weight: 500; }
+.resume-option span b { color: var(--text); }
 
-/* 9. TABLEAU DE BORD ------------------------------------------------------- */
-.chiffres { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 1rem; margin: 1.5rem 0; }
-.chiffre { background: var(--surface); border: 1px solid var(--bordure); border-radius: var(--rayon); padding: 1rem 1.25rem; }
-.chiffre strong { display: block; font-size: 2rem; letter-spacing: -0.02em; }
-.chiffre span { color: var(--texte-doux); font-size: 0.95rem; }
+.epreuve { margin-top: 52px; }
+.epreuve-hd { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.epreuve-hd h2 { margin: 0; font-size: clamp(1.4rem, 2.2vw, 1.8rem); }
+.epreuve-hd h2 small { display: block; font-family: var(--font); font-size: .9rem; font-weight: 600; letter-spacing: -.005em; color: var(--eyebrow); margin-bottom: 4px; }
+.epreuve-hd p { margin: 0; color: var(--muted); font-size: .92rem; }
 
-/* Respect du réglage « réduire les animations » du système. */
+.apps {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: 30px 18px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.apps > li { margin: 0; }
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  padding: 16px 10px 14px;
+  border-radius: 24px;
+  color: var(--text);
+  transition: background .25s var(--ease);
+}
+.app:hover { background: var(--hover); text-decoration: none; }
+.app:hover .app-ic { transform: translateY(-4px) scale(1.04); box-shadow: 0 14px 34px rgba(0, 0, 0, .2); }
+.app:active .app-ic { transform: scale(.94); }
+
+/* L'icône : un carré très arrondi rempli d'un dégradé, avec un pictogramme blanc */
+.app-ic {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 26px;
+  color: #fff;
+  font-size: 46px;
+  background: var(--app-grad, var(--spectre));
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .14), inset 0 1px 0 rgba(255, 255, 255, .25);
+  transition: transform .35s var(--spring), box-shadow .35s var(--ease);
+  overflow: hidden;
+}
+/* Reflet doux en haut de l'icône */
+.app-ic::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255, 255, 255, .22), rgba(255, 255, 255, 0) 55%); pointer-events: none; }
+.app-ic svg { width: 1em; height: 1em; position: relative; z-index: 1; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .15)); }
+
+.app-nom { margin-top: 10px; font-family: var(--font-d); font-weight: 650; font-size: 1.02rem; letter-spacing: -.015em; line-height: 1.25; }
+.app-sous { color: var(--muted); font-size: .84rem; line-height: 1.35; max-width: 15em; }
+.app-etat { margin-top: 6px; display: inline-flex; align-items: center; gap: 6px; font-size: .76rem; font-weight: 600; color: var(--muted); }
+.app-etat.ok { color: var(--ok); }
+.app-etat.encours { color: var(--accent); }
+.app-barre { display: block; width: 74px; height: 4px; border-radius: 2px; background: var(--panel3); overflow: hidden; }
+.app-barre i { display: block; height: 100%; border-radius: 2px; background: var(--accent); }
+.app-etat.ok .app-barre i { background: var(--ok); }
+
+/* Badge en coin d'icône : nombre de modules validés */
+.app-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  z-index: 2;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 7px;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  background: var(--ok);
+  color: #fff;
+  font-size: .74rem;
+  font-weight: 700;
+  border: 2.5px solid var(--bg);
+}
+.app-ic-wrap { position: relative; }
+
+/* Application pas encore publiée */
+.app.indisponible { cursor: default; }
+.app.indisponible .app-ic { filter: grayscale(1); opacity: .45; }
+.app.indisponible:hover { background: none; }
+.app.indisponible:hover .app-ic { transform: none; box-shadow: 0 6px 18px rgba(0, 0, 0, .14); }
+
+/* Emplacement vide : la prochaine application */
+.app.vide .app-ic { background: none; border: 2px dashed var(--line2); box-shadow: none; color: var(--faint); font-size: 34px; }
+.app.vide .app-ic::after { display: none; }
+.app.vide:hover { background: none; }
+.app.vide:hover .app-ic { transform: none; box-shadow: none; }
+
+/* Fiche détaillée d'une application, sous la grille (apparaît au survol / focus) */
+.app-fiche { display: none; }
+
+/* 9. PROGRESSION ET CONNEXION -------------------------------------------------- */
+.chiffres { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 26px 0 8px; }
+.chiffre { background: var(--panel); border: 1px solid var(--cardline); border-radius: 20px; padding: 18px 22px; }
+.chiffre strong { display: block; font-family: var(--font-d); font-size: 2.4rem; line-height: 1.05; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.chiffre span { color: var(--muted); font-size: .88rem; }
+
+.suivi-apps { display: grid; gap: 12px; margin-top: 14px; }
+.suivi-app {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(150px, 220px);
+  gap: 18px;
+  align-items: center;
+  background: var(--panel);
+  border: 1px solid var(--cardline);
+  border-radius: 20px;
+  padding: 16px 20px;
+  color: var(--text);
+  transition: border-color .2s, transform .25s var(--ease);
+}
+.suivi-app:hover { border-color: var(--line2); text-decoration: none; }
+.suivi-app .app-ic { width: 56px; height: 56px; border-radius: 15px; font-size: 27px; }
+.suivi-app h3 { margin: 0 0 2px; font-size: 1.06rem; }
+.suivi-app p { margin: 0; color: var(--muted); font-size: .86rem; }
+.suivi-modules { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.suivi-modules i { width: 22px; height: 6px; border-radius: 3px; background: var(--panel3); }
+.suivi-modules i.ok { background: var(--ok); }
+.suivi-modules i.essai { background: var(--warn); }
+.suivi-score { text-align: right; }
+.suivi-score b { display: block; font-family: var(--font-d); font-size: 1.5rem; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.suivi-score small { color: var(--muted); font-size: .8rem; }
+
+.formulaire {
+  max-width: 460px;
+  background: var(--panel);
+  border: 1px solid var(--cardline);
+  border-radius: 24px;
+  padding: 28px 30px;
+}
+.formulaire h2 { margin-top: 0; }
+.champ { display: block; margin-bottom: 14px; font-size: .84rem; font-weight: 600; color: var(--muted); }
+.champ input, .champ select { display: block; margin-top: 6px; font-weight: 500; color: var(--text); }
+.message { min-height: 1.2em; font-size: .9rem; }
+.message-erreur { color: var(--bad); }
+.message-succes { color: var(--ok); }
+.avertissement { background: var(--soft-orange); border-radius: 18px; padding: 16px 20px; max-width: 640px; }
+
+/* 10. ANIMATIONS -----------------------------------------------------------------
+   Apparition douce des blocs au défilement (classe .rv posée par JS) et entrée
+   des icônes en cascade. Toutes sont coupées si l'élève a demandé moins de
+   mouvement dans les réglages de son appareil. */
+.rv { opacity: 0; transform: translateY(22px); }
+.rv.rv-in { opacity: 1; transform: none; transition: opacity .7s var(--ease), transform .7s var(--ease); }
+
+.entree { animation: entree .7s var(--ease) both; }
+@keyframes entree { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+.apps > li { animation: iconeIn .55s var(--spring) both; animation-delay: calc(var(--i, 0) * 60ms + 120ms); }
+@keyframes iconeIn { from { opacity: 0; transform: translateY(12px) scale(.9); } to { opacity: 1; transform: none; } }
+
 @media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .rv { opacity: 1; transform: none; }
+}
+
+/* ADAPTATION AUX PETITS ÉCRANS ------------------------------------------------ */
+@media (max-width: 900px) {
+  .hero-grid, .options, .g2, .g3 { grid-template-columns: minmax(0, 1fr); }
+  .etapes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .chiffres { grid-template-columns: minmax(0, 1fr); }
+  .suivi-app { grid-template-columns: auto minmax(0, 1fr); }
+  .suivi-score { grid-column: 1 / -1; text-align: left; display: flex; align-items: baseline; gap: 8px; }
+}
+@media (max-width: 720px) {
+  main { padding: 20px 16px 48px; }
+  .entete-contenu { padding: 0 16px; gap: 10px; flex-wrap: wrap; padding-top: 8px; padding-bottom: 8px; }
+  .navigation { order: 3; flex-basis: 100%; justify-content: flex-start; overflow-x: auto; }
+  .logo span { display: none; }
+  .apps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 8px; }
+  .app-ic { width: 84px; height: 84px; border-radius: 23px; font-size: 40px; }
+  .etapes { grid-template-columns: minmax(0, 1fr); }
+  #pied { padding: 18px 16px 24px; }
 }

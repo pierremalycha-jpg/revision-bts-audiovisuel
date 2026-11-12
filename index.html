@@ -4,41 +4,71 @@
   <meta charset="utf-8">
   <!-- Indispensable pour un affichage correct sur téléphone -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Révision BTS Audiovisuel — TMO et TES</title>
-  <meta name="description" content="Plateforme de révision des épreuves TMO et TES pour les options TIEE et IMAGE.">
+  <title>Révision BTS Audiovisuel — TES et TMO</title>
+  <meta name="description" content="Plateforme de révision des épreuves TES et TMO pour les options TIEE et IMAGE du BTS Audiovisuel.">
+  <!-- theme.js en premier : il applique le thème clair ou sombre avant l'affichage -->
+  <script src="js/theme.js"></script>
   <link rel="stylesheet" href="css/style.css">
 </head>
 
 <!-- data-racine="" : cette page est à la racine du site (voir js/commun.js) -->
-<body data-racine="">
+<body data-racine="" data-page="accueil">
 
   <!-- L'en-tête est inséré automatiquement par js/commun.js -->
   <header id="entete"></header>
 
   <main>
-    <h1>Révise le TMO et le TES</h1>
-    <p class="chapeau">Des rappels de cours, des animations et des quiz, notion par notion. Choisis ton option pour commencer.</p>
+    <section class="hero entree">
+      <span class="eyebrow">BTS Audiovisuel · Révision TES et TMO</span>
+      <h1 class="display">Réviser.<br><span class="grad">Notion par notion.</span></h1>
+      <p class="lead">Des <b>applications interactives</b> pour comprendre, manipuler et retenir les notions des épreuves TES et TMO. Chaque application se parcourt module par module, et chaque module se termine par une <b>évaluation sur 20</b>.</p>
+      <p class="credit">Applications basées sur les cours de <b>Pierre MALYCHA</b>, du <b>BTS Audiovisuel</b> du <b>Lycée Henri Martin de Saint-Quentin</b>.</p>
+    </section>
 
-    <!-- Une grande carte cliquable par option -->
-    <div class="grille grille-etiree">
-      <a class="carte carte-option tiee" href="tiee.html">
+    <!-- Une grande carte par option. Les petites icônes (le « dock ») sont
+         ajoutées par js/page-accueil.js à partir du catalogue. -->
+    <div class="options">
+      <a class="carte-option tiee rv" href="tiee.html">
+        <span class="eyebrow">Techniques d'ingénierie et exploitation des équipements</span>
         <h2>TIEE</h2>
-        <p>Les modules de révision de l'option TIEE, classés par épreuve.</p>
+        <div class="dock" data-option="tiee" aria-hidden="true"></div>
+        <p>Les applications de l'option TIEE : signal, équipements, liaisons et régie.</p>
         <span class="suite">Ouvrir l'option TIEE →</span>
       </a>
-      <a class="carte carte-option image" href="image.html">
+      <a class="carte-option image rv" href="image.html">
+        <span class="eyebrow">Métiers de l'image</span>
         <h2>IMAGE</h2>
-        <p>Les modules de révision de l'option IMAGE, classés par épreuve.</p>
+        <div class="dock" data-option="image" aria-hidden="true"></div>
+        <p>Les applications de l'option IMAGE : lumière, photométrie, caméra et image.</p>
         <span class="suite">Ouvrir l'option IMAGE →</span>
       </a>
     </div>
 
-    <h2>Comment ça marche</h2>
+    <div class="sec-hd rv">
+      <h2 class="sec-t">Quatre temps par module</h2>
+      <p class="muted">Toutes les applications suivent le même parcours : une fois qu'on l'a pris en main, on le retrouve partout.</p>
+    </div>
     <ol class="etapes">
-      <li><strong>Choisis une notion</strong> dans ton option, en TES (théorie) ou en TMO (pratique sur plateau et en régie).</li>
-      <li><strong>Relis le rappel de cours</strong> et manipule l'animation quand il y en a une.</li>
-      <li><strong>Teste-toi avec le quiz.</strong> Chaque réponse est expliquée, et tes erreurs sont récapitulées à la fin.</li>
-      <li><strong>Suis ta progression</strong> dans « Ma progression ». Avec un compte, tu la retrouves sur tous tes appareils.</li>
+      <li class="rv">
+        <span class="ico-etape" style="background:linear-gradient(160deg,#5ac8fa,#007aff)" aria-hidden="true"><svg class="ico" viewBox="0 0 20 20"><path d="M10 5.2C8.4 4.1 6.2 3.7 3.4 3.9v10.9c2.8-.2 5 .2 6.6 1.3 1.6-1.1 3.8-1.5 6.6-1.3V3.9c-2.8-.2-5 .2-6.6 1.3zM10 5.2v10.9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>
+        <b>Comprendre</b>
+        <p>Les mots et les formules, présentés sous forme de questions. Chaque définition a sa comparaison avec la vie de tous les jours.</p>
+      </li>
+      <li class="rv">
+        <span class="ico-etape" style="background:linear-gradient(160deg,#ffb340,#ff6a3d)" aria-hidden="true"><svg class="ico" viewBox="0 0 20 20"><path d="M4 6h12M4 14h12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="7.5" cy="6" r="2.2" fill="currentColor"/><circle cx="13" cy="14" r="2.2" fill="currentColor"/></svg></span>
+        <b>Manipuler</b>
+        <p>Des animations et des simulations : on change un réglage, la scène et les calculs suivent en direct.</p>
+      </li>
+      <li class="rv">
+        <span class="ico-etape" style="background:linear-gradient(160deg,#ff5e8a,#af52de)" aria-hidden="true"><svg class="ico" viewBox="0 0 20 20"><path d="M10 2.8l2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5-3.6-3.5 5-.7z" fill="currentColor"/></svg></span>
+        <b>Retenir</b>
+        <p>L'essentiel avant l'évaluation : définitions, formules, ordres de grandeur et pièges à éviter.</p>
+      </li>
+      <li class="rv">
+        <span class="ico-etape" style="background:linear-gradient(160deg,#34c759,#00a37a)" aria-hidden="true"><svg class="ico" viewBox="0 0 20 20"><path d="M4.5 10.4l3.6 3.6 7.4-8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <b>S'évaluer</b>
+        <p>Dix questions notées sur 20, corrigées en détail. Au moins 12/20 pour ouvrir le module suivant.</p>
+      </li>
     </ol>
   </main>
 
@@ -49,12 +79,16 @@
        1. Firebase (bibliothèque de Google, chargée depuis son serveur)
        2. firebase-config.js (les coordonnées de ton projet)
        3. suivi.js (comptes et progression)
-       4. commun.js (en-tête, pied de page) -->
+       4. commun.js (en-tête, pied de page)
+       5. catalogue.js + applications.js (les applications et leurs icônes) -->
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
   <script src="js/firebase-config.js"></script>
   <script src="js/suivi.js"></script>
   <script src="js/commun.js"></script>
+  <script src="js/catalogue.js"></script>
+  <script src="js/applications.js"></script>
+  <script src="js/page-accueil.js"></script>
 </body>
 </html>
