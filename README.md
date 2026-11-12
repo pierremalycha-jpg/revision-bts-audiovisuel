@@ -23,6 +23,7 @@ La progression des étudiants est enregistrée avec Firebase. Le site est héber
 | Photométrie — *La lumière, mesurée.* | TES | 10 + bac à sable | `modules/tes-photometrie/` |
 | Signal vidéo numérique — *Du signal aux bits.* | TES | 3 | `modules/tes-signal-video-numerique/` |
 | Capteurs d’image — *De la lumière aux électrons.* | TES | 6 | `modules/tes-capteurs/` |
+| Éclairage — *LED, gélatines et ombres.* | TES | 3 | `modules/tes-eclairage/` |
 
 ## Choix techniques
 

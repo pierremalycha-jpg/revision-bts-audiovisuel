@@ -369,6 +369,22 @@ output.bump, b.bump { animation: bump .4s var(--ease); }
 .jauge { position: relative; height: 10px; border-radius: 5px; background: var(--panel3); overflow: hidden; }
 .jauge > i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; background: var(--accent); transition: width .6s var(--ease), background .3s; }
 
+/* Plusieurs labos dans une même étape : chacun a son petit titre */
+.sous-labo { margin: 44px 0 16px; max-width: 60em; }
+.manip > .sous-labo:first-child { margin-top: 0; }
+.sous-labo h3 { font-size: 1.22rem; margin: .15em 0 .3em; }
+.sous-labo p { margin: 0; }
+
+/* Pastille de couleur devant un libellé (canal d'une LED…) */
+.pastille { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 7px; vertical-align: 0; box-shadow: 0 0 0 1px rgba(0, 0, 0, .15); }
+
+/* Pastille de choix restée enfoncée (pièce sélectionnée…) */
+.chip[aria-pressed="true"] { background: var(--text); color: var(--bg); font-weight: 600; }
+
+/* Schéma placé dans la réponse d'une notion ou dans une question */
+.qa-fig { display: block; width: 100%; max-width: 560px; height: auto; margin: 10px 0 12px; border-radius: 14px; background: var(--stage); }
+.qz-fig svg { display: block; width: 100%; max-width: 620px; height: auto; border-radius: 14px; }
+
 /* Liste de barres comparatives : libellé · détail · jauge · valeur
    (exemple : quelle liaison SDI peut transporter ce débit ?) */
 .barres { display: grid; gap: 10px; }

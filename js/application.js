@@ -580,7 +580,7 @@ const Application = (function () {
     return liste.map(x => normaliser(x[0], x[1]));
   }
 
-  function lireNombre(v) { if (v === null || v === undefined) return NaN; return parseFloat(String(v).replace(/\s/g, "").replace(",", ".")); }
+  function lireNombre(v) { if (v === null || v === undefined) return NaN; return parseFloat(String(v).replace(/\s/g, "").replace(",", ".").replace(/[−–]/g, "-")); } // accepte « − » typographique
   function nombreJuste(o, v) {
     const x = lireNombre(v); if (!isFinite(x)) return false;
     if (o.atol !== undefined) return Math.abs(x - o.ans) <= o.atol + 1e-9;

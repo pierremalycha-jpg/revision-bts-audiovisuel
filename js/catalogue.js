@@ -74,6 +74,19 @@ const CATALOGUE = [
     suivi: "kit",
     page: "modules/tes-capteurs/index.html",
     disponible: true
+  },
+  {
+    id: "tes-eclairage",
+    epreuve: "TES",
+    titre: "Éclairage",
+    accroche: "LED, gélatines et ombres.",
+    description: "Technologies LED (bicolore, RVB, RVBW, anatomie, gradation), gélatines CTO, CTB, Plus et Minus Green et courbe de Planck, ombres et taille de la source.",
+    icone: "projecteur",
+    teinte: ["#ffb340", "#bf5af2", "#0a84ff"],
+    modules: 3,
+    suivi: "kit",
+    page: "modules/tes-eclairage/index.html",
+    disponible: true
   }
 
   // Pour ajouter une application, copie le bloc ci-dessous APRÈS une virgule,
@@ -133,6 +146,8 @@ const ICONES = {
   montage: '<rect x="3" y="4" width="18" height="16" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M7 4v16M17 4v16M3 8.5h4M3 15.5h4M17 8.5h4M17 15.5h4" stroke="currentColor" stroke-width="1.6"/>',
   // Une puce de capteur : quatre photosites (motif de Bayer) et ses broches
   capteur: '<rect x="4.6" y="4.6" width="14.8" height="14.8" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="7.4" y="7.4" width="4.2" height="4.2" rx=".8" fill="currentColor" opacity=".55"/><rect x="12.4" y="7.4" width="4.2" height="4.2" rx=".8" fill="currentColor"/><rect x="7.4" y="12.4" width="4.2" height="4.2" rx=".8" fill="currentColor"/><rect x="12.4" y="12.4" width="4.2" height="4.2" rx=".8" fill="currentColor" opacity=".55"/><path d="M9 2v2.2M15 2v2.2M9 19.8V22M15 19.8V22M2 9h2.2M2 15h2.2M19.8 9H22M19.8 15H22" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>',
+  // Un projecteur à lentille de Fresnel sur sa lyre, et son faisceau
+  projecteur: '<path d="M3.5 8.2l9-3.4v12.4l-9-3.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12.5 7.2l8 -2.6M12.5 12h8.5M12.5 16.8l8 2.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" opacity=".75"/><path d="M8 15.6v4.2M5 19.8h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
   // Le signe « plus » (emplacement de la prochaine application)
   plus: '<path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
 };
