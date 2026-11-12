@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capteurs d’image — Révision BTS Audiovisuel</title>
+  <meta name="description" content="Application de révision : fonctionnement d'un capteur, photosites, bruit et plage dynamique, matrice de Bayer et tri-capteur, rolling shutter, capteurs empilés et semi-empilés, taille de capteur.">
+  <!-- « ../../ » remonte de deux dossiers : modules/tes-capteurs/ → racine -->
+  <script src="../../js/theme.js"></script>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/application.css">
+</head>
+
+<!-- data-racine : chemin vers la racine du site (utilisé par js/commun.js).
+     Toute la page (menu, accueil, notions, essentiel, évaluation) est construite
+     par js/application.js à partir de contenu.js. Cette page ne contient que
+     les LABOS, un <template> par module. Identifiants : c1-…, c2-… (c = capteur). -->
+<body data-racine="../../">
+
+  <!-- =================== LABO DU MODULE 1 : du photon au nombre =================== -->
+  <template data-labo="1">
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Une ligne de 8 photosites</span><span id="c1-etat"></span></div>
+          <canvas id="c1-cv" class="cv" width="1000" height="470" role="img" aria-label="Animation : des photons tombent sur huit photosites qui se remplissent d’électrons, puis les charges sont lues et converties en nombres"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Photons (case 5)</small><b id="c1-ph">—</b></div>
+          <div><small>Électrons</small><b class="acc" id="c1-el">—</b></div>
+          <div><small>Remplissage</small><b id="c1-rem">—</b></div>
+          <div><small>Tension</small><b id="c1-u">—</b></div>
+          <div><small>Valeur 12 bits</small><b id="c1-v">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <p class="muted small">Chaque photosite peut stocker <b>20 000 électrons</b>. Gain de conversion : 40 µV par électron. Convertisseur 12 bits (0 à 4 095). La case 5 est la plus éclairée.</p>
+          <label class="ctl"><span>Éclairement E</span><input type="range" id="c1-e" min="2" max="200" step="1" value="50"><output id="c1-eo"></output></label>
+          <div class="ctl"><span>Exposition t</span><div id="c1-t" aria-label="Temps d’exposition"></div></div>
+          <label class="ctl"><span>Rendement QE</span><input type="range" id="c1-qe" min="20" max="90" step="1" value="50"><output id="c1-qeo"></output></label>
+          <div class="ctl"><span>Capteur</span><div id="c1-type" aria-label="Type de lecture : CCD ou CMOS"></div></div>
+          <div class="btnrow" style="margin-top:12px"><button class="btn" id="c1-jouer" type="button">▶ Exposer puis lire</button></div>
+        </div>
+        <div class="card">
+          <h3>Ce qu’il faut observer</h3>
+          <div id="c1-msg" class="note" aria-live="polite"></div>
+          <div class="say small" id="c1-lecture" style="margin:10px 0 0"></div>
+          <p class="muted small" style="margin:12px 0 8px">Essayez ces situations :</p>
+          <div class="btnrow" id="c1-situations">
+            <button class="chip" type="button" data-s="ok">Bien exposé</button>
+            <button class="chip" type="button" data-s="sous">Sous-exposé</button>
+            <button class="chip" type="button" data-s="sur">Surexposé</button>
+            <button class="chip" type="button" data-s="qe">Rendement faible</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Calcul pas à pas · case 5</h3>
+          <div class="calc" id="c1-calc" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- =================== LABO DU MODULE 2 : la taille des photosites =================== -->
+  <template data-labo="2">
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>À l’échelle · en coupe</span><div id="c2-arch" aria-label="Architecture du capteur"></div></div>
+          <canvas id="c2-cv" class="cv" width="1000" height="480" role="img" aria-label="À gauche, les photosites dessinés à l’échelle dans un carré de 24 micromètres ; à droite, la coupe d’un photosite et le trajet de la lumière"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Pas</small><b class="acc" id="c2-p">—</b></div>
+          <div><small>Surface</small><b id="c2-s">—</b></div>
+          <div><small>Capacité ≈</small><b id="c2-fw">—</b></div>
+          <div><small>Lumière captée</small><b id="c2-eff">—</b></div>
+          <div><small>Surface utile</small><b id="c2-utile">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Format</span>
+            <select id="c2-format">
+              <option value="6.17">Smartphone 1/2,3″ (6,2 mm)</option>
+              <option value="5.2">1/3″ (5,2 mm)</option>
+              <option value="9.6">2/3″ (9,6 mm)</option>
+              <option value="17.3">Micro 4/3 (17,3 mm)</option>
+              <option value="24.9" selected>Super 35 (24,9 mm)</option>
+              <option value="36">Plein format (36 mm)</option>
+            </select>
+          </label>
+          <label class="ctl"><span>Définition</span>
+            <select id="c2-def">
+              <option value="1920">HD · 1 920 en largeur</option>
+              <option value="3840">UHD · 3 840</option>
+              <option value="4096" selected>4K · 4 096</option>
+              <option value="4000">Photo 12 Mpx · 4 000</option>
+              <option value="6144">6K · 6 144</option>
+              <option value="8000">Photo 48 Mpx · 8 000</option>
+            </select>
+          </label>
+          <div class="ctl"><span>Microlentilles</span><div id="c2-ml" aria-label="Microlentilles"></div></div>
+          <p class="muted small" style="margin:10px 0 0">Les pourcentages de lumière captée viennent d’un <b>modèle simplifié</b> : ils servent à comparer, pas à mesurer.</p>
+        </div>
+        <div class="card">
+          <h3>Ce qu’il faut observer</h3>
+          <div id="c2-msg" class="note" aria-live="polite"></div>
+          <p class="muted small" style="margin:12px 0 8px">Essayez ces caméras :</p>
+          <div class="btnrow" id="c2-situations">
+            <button class="chip" type="button" data-s="tel">Smartphone 48 Mpx</button>
+            <button class="chip" type="button" data-s="23">Épaule 2/3″ HD</button>
+            <button class="chip" type="button" data-s="s35">Cinéma Super 35 4K</button>
+            <button class="chip" type="button" data-s="pf">Plein format 4K</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Calcul pas à pas</h3>
+          <div class="calc" id="c2-calc" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- =================== LABO DU MODULE 3 : bruit et plage dynamique =================== -->
+  <template data-labo="3">
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Charte de 15 cases, un diaph d’écart</span><span id="c3-etat"></span></div>
+          <canvas id="c3-cv" class="cv" width="1000" height="520" role="img" aria-label="En haut, quinze cases grises de plus en plus claires, avec leur bruit ; en bas, le graphique du signal et du bruit de chaque case, et la plage dynamique"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Plage dynamique</small><b class="acc" id="c3-dr">—</b></div>
+          <div><small>En décibels</small><b id="c3-db">—</b></div>
+          <div><small>Capacité</small><b id="c3-fw">—</b></div>
+          <div><small>Cases écrêtées</small><b id="c3-ecr">—</b></div>
+          <div><small>Cases noyées</small><b id="c3-noy">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Taille photosite</span><input type="range" id="c3-p" min="1" max="9" step="0.1" value="5"><output id="c3-po"></output></label>
+          <label class="ctl"><span>Bruit de lecture</span><input type="range" id="c3-rn" min="1" max="20" step="0.5" value="3"><output id="c3-rno"></output></label>
+          <label class="ctl"><span>Exposition</span><input type="range" id="c3-ex" min="-4" max="4" step="1" value="0"><output id="c3-exo"></output></label>
+          <div class="ctl"><span>Gain</span><div id="c3-g" aria-label="Gain en décibels"></div></div>
+          <div class="btnrow" style="margin-top:12px"><button class="btn" id="c3-pause" type="button">⏸ Figer le bruit</button></div>
+          <p class="muted small" style="margin:10px 0 0">Modèle simplifié : capacité ≈ 1 500 électrons par µm² ; le bruit de lecture ne dépend pas du gain.</p>
+        </div>
+        <div class="card">
+          <h3>Ce qu’il faut observer</h3>
+          <div id="c3-msg" class="note" aria-live="polite"></div>
+          <p class="muted small" style="margin:12px 0 8px">Essayez ces situations :</p>
+          <div class="btnrow" id="c3-situations">
+            <button class="chip" type="button" data-s="pf">Grand capteur</button>
+            <button class="chip" type="button" data-s="tel">Smartphone</button>
+            <button class="chip" type="button" data-s="gain">Trop de gain</button>
+            <button class="chip" type="button" data-s="sous">Sous-exposé + gain</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Calcul pas à pas</h3>
+          <div class="calc" id="c3-calc" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- =================== LABO DU MODULE 4 : Bayer et tri-capteur =================== -->
+  <template data-labo="4">
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>96 × 48 photosites</span><div id="c4-etape" aria-label="Étape affichée"></div></div>
+          <canvas id="c4-cv" class="cv" width="960" height="480" role="img" aria-label="Image test vue par un capteur de Bayer : scène, mosaïque des photosites, image dématricée ou tri-capteur" style="cursor:crosshair;touch-action:none"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Photosites</small><b id="c4-n">—</b></div>
+          <div><small>Verts</small><b id="c4-v">—</b></div>
+          <div><small>Rouges · bleus</small><b id="c4-rb">—</b></div>
+          <div><small>Valeurs devinées</small><b id="c4-dev">—</b></div>
+          <div><small>Fausses couleurs</small><b class="acc" id="c4-err">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <div class="ctl"><span>Filtre passe-bas</span><div id="c4-olpf" aria-label="Filtre passe-bas optique"></div></div>
+          <div class="say" id="c4-texte" aria-live="polite"></div>
+          <button class="btn" type="button" id="c4-defiler">▶ Montrer les étapes</button>
+          <p class="muted small" style="margin:10px 0 0">À gauche : couleurs douces. Au milieu : rayures et damiers noir et blanc, de plus en plus fins. À droite : fines rayures colorées.</p>
+        </div>
+        <div class="card">
+          <h3>La loupe · 6 × 6 photosites</h3>
+          <canvas id="c4-loupe" class="cv" width="360" height="360" role="img" aria-label="Agrandissement de 6 × 6 photosites autour du pointeur"></canvas>
+          <p class="muted small" id="c4-loupe-txt" style="margin:8px 0 0">Survolez ou touchez l’image pour déplacer la loupe.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Séparer la lumière en trois couleurs</span><div id="c4-sys" aria-label="Système de séparation des couleurs"></div></div>
+          <canvas id="c4-prisme" class="cv" width="1000" height="420" role="img" aria-label="Animation : des photons rouges, verts et bleus traversent l’objectif puis un prisme dichroïque vers trois capteurs, ou un filtre de Bayer vers un capteur unique"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Lumière utilisée</small><b class="acc" id="c4-util">—</b></div>
+          <div><small>Capteurs</small><b id="c4-nc">—</b></div>
+          <div><small>Mesures par pixel</small><b id="c4-mp">—</b></div>
+          <div><small>Dématriçage</small><b id="c4-dm">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Tri-capteur ou Bayer ?</h3>
+          <div id="c4-p-msg" class="note" aria-live="polite"></div>
+          <div class="btnrow" style="margin-top:12px"><button class="btn" id="c4-pause" type="button">⏸ Pause</button></div>
+        </div>
+        <div class="card">
+          <h3>Les deux solutions</h3>
+          <table class="fx-t">
+            <tr><td class="nm"></td><td class="nm">Bayer</td><td class="nm">Tri-capteur</td></tr>
+            <tr><td class="role">Capteurs</td><td>1</td><td>3 + prisme</td></tr>
+            <tr><td class="role">Couleurs mesurées</td><td>1 sur 3</td><td>3 sur 3</td></tr>
+            <tr><td class="role">Lumière perdue</td><td>≈ 2/3</td><td>faible</td></tr>
+            <tr><td class="role">Taille du capteur</td><td>jusqu’au grand format</td><td>2/3″ en général</td></tr>
+            <tr><td class="role">Usage</td><td>cinéma, hybrides</td><td>plateau, reportage</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- =================== LABO DU MODULE 5 : lecture, rolling shutter, empilement =================== -->
+  <template data-labo="5">
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Scène réelle · image enregistrée</span><span id="c5-etat"></span></div>
+          <canvas id="c5-cv" class="cv" width="1000" height="330" role="img" aria-label="À gauche la scène en mouvement, à droite l’image enregistrée ligne par ligne au passage d’une ligne rouge"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Temps de lecture</small><b class="acc" id="c5-tr">—</b></div>
+          <div><small>Cadence max</small><b id="c5-fmax">—</b></div>
+          <div><small id="c5-l3">Décalage (UHD)</small><b id="c5-d">—</b></div>
+          <div><small id="c5-l4">Inclinaison</small><b id="c5-a">—</b></div>
+        </div>
+        <div class="stg">
+          <div class="vt"><span>L’architecture du capteur</span></div>
+          <canvas id="c5-arch" class="cv" width="1000" height="260" role="img" aria-label="Schéma de l’architecture du capteur choisi et comparaison des temps de lecture"></canvas>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <div class="ctl"><span>Capteur</span><div id="c5-type" aria-label="Architecture du capteur"></div></div>
+          <div class="ctl"><span>Scène</span><div id="c5-sujet" aria-label="Scène filmée"></div></div>
+          <label class="ctl"><span id="c5-vl">Panoramique</span><input type="range" id="c5-v" min="0.5" max="10" step="0.5" value="3"><output id="c5-vo"></output></label>
+          <label class="ctl"><span>Temps de lecture</span><input type="range" id="c5-t" min="0" max="40" step="1" value="30"><output id="c5-to"></output></label>
+          <div class="btnrow" style="margin-top:12px"><button class="btn" id="c5-pause" type="button">⏸ Pause</button><button class="btn" id="c5-rejouer" type="button">↺ Nouvelle prise</button></div>
+        </div>
+        <div class="card">
+          <h3>Ce qu’il faut observer</h3>
+          <div id="c5-msg" class="note" aria-live="polite"></div>
+        </div>
+        <div class="card">
+          <h3>Calcul pas à pas</h3>
+          <div class="calc" id="c5-calc" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- =================== LABO DU MODULE 6 : taille du capteur =================== -->
+  <template data-labo="6">
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Le cadre obtenu</span><span id="c6-etat"></span></div>
+          <canvas id="c6-cv" class="cv" width="1000" height="562" role="img" aria-label="Image simulée : une personne à 3 mètres devant des lumières de ville, cadrée selon le capteur, la focale et le diaphragme choisis"></canvas>
+        </div>
+        <div class="readouts" style="grid-template-columns:repeat(auto-fit,minmax(104px,1fr))">
+          <div><small>Coef. k</small><b id="c6-k">—</b></div>
+          <div><small>Focale</small><b class="acc" id="c6-f">—</b></div>
+          <div><small>Focale équiv.</small><b id="c6-feq">—</b></div>
+          <div><small>Angle H</small><b id="c6-a">—</b></div>
+          <div><small>Prof. de champ</small><b id="c6-pdc">—</b></div>
+          <div><small>Flou du fond</small><b id="c6-flou">—</b></div>
+        </div>
+        <div class="stg">
+          <div class="vt"><span>Les formats à la même échelle · angle de champ</span></div>
+          <canvas id="c6-formats" class="cv" width="1000" height="300" role="img" aria-label="Les formats de capteur dessinés à la même échelle, avec le cercle image et l’angle de champ"></canvas>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Capteur</span>
+            <select id="c6-format">
+              <option value="0">1/3″ (caméscope)</option>
+              <option value="1">1/2″</option>
+              <option value="2">2/3″ (broadcast)</option>
+              <option value="3">Micro 4/3</option>
+              <option value="4" selected>Super 35 (cinéma)</option>
+              <option value="5">Plein format 24 × 36</option>
+              <option value="6">Grand format 65 mm</option>
+            </select>
+          </label>
+          <div class="ctl"><span>Comparer à</span><div id="c6-mode" aria-label="Mode de comparaison"></div></div>
+          <label class="ctl"><span id="c6-fl">Focale</span><input type="range" id="c6-fs" min="8" max="200" step="1" value="50"><output id="c6-fo"></output></label>
+          <label class="ctl"><span>Diaphragme</span>
+            <select id="c6-n">
+              <option value="1.4">F1,4</option>
+              <option value="2">F2</option>
+              <option value="2.8" selected>F2,8</option>
+              <option value="4">F4</option>
+              <option value="5.6">F5,6</option>
+              <option value="8">F8</option>
+              <option value="11">F11</option>
+              <option value="16">F16</option>
+            </select>
+          </label>
+          <div class="btnrow" style="margin-top:12px"><button class="btn" id="c6-defiler" type="button">▶ Faire défiler les capteurs</button></div>
+        </div>
+        <div class="card">
+          <h3>Ce qu’il faut observer</h3>
+          <div id="c6-msg" class="note" aria-live="polite"></div>
+          <p class="muted small" style="margin:12px 0 8px">Essayez ces situations :</p>
+          <div class="btnrow" id="c6-situations">
+            <button class="chip" type="button" data-s="rep">Reportage 2/3″ F4</button>
+            <button class="chip" type="button" data-s="cine">Cinéma Super 35 F2</button>
+            <button class="chip" type="button" data-s="pf">Portrait plein format F1,4</button>
+            <button class="chip" type="button" data-s="recadre">Même focale, petit capteur</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Calcul pas à pas</h3>
+          <div class="calc" id="c6-calc" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- Scripts communs à tout le site (même ordre que sur les autres pages) -->
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="../../js/firebase-config.js"></script>
+  <script src="../../js/suivi.js"></script>
+  <script src="../../js/commun.js"></script>
+  <script src="../../js/catalogue.js"></script>
+  <script src="../../js/applications.js"></script>
+  <!-- Le kit application, puis le contenu et les labos de CETTE application -->
+  <script src="../../js/application.js"></script>
+  <script src="contenu.js"></script>
+  <script src="labos.js"></script>
+  <script>
+    Application.demarrer(APPLICATION);
+  </script>
+</body>
+</html>

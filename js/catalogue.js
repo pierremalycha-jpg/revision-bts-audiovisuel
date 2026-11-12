@@ -55,6 +55,20 @@ const CATALOGUE = [
     suivi: "kit",
     page: "modules/tes-signal-video-numerique/index.html",
     disponible: true
+  },
+  {
+    id: "tes-capteurs",
+    options: ["image", "tiee"],
+    epreuve: "TES",
+    titre: "Capteurs d’image",
+    accroche: "De la lumière aux électrons.",
+    description: "Fonctionnement d’un capteur, photosites, bruit et plage dynamique, matrice de Bayer et tri-capteur, rolling shutter, capteurs empilés et semi-empilés, taille de capteur.",
+    icone: "capteur",
+    teinte: ["#30d158", "#00c7be", "#0a84ff"],
+    modules: 6,
+    suivi: "kit",
+    page: "modules/tes-capteurs/index.html",
+    disponible: true
   }
 
   // Pour ajouter une application, copie le bloc ci-dessous APRÈS une virgule,
@@ -129,6 +143,8 @@ const ICONES = {
   liaison: '<rect x="2.5" y="9" width="5" height="6" rx="1.4" fill="currentColor"/><rect x="16.5" y="9" width="5" height="6" rx="1.4" fill="currentColor"/><path d="M7.5 12c3-4 6-4 9 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
   // Une pellicule (montage, formats)
   montage: '<rect x="3" y="4" width="18" height="16" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M7 4v16M17 4v16M3 8.5h4M3 15.5h4M17 8.5h4M17 15.5h4" stroke="currentColor" stroke-width="1.6"/>',
+  // Une puce de capteur : quatre photosites (motif de Bayer) et ses broches
+  capteur: '<rect x="4.6" y="4.6" width="14.8" height="14.8" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="7.4" y="7.4" width="4.2" height="4.2" rx=".8" fill="currentColor" opacity=".55"/><rect x="12.4" y="7.4" width="4.2" height="4.2" rx=".8" fill="currentColor"/><rect x="7.4" y="12.4" width="4.2" height="4.2" rx=".8" fill="currentColor"/><rect x="12.4" y="12.4" width="4.2" height="4.2" rx=".8" fill="currentColor" opacity=".55"/><path d="M9 2v2.2M15 2v2.2M9 19.8V22M15 19.8V22M2 9h2.2M2 15h2.2M19.8 9H22M19.8 15H22" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>',
   // Le signe « plus » (emplacement de la prochaine application)
   plus: '<path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
 };

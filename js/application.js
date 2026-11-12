@@ -196,13 +196,20 @@ const Application = (function () {
      ========================================================================== */
   function infosCatalogue() {
     const c = (typeof CATALOGUE !== "undefined" ? CATALOGUE : []).find(x => x.id === A.id) || {};
+    // Application commune à plusieurs options : le menu ramène à l'option d'où
+    // vient l'élève (mémorisée par js/page-option.js), sinon à celle de contenu.js.
+    let option = A.option || (c.options ? c.options[0] : "image");
+    try {
+      const vue = sessionStorage.getItem("revision-bts-option");
+      if (vue && c.options && c.options.includes(vue)) option = vue;
+    } catch (e) { /* stockage indisponible : on garde l'option par défaut */ }
     return {
       titre: A.titre || c.titre || "Application",
       accroche: A.accroche || c.accroche || "",
       icone: A.icone || c.icone || "plus",
       teinte: A.teinte || c.teinte,
       epreuve: A.epreuve || c.epreuve || "",
-      option: A.option || (c.options ? c.options[0] : "image")
+      option: option
     };
   }
 
