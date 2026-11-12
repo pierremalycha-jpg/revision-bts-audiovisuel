@@ -11,10 +11,9 @@ Cette charte dit ce qu'il faut respecter, et pourquoi.
 1. **Duplique** `modules/modele/` et renomme la copie `epreuve-nom-de-la-notion` (minuscules, tirets, sans accent). Exemple : `tmo-reglage-camera`.
 2. **Écris le contenu** dans `contenu.js` : pour chaque module, les notions, l'essentiel et les questions. Le format est expliqué ligne par ligne dans le fichier.
 3. **Écris les labos** : leur HTML dans `index.html` (un `<template data-labo="n">` par module qui en a un), leur code dans `labos.js`.
-4. **Déclare l'application** dans `js/catalogue.js` (id, option, épreuve, titre, icône, couleurs, nombre de modules). Son icône apparaît alors sur la page de l'option, sur l'accueil et dans « Ma progression ».
+4. **Déclare l'application** dans `js/catalogue.js` (id, épreuve, titre, icône, couleurs, nombre de modules). Son icône apparaît alors dans la grille de l'accueil et dans « Ma progression ».
 5. **Teste** : ouvre `index.html` de l'application, ajoute `?enseignant` à l'adresse pour ouvrir tous les modules sans passer les évaluations, vérifie chaque étape en clair, en sombre et sur téléphone.
 
-> **Application commune à deux options** : dans le catalogue, `options: ["image", "tiee"]`. Son icône apparaît sur les deux pages, et le lien « Option… » du menu ramène l'élève à l'option d'où il vient (mémorisée par `js/page-option.js`) ; `option` dans `contenu.js` ne sert plus que par défaut. Exemple : `modules/tes-capteurs/`.
 
 > L'`id` de `contenu.js` doit être **identique** à celui du catalogue, et ne doit **plus changer** une fois l'application en ligne : les notes sont enregistrées sous ce nom (`id.1`, `id.2`…).
 
@@ -27,7 +26,7 @@ Cette charte dit ce qu'il faut respecter, et pourquoi.
 | Élément | Rôle |
 |---|---|
 | **Accueil** | Grand titre + accroche en dégradé, présentation, bouton « Commencer / Reprendre », progression (anneau), méthode en quatre temps, **parcours** (une tuile par module avec son anneau de note). |
-| **Menu latéral** | Accueil, retour à l'option, la liste des modules (numéro, coche verte si validé, cadenas si verrouillé), le lexique, la progression et le thème. Réductible en pastilles ; en tiroir sur téléphone. |
+| **Menu latéral** | Accueil, retour à toutes les applications, la liste des modules (numéro, coche verte si validé, cadenas si verrouillé), le lexique, la progression et le thème. Réductible en pastilles ; en tiroir sur téléphone. |
 | **Modules** | 2 à 10 modules, du plus simple au plus technique. Chacun s'ouvre quand le précédent est validé (**12/20**). |
 | **Lexique** | Toutes les définitions, de A à Z, avec recherche. Construit automatiquement. |
 
@@ -77,7 +76,7 @@ Reprise de la photométrie : sobre, claire, inspirée des interfaces Apple. Tout
 | Scènes et animations | **Fond sombre `#0b0c0e` dans les deux thèmes** | Une lumière, une couleur, un signal se lisent mieux sur du noir. |
 | Typographie | Police système (San Francisco, Segoe UI…) ; chiffres à chasse fixe dans les valeurs | Rien à télécharger ; les nombres ne « sautent » pas quand ils changent. |
 | Formes | Cartes arrondies (18 à 28 px), boutons en pilule, contrôles segmentés | Cohérence avec la photométrie. |
-| Icône d'application | Carré très arrondi, dégradé de 2 ou 3 couleurs (`teinte`), pictogramme blanc (`icone`) | Reconnaissable d'un coup d'œil dans la grille de l'option. |
+| Icône d'application | Carré très arrondi, dégradé de 2 ou 3 couleurs (`teinte`), pictogramme blanc (`icone`) | Reconnaissable d'un coup d'œil dans la grille de l'accueil. |
 
 **Ton des textes** : on vouvoie l'élève dans les applications (comme dans la photométrie). Phrases courtes, un mot important en **gras** par phrase au plus, pas de jargon sans définition. Typographie française : espace avant `: ; ? !`, guillemets « », apostrophe ’.
 
@@ -154,9 +153,9 @@ Règles de code (dans `labos.js`) :
 | `css/application.css` | La mise en page de référence des applications. |
 | `css/style.css` | Couleurs, typographie, boutons, champs : partagés avec toute la plateforme. |
 | `js/theme.js` | Thème clair ou sombre, partagé avec la photométrie. |
-| `js/applications.js` | Icônes d'application et lecture de la progression (pages d'option, tableau de bord). |
+| `js/applications.js` | Icônes d'application et lecture de la progression (accueil, tableau de bord). |
 | `modules/modele/` | Le modèle à dupliquer, entièrement commenté. |
 | `modules/tes-signal-video-numerique/` | Une application complète construite avec le kit : à lire comme exemple. |
-| `modules/tes-capteurs/` | Application commune IMAGE et TIEE, six labos animés (canvas, boucles d'animation avec pause, mouvement réduit). |
+| `modules/tes-capteurs/` | Six labos animés (canvas, boucles d'animation avec pause, mouvement réduit). |
 
 La photométrie, elle, reste un **fichier unique** autonome (elle fonctionne aussi hors ligne, avec son propre enregistrement, son relevé PDF et son tableau de bord enseignant). Le kit en reprend la forme ; il ne la remplace pas.

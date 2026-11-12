@@ -248,7 +248,13 @@ svg.ico { width: 1em; height: 1em; vertical-align: -.14em; flex: none; }
   white-space: nowrap;
 }
 .logo:hover { text-decoration: none; opacity: .75; }
-.logo span { color: var(--muted); font-weight: 500; }
+.logo span { color: var(--muted); font-weight: 500; padding-left: 10px; border-left: 1px solid var(--line2); }
+.logo img { display: block; height: 34px; width: auto; }
+
+/* Le logo du BTS existe en deux versions : on montre celle qui convient au thème. */
+.logo-sombre { display: none !important; }
+:root[data-theme="dark"] .logo-clair { display: none !important; }
+:root[data-theme="dark"] .logo-sombre { display: block !important; }
 
 /* Le disque spectral : la « marque » de la plateforme, identique à celle de la photométrie */
 .brand-mark {
@@ -536,6 +542,8 @@ th { color: var(--muted); font-size: .74rem; font-weight: 600; text-transform: u
 
 /* 7. ACCUEIL ----------------------------------------------------------------- */
 .hero { padding: 34px 0 10px; }
+.hero-logo { margin: 0 0 30px; line-height: 0; }
+.hero-logo img { width: min(520px, 100%); height: auto; }
 .hero-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 48px; align-items: center; }
 .credit {
   font-size: .96rem;
@@ -772,6 +780,7 @@ th { color: var(--muted); font-size: .74rem; font-weight: 600; text-transform: u
   .entete-contenu { padding: 0 16px; gap: 10px; flex-wrap: wrap; padding-top: 8px; padding-bottom: 8px; }
   .navigation { order: 3; flex-basis: 100%; justify-content: flex-start; overflow-x: auto; }
   .logo span { display: none; }
+  .logo img { height: 28px; }
   .apps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 8px; }
   .app-ic { width: 84px; height: 84px; border-radius: 23px; font-size: 40px; }
   .etapes { grid-template-columns: minmax(0, 1fr); }

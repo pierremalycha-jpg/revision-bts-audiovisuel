@@ -76,7 +76,8 @@ const Application = (function () {
   function fiche(n) { return progression[cleModule(n)] || null; }
   function valide(n) { const b = meilleure(n); return b !== null && b >= noteMin(); }
   // Mode enseignant : ajouter « ?enseignant » à l'adresse ouvre tous les modules.
-  const enseignant = /[?&]enseignant\b/.test(location.search);
+  // TOUT_DEBLOQUER (js/catalogue.js) fait de même pour tout le monde.
+  const enseignant = /[?&]enseignant\b/.test(location.search) || (typeof TOUT_DEBLOQUER !== "undefined" && TOUT_DEBLOQUER);
   function ouvert(n) { return enseignant || A.deblocage === false || n === 1 || valide(n - 1); }
   function nbValides() { let k = 0; for (let n = 1; n <= A.modules.length; n++) if (valide(n)) k++; return k; }
   // Le module « en cours » : le premier ouvert et non validé.
@@ -196,32 +197,23 @@ const Application = (function () {
      ========================================================================== */
   function infosCatalogue() {
     const c = (typeof CATALOGUE !== "undefined" ? CATALOGUE : []).find(x => x.id === A.id) || {};
-    // Application commune à plusieurs options : le menu ramène à l'option d'où
-    // vient l'élève (mémorisée par js/page-option.js), sinon à celle de contenu.js.
-    let option = A.option || (c.options ? c.options[0] : "image");
-    try {
-      const vue = sessionStorage.getItem("revision-bts-option");
-      if (vue && c.options && c.options.includes(vue)) option = vue;
-    } catch (e) { /* stockage indisponible : on garde l'option par défaut */ }
     return {
       titre: A.titre || c.titre || "Application",
       accroche: A.accroche || c.accroche || "",
       icone: A.icone || c.icone || "plus",
       teinte: A.teinte || c.teinte,
-      epreuve: A.epreuve || c.epreuve || "",
-      option: option
+      epreuve: A.epreuve || c.epreuve || ""
     };
   }
 
   function construireCoquille(info) {
-    const optionNom = (typeof OPTIONS !== "undefined" && OPTIONS[info.option]) ? OPTIONS[info.option].nom : info.option.toUpperCase();
     document.body.classList.add("app-page");
     document.body.insertAdjacentHTML("afterbegin",
       '<aside class="side" id="side" aria-label="Navigation de l’application">' +
       '  <div class="side-hd"><button class="brand" data-go="accueil" data-tip="Accueil de l’application"><span class="bt">' + echapper(info.titre) + "</span></button></div>" +
       '  <div class="side-sc">' +
       '    <button class="si" data-go="accueil" id="navAccueil" data-tip="Accueil"><span class="si-ic">' + PICTO.accueil + '</span><span class="lb"><b>Accueil</b></span></button>' +
-      '    <a class="si" href="' + RACINE + info.option + '.html" data-tip="Retour à l’option ' + optionNom + '"><span class="si-ic">' + PICTO.grille + '</span><span class="lb"><b>Option ' + optionNom + "</b><small>Toutes les applications</small></span></a>" +
+      '    <a class="si" href="' + RACINE + 'index.html#applications" data-tip="Retour à toutes les applications"><span class="si-ic">' + PICTO.grille + '</span><span class="lb"><b>Les applications</b><small>Retour à l’accueil</small></span></a>' +
       '    <div class="side-lb"><span>Parcours</span></div>' +
       '    <nav id="navModules" aria-label="Modules"></nav>' +
       '    <div class="side-lb"><span>Outils</span></div>' +

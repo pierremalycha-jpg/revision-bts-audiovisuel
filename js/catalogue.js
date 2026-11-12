@@ -1,16 +1,15 @@
 /* ==========================================================================
    catalogue.js — la liste de toutes les applications de révision
    --------------------------------------------------------------------------
-   Pourquoi une liste centrale ? Les pages TIEE et IMAGE (grilles d'icônes),
-   l'accueil et le tableau de bord se construisent automatiquement à partir
-   d'elle. Pour publier une nouvelle application, tu ajoutes UN bloc ici :
+   Pourquoi une liste centrale ? L'accueil (la grille d'icônes de toutes les
+   applications) et le tableau de bord se construisent automatiquement à
+   partir d'elle. Pour publier une nouvelle application, tu ajoutes UN bloc ici :
    aucune autre page à modifier.
 
    Chaque application est décrite par :
      id          identifiant unique, sans espace ni accent. Il sert de nom dans
                  la base de données : NE LE CHANGE PLUS une fois l'application
                  en ligne, sinon les notes déjà enregistrées seraient perdues.
-     options     les options concernées : ["tiee"], ["image"] ou ["tiee", "image"]
      epreuve     "TES" ou "TMO"
      titre       le nom affiché sous l'icône (court : un ou deux mots)
      accroche    une ligne sous le nom
@@ -27,10 +26,18 @@
      disponible  true = en ligne ; false = icône grisée « Bientôt »
    ========================================================================== */
 
+/* TOUT DÉBLOQUER — interrupteur de prévisualisation.
+   true  : tous les modules de toutes les applications sont ouverts, sans
+           attendre 12/20 (pratique pour tout parcourir et vérifier le contenu).
+   false : parcours normal, chaque module s'ouvre après 12/20 au précédent.
+   Pense à le remettre à false avant de donner le lien aux étudiants.
+   (L'application Photométrie, autonome, a le même interrupteur en tête de son
+   script : TOUT_DEBLOQUER, dans modules/tes-photometrie/index.html.) */
+const TOUT_DEBLOQUER = true;
+
 const CATALOGUE = [
   {
     id: "tes-photometrie",
-    options: ["image"],
     epreuve: "TES",
     titre: "Photométrie",
     accroche: "La lumière, mesurée.",
@@ -44,7 +51,6 @@ const CATALOGUE = [
   },
   {
     id: "tes-signal-video-numerique",
-    options: ["tiee"],
     epreuve: "TES",
     titre: "Signal vidéo numérique",
     accroche: "Du signal aux bits.",
@@ -58,7 +64,6 @@ const CATALOGUE = [
   },
   {
     id: "tes-capteurs",
-    options: ["image", "tiee"],
     epreuve: "TES",
     titre: "Capteurs d’image",
     accroche: "De la lumière aux électrons.",
@@ -76,7 +81,6 @@ const CATALOGUE = [
   //
   // ,{
   //   id: "tmo-nom-de-la-notion",
-  //   options: ["image"],
   //   epreuve: "TMO",
   //   titre: "Nom court",
   //   accroche: "Une ligne d'accroche.",
@@ -90,7 +94,7 @@ const CATALOGUE = [
   // }
 ];
 
-// Présentation des épreuves, affichée sur les pages d'option.
+// Présentation des épreuves (TES, TMO).
 const EPREUVES = {
   TES: {
     sigle: "TES",
@@ -101,22 +105,6 @@ const EPREUVES = {
     sigle: "TMO",
     nom: "Techniques de mise en œuvre",
     description: "Les cours pratiques, sur plateau et en régie."
-  }
-};
-
-// Présentation des options (pages tiee.html et image.html, accueil).
-const OPTIONS = {
-  tiee: {
-    nom: "TIEE",
-    nomComplet: "Techniques d'ingénierie et exploitation des équipements",
-    accroche: "Du signal à la régie.",
-    teinte: ["#007aff", "#00c7be", "#34c759"]
-  },
-  image: {
-    nom: "IMAGE",
-    nomComplet: "Métiers de l'image",
-    accroche: "La lumière, la caméra, l'image.",
-    teinte: ["#ff9500", "#ff2d55", "#af52de"]
   }
 };
 

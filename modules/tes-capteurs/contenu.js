@@ -6,7 +6,7 @@
    faits par js/application.js. Le format est expliqué pas à pas dans
    modules/modele/contenu.js.
 
-   Application commune aux options IMAGE et TIEE (épreuve TES).
+   Application commune à tous les étudiants (épreuve TES).
 
    CONTENU À VALIDER : rédigé à partir de connaissances techniques générales,
    pas à partir du référentiel du BTS. Relis et adapte le vocabulaire, le
@@ -112,7 +112,6 @@ const APPLICATION = {
   id: "tes-capteurs",                 // IDENTIQUE à l'id de js/catalogue.js
   titre: "Capteurs d’image",
   accroche: "De la lumière aux électrons.",
-  option: "image",                    // option par défaut du lien « retour » (l'application est aussi dans TIEE)
   epreuve: "TES",
   intro: "Six modules pour comprendre ce qui se passe au fond de la caméra : comment un <b>capteur</b> transforme la lumière en nombres, ce que sont les <b>photosites</b>, d’où viennent le <b>bruit</b> et la <b>plage dynamique</b>, comment on obtient la <b>couleur</b> (Bayer, tri-capteur), pourquoi les images se <b>déforment</b> (rolling shutter, capteurs empilés et semi-empilés) et ce que change la <b>taille du capteur</b>. Chaque module se termine par une évaluation : obtenez au moins <b>12/20</b> pour débloquer le suivant.",
 
