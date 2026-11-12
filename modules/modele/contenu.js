@@ -30,7 +30,6 @@ const APPLICATION = {
   id: "identifiant-a-changer",
   titre: "Nom de l’application",          // court : il s'affiche dans le menu
   accroche: "Une phrase d’accroche.",      // en dégradé sous le titre
-  option: "image",                         // "tiee" ou "image" : la page vers laquelle revient le menu
   epreuve: "TES",                          // "TES" ou "TMO"
   intro: "Deux modules pour comprendre <b>la notion</b>. Chaque module se termine par une évaluation : obtenez au moins <b>12/20</b> pour débloquer le suivant.",
   // Facultatif :

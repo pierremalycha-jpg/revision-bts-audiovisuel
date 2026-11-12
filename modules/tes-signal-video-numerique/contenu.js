@@ -47,7 +47,6 @@ const APPLICATION = {
   id: "tes-signal-video-numerique",   // IDENTIQUE à l'id de js/catalogue.js
   titre: "Signal vidéo numérique",
   accroche: "Du signal aux bits.",
-  option: "tiee",                     // la page d'option vers laquelle revient le menu
   epreuve: "TES",
   intro: "Trois modules pour comprendre comment une image devient une suite de <b>bits</b> : l’échantillonnage et la quantification, l’allègement de la couleur (<b>4:2:2</b>, <b>4:2:0</b>…) et le calcul du <b>débit</b>. Chaque module se termine par une évaluation : obtenez au moins <b>12/20</b> pour débloquer le suivant.",
 

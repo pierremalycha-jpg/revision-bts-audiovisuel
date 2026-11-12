@@ -57,7 +57,7 @@ async function afficherTableauDeBord(utilisateur) {
     const texte = creerElement("div");
     texte.append(
       creerElement("h3", "", app.titre),
-      creerElement("p", "", app.epreuve + " · " + app.options.map(function (o) { return OPTIONS[o].nom; }).join(", ") +
+      creerElement("p", "", app.epreuve +
         (p.date ? " · dernière évaluation le " + new Date(p.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long" }) : ""))
     );
     // Une barre par module : verte = validé, orange = tenté, grise = pas encore.

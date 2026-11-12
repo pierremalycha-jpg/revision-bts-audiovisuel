@@ -45,10 +45,14 @@ function insererEntete() {
   if (!entete) return;
   entete.innerHTML =
     '<div class="entete-contenu">' +
-    '  <a class="logo" href="' + RACINE + 'index.html"><i class="brand-mark" aria-hidden="true"></i>' + NOM_DU_SITE + " <span>" + SOUS_TITRE_DU_SITE + "</span></a>" +
+    // Le logo du BTS, en deux versions : texte gris foncé (thème clair) et
+    // texte éclairci (thème sombre). css/style.css affiche la bonne.
+    '  <a class="logo" href="' + RACINE + 'index.html" aria-label="' + NOM_DU_SITE + " " + SOUS_TITRE_DU_SITE + ' — accueil">' +
+    '<img class="logo-clair" src="' + RACINE + 'images/logo-bts.webp" width="1200" height="275" alt="">' +
+    '<img class="logo-sombre" src="' + RACINE + 'images/logo-bts-sombre.webp" width="1200" height="275" alt="">' +
+    "<span>Révision</span></a>" +
     '  <nav class="navigation" aria-label="Navigation principale">' +
-    '    <a href="' + RACINE + 'tiee.html" data-page="tiee">Option TIEE</a>' +
-    '    <a href="' + RACINE + 'image.html" data-page="image">Option IMAGE</a>' +
+    '    <a href="' + RACINE + 'index.html#applications" data-page="accueil">Les applications</a>' +
     '    <a href="' + RACINE + 'tableau-de-bord.html" data-page="progression">Ma progression</a>' +
     "  </nav>" +
     '  <div class="zone-compte" id="zone-compte"></div>' +
@@ -80,7 +84,7 @@ function insererPied() {
   const pied = document.getElementById("pied");
   if (!pied) return;
   pied.innerHTML =
-    "<span>Plateforme de révision TES et TMO — options TIEE et IMAGE.</span>" +
+    "<span>Plateforme de révision TES et TMO — BTS Audiovisuel.</span>" +
     "<span>D'après les cours de Pierre MALYCHA · BTS Audiovisuel · Lycée Henri Martin, Saint-Quentin</span>";
 }
 

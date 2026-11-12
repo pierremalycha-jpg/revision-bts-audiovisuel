@@ -45,7 +45,7 @@ Ton site est en ligne à l'adresse :
 https://PSEUDO.github.io/revision-bts-audiovisuel/
 ```
 
-**Vérification :** la page d'accueil s'affiche, avec la mention « Mode local » en haut à droite. Ouvre l'option TIEE, touche l'icône « Signal vidéo numérique » et fais l'évaluation du module 1.
+**Vérification :** la page d'accueil s'affiche, avec la mention « Mode local » en haut à droite. Touche l'icône « Signal vidéo numérique » et fais l'évaluation du module 1.
 
 ### Modifier le site ensuite
 
@@ -173,7 +173,7 @@ Rappel : dans un dépôt public, tout est visible, y compris l'historique. Un se
 | Plus rien ne s'affiche après avoir modifié un fichier `.js` | Il manque une virgule, un guillemet ou une accolade. Appuie sur **F12**, onglet **Console** : le message en rouge indique le fichier et la ligne. |
 | « La connexion par e-mail n'est pas activée » | Étape 3.3 non faite. |
 | « Accès refusé par la base de données » | Les règles Firestore n'ont pas été publiées (étape 3.4), ou la base n'a pas été créée. |
-| L'icône d'une nouvelle application n'apparaît pas sur la page de l'option | L'application n'est pas déclarée dans `js/catalogue.js`, ou une virgule manque entre deux blocs. |
+| L'icône d'une nouvelle application n'apparaît pas sur l'accueil | L'application n'est pas déclarée dans `js/catalogue.js`, ou une virgule manque entre deux blocs. |
 | Les notes d'une nouvelle application ne s'affichent pas dans la progression | L'`id` du catalogue et l'`id` écrit en tête de son `contenu.js` ne sont pas identiques, ou le nombre de `modules` du catalogue est faux. |
 | La page d'une application reste blanche | Une erreur dans `contenu.js` ou `labos.js` (virgule, guillemet, accolade). **F12**, onglet **Console** : le message en rouge indique le fichier et la ligne. |
-| La progression de la photométrie n'apparaît pas sur la page IMAGE | Elle est lue dans le navigateur : il faut avoir ouvert la photométrie sur le même appareil et le même navigateur que la plateforme. |
+| La progression de la photométrie n'apparaît pas sur l'accueil | Elle est lue dans le navigateur : il faut avoir ouvert la photométrie sur le même appareil et le même navigateur que la plateforme. |

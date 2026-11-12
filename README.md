@@ -1,11 +1,11 @@
 # Révision BTS Audiovisuel — TES et TMO
 
-Plateforme de révision pour les étudiants des options **TIEE** et **IMAGE**, couvrant les épreuves :
+Plateforme de révision pour les étudiants du BTS Audiovisuel du Lycée Henri Martin, couvrant les épreuves :
 
 - **TES** — Techniques des équipements et des supports (cours théoriques) ;
 - **TMO** — Techniques de mise en œuvre (cours pratiques, sur plateau et en régie).
 
-Chaque notion a sa propre **application de révision**. Les pages des options présentent les applications sous forme d'**icônes**. Toutes suivent le modèle de l'application **Photométrie**, qui sert de référence : un parcours de modules, et dans chaque module quatre étapes — **Comprendre**, **Manipuler**, **Retenir**, **S'évaluer** (évaluation sur 20, 12/20 pour ouvrir le module suivant).
+Chaque notion a sa propre **application de révision**. La page d'accueil présente toutes les applications, sans distinction d'option, sous forme d'**icônes**. Toutes suivent le modèle de l'application **Photométrie**, qui sert de référence : un parcours de modules, et dans chaque module quatre étapes — **Comprendre**, **Manipuler**, **Retenir**, **S'évaluer** (évaluation sur 20, 12/20 pour ouvrir le module suivant).
 
 La progression des étudiants est enregistrée avec Firebase. Le site est hébergé gratuitement avec GitHub Pages.
 
@@ -16,11 +16,13 @@ La progression des étudiants est enregistrée avec Firebase. Le site est héber
 
 ## Les applications
 
-| Application | Option | Épreuve | Modules | Dossier |
-|---|---|---|---|---|
-| Photométrie — *La lumière, mesurée.* | IMAGE | TES | 10 + bac à sable | `modules/tes-photometrie/` |
-| Signal vidéo numérique — *Du signal aux bits.* | TIEE | TES | 3 | `modules/tes-signal-video-numerique/` |
-| Capteurs d’image — *De la lumière aux électrons.* | IMAGE et TIEE | TES | 6 | `modules/tes-capteurs/` |
+> **Prévisualisation : tous les modules sont débloqués.** Pour revenir au parcours normal (12/20 pour ouvrir le module suivant), passe `TOUT_DEBLOQUER` à `false` dans `js/catalogue.js` **et** dans `modules/tes-photometrie/index.html`.
+
+| Application | Épreuve | Modules | Dossier |
+|---|---|---|---|
+| Photométrie — *La lumière, mesurée.* | TES | 10 + bac à sable | `modules/tes-photometrie/` |
+| Signal vidéo numérique — *Du signal aux bits.* | TES | 3 | `modules/tes-signal-video-numerique/` |
+| Capteurs d’image — *De la lumière aux électrons.* | TES | 6 | `modules/tes-capteurs/` |
 
 ## Choix techniques
 
@@ -38,8 +40,9 @@ La progression des étudiants est enregistrée avec Firebase. Le site est héber
 
 ```
 revision-bts-audiovisuel/
-├── index.html                  Accueil : choix de l'option
-├── tiee.html, image.html       Pages d'option : la grille d'icônes des applications
+├── index.html                  Accueil : logo et grille d'icônes de toutes les applications
+├── tiee.html, image.html       Anciennes pages d'option : redirigent vers l'accueil
+├── images/                     Logo du BTS (versions thème clair et thème sombre)
 ├── connexion.html              Connexion et création de compte
 ├── tableau-de-bord.html        Progression de l'étudiant, application par application
 ├── firestore.rules             Règles de sécurité à coller dans la console Firebase
@@ -56,8 +59,7 @@ revision-bts-audiovisuel/
 │   ├── catalogue.js            La liste des applications, leurs icônes
 │   ├── applications.js         Icônes et lecture de la progression
 │   ├── application.js          Le moteur du kit application
-│   ├── page-accueil.js         Fait fonctionner index.html
-│   ├── page-option.js          Construit tiee.html et image.html
+│   ├── page-accueil.js         Construit la grille d'applications de index.html
 │   ├── page-connexion.js       Fait fonctionner connexion.html
 │   └── page-tableau-de-bord.js Fait fonctionner tableau-de-bord.html
 └── modules/
@@ -88,7 +90,7 @@ Résumé (le détail est dans [docs/CHARTE-APPLICATIONS.md](docs/CHARTE-APPLICAT
 1. **Duplique** `modules/modele/` et renomme la copie `epreuve-nom-de-la-notion` (exemple : `tmo-reglage-camera`).
 2. **Écris le contenu** dans `contenu.js` : notions, essentiel et questions de chaque module.
 3. **Écris les labos** : HTML dans `index.html`, code dans `labos.js`.
-4. **Déclare l'application** dans `js/catalogue.js` : son icône apparaît sur la page de son option.
+4. **Déclare l'application** dans `js/catalogue.js` : son icône apparaît sur l'accueil.
 5. **Teste** avec `?enseignant`, en clair, en sombre et sur téléphone, puis envoie les fichiers sur GitHub.
 
 **Important :** ne change plus l'`id` d'une application une fois qu'elle est en ligne. Les notes sont enregistrées sous ce nom.
