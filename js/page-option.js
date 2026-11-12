@@ -1,77 +1,122 @@
 /* ==========================================================================
-   page-option.js — construit la liste des modules d'une option
+   page-option.js — la grille d'applications d'une option
    --------------------------------------------------------------------------
    Utilisé par tiee.html et image.html. La page indique son option sur la
    balise <body> (data-option="tiee" ou "image") ; ce script lit le catalogue,
-   garde les modules de cette option et les range par épreuve (TES, TMO).
+   garde les applications de cette option, les range par épreuve (TES, TMO)
+   et affiche chacune sous forme d'icône, avec sa progression.
    Pourquoi un seul script pour deux pages ? Pour qu'elles restent identiques
    dans leur fonctionnement : une correction profite aux deux.
    ========================================================================== */
 
 const OPTION_COURANTE = document.body.dataset.option;
 
-// Fabrique la carte d'un module. « fiche » est sa progression (ou undefined).
-function creerCarteModule(module, fiche) {
-  const carte = creerElement("li", "carte");
+// Fabrique l'icône cliquable d'une application.
+function creerIconeApplication(app, progression, rang) {
+  const element = creerElement("li");
+  element.style.setProperty("--i", rang); // décalage de l'animation d'entrée (en cascade)
 
-  const etiquettes = creerElement("div", "carte-etiquettes");
-  module.contenu.forEach(function (type) {
-    etiquettes.append(creerElement("span", "etiquette", type));
-  });
+  const lien = creerElement(app.disponible ? "a" : "div", "app" + (app.disponible ? "" : " indisponible"));
+  if (app.disponible) lien.href = RACINE + app.page;
+  lien.title = app.description;
 
-  carte.append(creerElement("h3", "", module.titre), creerElement("p", "", module.description), etiquettes);
-
-  if (fiche) {
-    carte.append(creerElement("div", "carte-progression",
-      "Meilleur score : " + fiche.meilleurScore + " / " + fiche.total));
+  const cadre = creerElement("span", "app-ic-wrap");
+  cadre.append(Applications.icone(app));
+  if (progression && progression.valides > 0) {
+    const badge = creerElement("span", "app-badge", String(progression.valides));
+    badge.title = progression.valides + " module(s) validé(s)";
+    cadre.append(badge);
   }
 
-  if (module.disponible) {
-    const lien = creerElement("a", "bouton", fiche ? "Réviser à nouveau" : "Commencer");
-    lien.href = RACINE + module.page;
-    carte.append(lien);
+  lien.append(cadre, creerElement("span", "app-nom", app.titre), creerElement("span", "app-sous", app.accroche));
+
+  // Ligne d'état : progression, ou nombre de modules si l'élève n'a pas commencé.
+  const etat = creerElement("span", "app-etat");
+  if (!app.disponible) {
+    etat.textContent = "Bientôt disponible";
+  } else if (progression && progression.tentes > 0) {
+    const fini = progression.valides === progression.total;
+    etat.classList.add(fini ? "ok" : "encours");
+    const barre = creerElement("span", "app-barre");
+    const remplissage = creerElement("i");
+    remplissage.style.width = (progression.valides / progression.total) * 100 + "%";
+    barre.append(remplissage);
+    etat.append(barre, document.createTextNode(progression.valides + " / " + progression.total));
   } else {
-    carte.classList.add("carte-indisponible");
-    carte.append(creerElement("span", "etiquette etiquette-neutre", "Bientôt disponible"));
+    etat.textContent = app.modules + " module" + (app.modules > 1 ? "s" : "");
   }
-  return carte;
+  lien.append(etat);
+
+  element.append(lien);
+  return element;
 }
 
-async function afficherModules() {
-  const zone = document.getElementById("liste-modules");
+// L'emplacement de la prochaine application : il montre que la grille va se remplir.
+function creerEmplacementVide(rang) {
+  const element = creerElement("li");
+  element.style.setProperty("--i", rang);
+  const bloc = creerElement("div", "app vide");
+  const icone = creerElement("span", "app-ic");
+  icone.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICONES.plus + "</svg>";
+  bloc.append(icone, creerElement("span", "app-nom", "Prochainement"), creerElement("span", "app-sous", "Une nouvelle notion arrive ici."));
+  element.append(bloc);
+  return element;
+}
 
-  // La progression sert seulement à afficher « Meilleur score » sur les
-  // cartes : si sa lecture échoue, on affiche quand même les modules.
-  let progression = {};
+async function afficherApplications() {
+  const zone = document.getElementById("liste-applications");
+
+  // La progression sert seulement à afficher l'avancement sous les icônes :
+  // si sa lecture échoue, on affiche quand même les applications.
+  let progressionSuivi = {};
   try {
-    progression = await Suivi.lireProgression();
+    progressionSuivi = await Suivi.lireProgression();
   } catch (erreur) {
     console.warn("Progression illisible :", erreur);
   }
 
+  const applications = CATALOGUE.filter(function (app) { return app.options.includes(OPTION_COURANTE); });
+
+  // Le résumé de l'option, sous le titre.
+  const resume = document.getElementById("resume-option");
+  if (resume) {
+    const publiees = applications.filter(function (app) { return app.disponible; });
+    const nbModules = publiees.reduce(function (s, app) { return s + app.modules; }, 0);
+    const nbValides = publiees.reduce(function (s, app) { return s + Applications.progression(app, progressionSuivi).valides; }, 0);
+    resume.innerHTML = "";
+    [
+      [publiees.length, publiees.length > 1 ? " applications" : " application"],
+      [nbModules, " modules"],
+      [nbValides, nbValides > 1 ? " modules validés" : " module validé"]
+    ].forEach(function (ligne) {
+      const pastille = creerElement("span");
+      pastille.append(creerElement("b", "", String(ligne[0])), document.createTextNode(ligne[1]));
+      resume.append(pastille);
+    });
+  }
+
   zone.textContent = "";
+  let rang = 0;
   ["TES", "TMO"].forEach(function (epreuve) {
-    const modules = CATALOGUE.filter(function (module) {
-      return module.epreuve === epreuve && module.options.includes(OPTION_COURANTE);
-    });
+    const apps = applications.filter(function (app) { return app.epreuve === epreuve; });
 
-    zone.append(
-      creerElement("h2", "", EPREUVES[epreuve].nom),
-      creerElement("p", "discret", EPREUVES[epreuve].description)
-    );
+    const section = creerElement("section", "epreuve");
+    const entete = creerElement("div", "epreuve-hd");
+    const titre = creerElement("h2");
+    titre.append(creerElement("small", "", EPREUVES[epreuve].sigle), document.createTextNode(EPREUVES[epreuve].nom));
+    entete.append(titre, creerElement("p", "", EPREUVES[epreuve].description));
 
-    if (modules.length === 0) {
-      zone.append(creerElement("p", "", "Aucun module pour l'instant : ils arrivent bientôt."));
-      return;
-    }
-    const grille = creerElement("ul", "grille");
-    modules.forEach(function (module) {
-      grille.append(creerCarteModule(module, progression[module.id]));
+    const grille = creerElement("ul", "apps");
+    apps.forEach(function (app) {
+      grille.append(creerIconeApplication(app, app.disponible ? Applications.progression(app, progressionSuivi) : null, rang++));
     });
-    zone.append(grille);
+    grille.append(creerEmplacementVide(rang++));
+
+    section.append(entete, grille);
+    zone.append(section);
   });
 }
 
-// On reconstruit la liste à chaque connexion / déconnexion, car la
+// On reconstruit la grille à chaque connexion / déconnexion, car la
 // progression affichée dépend de l'élève connecté.
-Suivi.surChangementUtilisateur(afficherModules);
+Suivi.surChangementUtilisateur(afficherApplications);

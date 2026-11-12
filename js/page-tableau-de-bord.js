@@ -2,15 +2,17 @@
    page-tableau-de-bord.js — remplit tableau-de-bord.html
    --------------------------------------------------------------------------
    Lit la progression (compte en ligne ou appareil, c'est suivi.js qui décide)
-   et la croise avec le catalogue pour afficher une ligne par module.
+   et la croise avec le catalogue pour afficher une ligne par application,
+   avec une petite barre par module.
    ========================================================================== */
 
 async function afficherTableauDeBord(utilisateur) {
   const origine = document.getElementById("origine-donnees");
-  const lignes = document.getElementById("lignes-progression");
+  const liste = document.getElementById("liste-progression");
 
   // 1. D'où viennent les données ?
   origine.textContent = "";
+  origine.className = "chapeau";
   if (utilisateur) {
     origine.textContent = "Progression enregistrée dans ton compte (" + utilisateur.email + ").";
   } else if (Suivi.firebaseActif) {
@@ -23,57 +25,65 @@ async function afficherTableauDeBord(utilisateur) {
   }
 
   // 2. Lecture de la progression.
-  let progression;
+  let progressionSuivi;
   try {
-    progression = await Suivi.lireProgression();
+    progressionSuivi = await Suivi.lireProgression();
   } catch (erreur) {
     origine.textContent = "Impossible de lire ta progression. " + Suivi.messageErreur(erreur);
     origine.className = "message message-erreur";
     return;
   }
 
-  // 3. Une ligne par module disponible du catalogue.
-  lignes.textContent = "";
-  let modulesCommences = 0;
-  let sommePourcentages = 0;
+  // 3. Une ligne par application publiée.
+  liste.textContent = "";
+  let valides = 0;
+  let modulesTotal = 0;
+  let sommeNotes = 0;
+  let notes = 0;
   let tentatives = 0;
 
-  CATALOGUE.filter(function (module) { return module.disponible; }).forEach(function (module) {
-    const fiche = progression[module.id];
-    const ligne = creerElement("tr");
+  CATALOGUE.filter(function (app) { return app.disponible; }).forEach(function (app) {
+    const p = Applications.progression(app, progressionSuivi);
+    valides += p.valides;
+    modulesTotal += p.total;
+    tentatives += p.tentatives;
+    p.modules.forEach(function (m) {
+      if (m.meilleure !== null) { sommeNotes += m.meilleure; notes++; }
+    });
 
-    const celluleTitre = creerElement("td");
-    const lien = creerElement("a", "", module.titre);
-    lien.href = module.page;
-    celluleTitre.append(lien);
-    ligne.append(celluleTitre, creerElement("td", "", module.epreuve));
+    const ligne = creerElement("a", "suivi-app rv");
+    ligne.href = app.page;
 
-    if (fiche) {
-      modulesCommences++;
-      sommePourcentages += (fiche.meilleurScore / fiche.total) * 100;
-      tentatives += fiche.tentatives;
-      ligne.append(
-        creerElement("td", "nombre", fiche.meilleurScore + " / " + fiche.total),
-        creerElement("td", "nombre", fiche.dernierScore + " / " + fiche.total),
-        creerElement("td", "nombre", fiche.tentatives),
-        // toLocaleDateString écrit la date à la française : 12 novembre 2026.
-        creerElement("td", "", new Date(fiche.date).toLocaleDateString("fr-FR",
-          { day: "numeric", month: "long", year: "numeric" }))
-      );
-    } else {
-      const vide = creerElement("td", "discret", "Pas encore commencé");
-      vide.colSpan = 4; // cette cellule occupe la place des quatre dernières colonnes
-      ligne.append(vide);
-    }
-    lignes.append(ligne);
+    const texte = creerElement("div");
+    texte.append(
+      creerElement("h3", "", app.titre),
+      creerElement("p", "", app.epreuve + " · " + app.options.map(function (o) { return OPTIONS[o].nom; }).join(", ") +
+        (p.date ? " · dernière évaluation le " + new Date(p.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long" }) : ""))
+    );
+    // Une barre par module : verte = validé, orange = tenté, grise = pas encore.
+    const barres = creerElement("div", "suivi-modules");
+    p.modules.forEach(function (m, i) {
+      const barre = creerElement("i", m.meilleure === null ? "" : m.meilleure >= NOTE_DE_VALIDATION ? "ok" : "essai");
+      barre.title = "Module " + (i + 1) + " : " + (m.meilleure === null ? "pas encore évalué" : Applications.note(m.meilleure) + " / 20");
+      barres.append(barre);
+    });
+    texte.append(barres);
+
+    const score = creerElement("div", "suivi-score");
+    score.append(
+      creerElement("b", "", p.valides + " / " + p.total),
+      creerElement("small", "", p.moyenne === null ? "pas encore commencé" : "modules validés · moyenne " + Applications.note(p.moyenne) + "/20")
+    );
+
+    ligne.append(Applications.icone(app), texte, score);
+    liste.append(ligne);
   });
 
   // 4. Les chiffres clés.
-  const disponibles = CATALOGUE.filter(function (module) { return module.disponible; }).length;
-  document.getElementById("chiffre-modules").textContent = modulesCommences + " / " + disponibles;
-  document.getElementById("chiffre-moyenne").textContent =
-    modulesCommences > 0 ? Math.round(sommePourcentages / modulesCommences) + " %" : "–";
+  document.getElementById("chiffre-modules").textContent = valides + " / " + modulesTotal;
+  document.getElementById("chiffre-moyenne").textContent = notes > 0 ? Applications.note(sommeNotes / notes) + " / 20" : "–";
   document.getElementById("chiffre-tentatives").textContent = tentatives;
+  Apparition.scanner(liste);
 }
 
 Suivi.surChangementUtilisateur(afficherTableauDeBord);

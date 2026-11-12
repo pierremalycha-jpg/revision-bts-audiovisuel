@@ -45,12 +45,12 @@ Ton site est en ligne à l'adresse :
 https://PSEUDO.github.io/revision-bts-audiovisuel/
 ```
 
-**Vérification :** la page d'accueil s'affiche, avec la mention « Mode local » en haut à droite. Ouvre l'option TIEE et fais le quiz du module pilote.
+**Vérification :** la page d'accueil s'affiche, avec la mention « Mode local » en haut à droite. Ouvre l'option TIEE, touche l'icône « Signal vidéo numérique » et fais l'évaluation du module 1.
 
 ### Modifier le site ensuite
 
 - **Petite modification** : sur GitHub, ouvre le fichier, clique sur le crayon, modifie, puis **Commit changes**. Le site est mis à jour une à deux minutes plus tard.
-- **Nouveau module (plusieurs fichiers)** : ouvre le dossier `modules` sur GitHub, puis **Add file › Upload files**, et glisse le dossier du nouveau module.
+- **Nouvelle application (plusieurs fichiers)** : ouvre le dossier `modules` sur GitHub, puis **Add file › Upload files**, et glisse le dossier de la nouvelle application. N'oublie pas de la déclarer dans `js/catalogue.js`.
 - **Si tu ne vois pas ta modification** : le navigateur a gardé l'ancienne version. Recharge avec **Ctrl + F5** (Windows) ou **Cmd + Maj + R** (Mac).
 
 Plus tard, l'application gratuite [GitHub Desktop](https://desktop.github.com/) te permettra de travailler sur ton ordinateur et d'envoyer toutes tes modifications en un clic.
@@ -121,7 +121,7 @@ Ces règles disent : « un étudiant connecté peut lire et écrire uniquement s
 
 1. Ouvre le site et recharge avec **Ctrl + F5**. En haut à droite, « Mode local » a laissé la place à un bouton **Connexion**.
 2. Clique dessus, puis sur **Créer un compte**, et inscris un compte de test.
-3. Fais le quiz du module pilote. À la fin, le message doit être « Résultat enregistré dans ton compte ».
+3. Fais l'évaluation du module 1 de l'application « Signal vidéo numérique ». À la fin, le message doit être « Note enregistrée dans votre compte ».
 4. Dans la console Firebase :
    - **Authentication › Utilisateurs** : ton compte de test apparaît ;
    - **Firestore Database › Données** : une collection `utilisateurs` contient ta fiche et, dedans, une sous-collection `progression`.
@@ -173,5 +173,7 @@ Rappel : dans un dépôt public, tout est visible, y compris l'historique. Un se
 | Plus rien ne s'affiche après avoir modifié un fichier `.js` | Il manque une virgule, un guillemet ou une accolade. Appuie sur **F12**, onglet **Console** : le message en rouge indique le fichier et la ligne. |
 | « La connexion par e-mail n'est pas activée » | Étape 3.3 non faite. |
 | « Accès refusé par la base de données » | Les règles Firestore n'ont pas été publiées (étape 3.4), ou la base n'a pas été créée. |
-| Le quiz d'un nouveau module n'apparaît pas sur la page de l'option | Le module n'est pas déclaré dans `js/catalogue.js`, ou une virgule manque entre deux blocs. |
-| Les scores d'un nouveau module ne s'affichent pas dans la progression | L'`id` du catalogue et le `data-module` de la page du module ne sont pas identiques. |
+| L'icône d'une nouvelle application n'apparaît pas sur la page de l'option | L'application n'est pas déclarée dans `js/catalogue.js`, ou une virgule manque entre deux blocs. |
+| Les notes d'une nouvelle application ne s'affichent pas dans la progression | L'`id` du catalogue et l'`id` écrit en tête de son `contenu.js` ne sont pas identiques, ou le nombre de `modules` du catalogue est faux. |
+| La page d'une application reste blanche | Une erreur dans `contenu.js` ou `labos.js` (virgule, guillemet, accolade). **F12**, onglet **Console** : le message en rouge indique le fichier et la ligne. |
+| La progression de la photométrie n'apparaît pas sur la page IMAGE | Elle est lue dans le navigateur : il faut avoir ouvert la photométrie sur le même appareil et le même navigateur que la plateforme. |

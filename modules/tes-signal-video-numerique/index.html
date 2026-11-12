@@ -3,145 +3,141 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Le signal vidéo numérique — Révision BTS Audiovisuel</title>
+  <title>Signal vidéo numérique — Révision BTS Audiovisuel</title>
+  <meta name="description" content="Application de révision : échantillonnage, quantification, 4:4:4, 4:2:2, 4:2:0 et débit d'un signal vidéo numérique.">
   <!-- « ../../ » remonte de deux dossiers : modules/tes-signal-video-numerique/ → racine -->
+  <script src="../../js/theme.js"></script>
   <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/application.css">
 </head>
 
-<!-- data-racine : chemin vers la racine du site (utilisé par js/commun.js)
-     data-module : identifiant du module, IDENTIQUE à celui de js/catalogue.js -->
-<body data-racine="../../" data-module="tes-signal-video-numerique">
+<!-- data-racine : chemin vers la racine du site (utilisé par js/commun.js).
+     Toute la page (menu, accueil, notions, essentiel, évaluation) est construite
+     par js/application.js à partir de contenu.js. Cette page ne contient que
+     les LABOS, un <template> par module. -->
+<body data-racine="../../">
 
-  <header id="entete"></header>
-
-  <main>
-    <p class="fil-ariane"><a href="../../index.html">Accueil</a> › <a href="../../tiee.html">Option TIEE</a> › Module</p>
-    <span class="etiquette">TES</span>
-    <h1>Le signal vidéo numérique : 4:4:4, 4:2:2, 4:2:0</h1>
-    <p class="chapeau">Comprendre comment une image est numérisée, pourquoi on allège la couleur, et ce que cela change pour le débit.</p>
-
-    <ul class="sommaire">
-      <li><a href="#cours">1. Rappel de cours</a></li>
-      <li><a href="#animation">2. Animation</a></li>
-      <li><a href="#calculateur">3. Calculateur de débit</a></li>
-      <li><a href="#quiz-titre">4. Quiz</a></li>
-    </ul>
-
-    <!-- ===================== 1. RAPPEL DE COURS ===================== -->
-    <h2 id="cours">1. Rappel de cours</h2>
-    <div class="cours">
-
-      <h3>Numériser un signal : deux opérations</h3>
-      <ul>
-        <li><strong>L'échantillonnage</strong> : on mesure le signal à intervalles réguliers. Le nombre de mesures par seconde est la fréquence d'échantillonnage. D'après le théorème de Shannon, elle doit valoir au moins le double de la fréquence la plus élevée du signal.</li>
-        <li><strong>La quantification</strong> : chaque mesure est arrondie à un niveau, codé sur un nombre de bits fixe. Avec <em>n</em> bits, on dispose de 2<sup>n</sup> niveaux : 256 niveaux en 8 bits, 1 024 en 10 bits.</li>
-      </ul>
-
-      <h3>Les composantes Y, Cb, Cr</h3>
-      <ul>
-        <li><strong>Y</strong> est la luminance : l'image en noir et blanc, qui porte les détails.</li>
-        <li><strong>Cb</strong> et <strong>Cr</strong> forment la chrominance : deux signaux de différence de couleur (bleu − Y et rouge − Y).</li>
-        <li>L'œil distingue moins bien les détails de couleur que les détails de lumière. On peut donc transmettre moins d'échantillons de chrominance sans que l'image paraisse dégradée : c'est le <strong>sous-échantillonnage de la chrominance</strong>.</li>
-      </ul>
-
-      <h3>Les structures d'échantillonnage</h3>
-      <div class="tableau-defilant">
-        <table>
-          <thead>
-            <tr><th>Structure</th><th>Chrominance</th><th class="nombre">Échantillons par pixel</th><th>Exemples d'usage</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><strong>4:4:4</strong></td><td>Complète : une par pixel</td><td class="nombre">3</td><td>Étalonnage, effets visuels, incrustation exigeante</td></tr>
-            <tr><td><strong>4:2:2</strong></td><td>Divisée par 2 horizontalement</td><td class="nombre">2</td><td>Production et régie (liaisons SDI)</td></tr>
-            <tr><td><strong>4:2:0</strong></td><td>Divisée par 2 horizontalement et verticalement</td><td class="nombre">1,5</td><td>Diffusion, streaming, nombreuses caméras légères</td></tr>
-            <tr><td><strong>4:1:1</strong></td><td>Divisée par 4 horizontalement</td><td class="nombre">1,5</td><td>Certains formats DV</td></tr>
-          </tbody>
-        </table>
+  <!-- =================== LABO DU MODULE 1 =================== -->
+  <template data-labo="1">
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Signal analogique, échantillons et niveaux</span><span id="s1-etat"></span></div>
+          <canvas id="s1-cv" class="cv" width="1000" height="440" role="img" aria-label="Animation : une sinusoïde grise, ses échantillons en orange et le signal numérique reconstitué en bleu"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>fe / f</small><b id="s1-rapport">—</b></div>
+          <div><small>Shannon respecté ?</small><b id="s1-shannon">—</b></div>
+          <div><small>Fréquence vue</small><b class="acc" id="s1-fa">—</b></div>
+          <div><small>Niveaux 2ⁿ</small><b id="s1-niv">—</b></div>
+          <div><small>Erreur max</small><b id="s1-err">—</b></div>
+        </div>
       </div>
-
-      <h3>Calculer un débit non compressé</h3>
-      <p class="formule">Débit (bit/s) = pixels par ligne × lignes × images par seconde × bits par échantillon × échantillons par pixel</p>
-      <p><strong>Exemple</strong> — 1920 × 1080, 25 images/s, 10 bits, 4:2:2 :<br>
-        1920 × 1080 × 25 × 10 × 2 = 1 036 800 000 bit/s, soit environ <strong>1,04 Gbit/s</strong> pour l'image seule.</p>
-      <p>Une liaison HD-SDI transporte 1,485 Gbit/s : ce débit est plus élevé car il inclut aussi les intervalles de suppression, qui servent notamment à acheminer l'audio embarqué et des données auxiliaires.</p>
-    </div>
-
-    <!-- ===================== 2. ANIMATION ===================== -->
-    <h2 id="animation">2. Animation : que devient la couleur ?</h2>
-    <p>Choisis une structure et observe à la fois où sont prélevés les échantillons, et l'effet sur une image test.</p>
-
-    <div class="atelier">
-      <!-- Les boutons sont créés par animation.js, un par structure -->
-      <div class="choix" id="choix-structure" role="group" aria-label="Structure d'échantillonnage"></div>
-      <p id="description-structure" aria-live="polite"></p>
-
-      <figure>
-        <!-- role="img" + aria-label : décrit le schéma aux lecteurs d'écran -->
-        <canvas id="canvas-grille" width="960" height="480" role="img" aria-label="Schéma des échantillons"></canvas>
-        <figcaption>Un bloc de 8 × 4 pixels. Disque gris : échantillon de luminance (Y). Anneau bleu et rouge : échantillon de chrominance (Cb et Cr). Chaque cadre regroupe les pixels qui partagent la même chrominance.</figcaption>
-      </figure>
-
-      <div class="avant-apres">
-        <figure>
-          <canvas id="canvas-original" width="480" height="240" role="img" aria-label="Image test d'origine"></canvas>
-          <figcaption>Image test d'origine (16 × 8 pixels, agrandie).</figcaption>
-        </figure>
-        <figure>
-          <canvas id="canvas-resultat" width="480" height="240" role="img" aria-label="Image test après sous-échantillonnage"></canvas>
-          <figcaption id="legende-resultat">Après sous-échantillonnage.</figcaption>
-        </figure>
-      </div>
-      <p class="discret">L'image test contient, de gauche à droite : des rayures verticales d'un pixel, des rayures horizontales d'un pixel, puis deux lignes fines en diagonale. Ce sont les cas les plus défavorables : sur une image réelle, la perte est bien plus discrète.</p>
-
-      <button class="bouton bouton-secondaire" type="button" id="bouton-defilement">▶ Faire défiler les structures</button>
-    </div>
-
-    <!-- ===================== 3. CALCULATEUR ===================== -->
-    <h2 id="calculateur">3. Calculateur de débit non compressé</h2>
-    <p>Change les réglages pour voir leur poids sur le débit. La structure est celle choisie dans l'animation ci-dessus.</p>
-
-    <div class="atelier">
-      <div class="reglages">
-        <label>Définition
-          <select id="reglage-definition">
-            <option value="720x576">720 × 576 (SD)</option>
-            <option value="1280x720">1280 × 720 (HD)</option>
-            <option value="1920x1080" selected>1920 × 1080 (HD)</option>
-            <option value="3840x2160">3840 × 2160 (UHD)</option>
-          </select>
-        </label>
-        <label>Cadence
-          <select id="reglage-cadence">
-            <option value="24">24 images/s</option>
-            <option value="25" selected>25 images/s</option>
-            <option value="30">30 images/s</option>
-            <option value="50">50 images/s</option>
-            <option value="60">60 images/s</option>
-          </select>
-        </label>
-        <label>Quantification
-          <select id="reglage-bits">
-            <option value="8">8 bits</option>
-            <option value="10" selected>10 bits</option>
-            <option value="12">12 bits</option>
-          </select>
-        </label>
-      </div>
-
-      <div aria-live="polite">
-        <p class="resultat-debit" id="resultat-debit"></p>
-        <p id="resultat-formule" class="discret"></p>
-        <div class="jauge" aria-hidden="true"><div id="jauge-debit"></div></div>
-        <p id="resultat-comparaison"></p>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <p class="muted small">Pour l’exemple, le signal dure une seconde et ses fréquences sont de quelques hertz : le principe est exactement le même à 48 kHz ou à 74 MHz.</p>
+          <label class="ctl"><span>Fréquence du signal f</span><input type="range" id="s1-f" min="1" max="12" step="0.5" value="3"><output id="s1-fo"></output></label>
+          <label class="ctl"><span>Échantillonnage fe</span><input type="range" id="s1-fe" min="2" max="60" step="1" value="24"><output id="s1-feo"></output></label>
+          <label class="ctl"><span>Quantification n</span><input type="range" id="s1-n" min="1" max="8" step="1" value="3"><output id="s1-no"></output></label>
+          <div class="ctl"><span>Afficher</span><div id="s1-vue" aria-label="Courbes affichées : tout, seulement les échantillons (points), ou le signal codé"></div></div>
+          <div class="btnrow" style="margin-top:12px"><button class="btn" id="s1-rejouer" type="button">▶ Rejouer l’animation</button></div>
+        </div>
+        <div class="card">
+          <h3>Ce qu’il faut observer</h3>
+          <div id="s1-msg" class="note" aria-live="polite"></div>
+          <p class="muted small" style="margin:12px 0 8px">Essayez ces situations :</p>
+          <div class="btnrow" id="s1-situations">
+            <button class="chip" type="button" data-s="ok">Shannon respecté</button>
+            <button class="chip" type="button" data-s="limite">Juste à la limite</button>
+            <button class="chip" type="button" data-s="repli">Repliement</button>
+            <button class="chip" type="button" data-s="bits">Trop peu de bits</button>
+          </div>
+        </div>
       </div>
     </div>
+  </template>
 
-    <!-- ===================== 4. QUIZ ===================== -->
-    <h2 id="quiz-titre">4. Quiz</h2>
-    <div id="quiz"></div>
-  </main>
+  <!-- =================== LABO DU MODULE 2 =================== -->
+  <template data-labo="2">
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Un bloc de 8 × 4 pixels</span><div id="s2-choix" aria-label="Structure d’échantillonnage"></div></div>
+          <canvas id="s2-grille" class="cv" width="960" height="480" role="img" aria-label="Schéma des échantillons"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Échantillons / pixel</small><b class="acc" id="s2-e">—</b></div>
+          <div><small>Données vs 4:4:4</small><b id="s2-part">—</b></div>
+          <div><small>Groupe de couleur</small><b id="s2-groupe">—</b></div>
+          <div><small>Cb et Cr gardés</small><b id="s2-cb">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Lire le schéma</h3>
+          <p class="small">Disque gris : échantillon de <b>luminance</b> (Y). Anneau bleu et rouge : échantillon de <b>chrominance</b> (Cb et Cr). Chaque cadre regroupe les pixels qui partagent la <b>même couleur</b>.</p>
+          <div class="say" id="s2-texte" aria-live="polite"></div>
+          <button class="btn" type="button" id="s2-defiler">▶ Faire défiler les structures</button>
+        </div>
+        <div class="card">
+          <h3>L’effet sur une image test</h3>
+          <div class="grid g2">
+            <figure style="margin:0"><canvas id="s2-avant" class="cv" width="480" height="240" role="img" aria-label="Image test d’origine"></canvas><figcaption class="muted small" style="margin-top:6px">Image d’origine</figcaption></figure>
+            <figure style="margin:0"><canvas id="s2-apres" class="cv" width="480" height="240" role="img" aria-label="Image test après sous-échantillonnage"></canvas><figcaption class="muted small" style="margin-top:6px" id="s2-legende">Après passage</figcaption></figure>
+          </div>
+          <p class="muted small" style="margin:10px 0 0">De gauche à droite : rayures verticales d’un pixel, rayures horizontales d’un pixel, puis deux diagonales fines. Ce sont les pires cas : sur une image réelle, la perte est bien plus discrète.</p>
+        </div>
+      </div>
+    </div>
+  </template>
 
-  <footer id="pied"></footer>
+  <!-- =================== LABO DU MODULE 3 =================== -->
+  <template data-labo="3">
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="readouts">
+          <div><small>Débit non compressé</small><b class="acc" id="s3-debit">—</b></div>
+          <div><small>Par rapport au 4:4:4</small><b id="s3-part">—</b></div>
+          <div><small>En octets</small><b id="s3-mo">—</b></div>
+          <div><small>Une minute</small><b id="s3-go">—</b></div>
+        </div>
+        <div class="stg">
+          <div class="vt"><span>Quelle liaison SDI pour ce signal ?</span></div>
+          <div class="barres" id="s3-liaisons"></div>
+          <p class="muted small" id="s3-verdict" style="margin:12px 2px 2px"></p>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Définition</span>
+            <select id="s3-def">
+              <option value="720x576">720 × 576 (SD)</option>
+              <option value="1280x720">1280 × 720 (HD)</option>
+              <option value="1920x1080" selected>1920 × 1080 (HD)</option>
+              <option value="3840x2160">3840 × 2160 (UHD)</option>
+            </select>
+          </label>
+          <label class="ctl"><span>Cadence</span>
+            <select id="s3-cad">
+              <option value="24">24 images/s</option>
+              <option value="25" selected>25 images/s</option>
+              <option value="30">30 images/s</option>
+              <option value="50">50 images/s</option>
+              <option value="60">60 images/s</option>
+            </select>
+          </label>
+          <div class="ctl"><span>Quantification</span><div id="s3-bits"></div></div>
+          <div class="ctl"><span>Structure</span><div id="s3-struct"></div></div>
+        </div>
+        <div class="card">
+          <h3>Calcul pas à pas</h3>
+          <div class="calc" id="s3-calc" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </template>
 
   <!-- Scripts communs à tout le site (même ordre que sur les autres pages) -->
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
@@ -150,18 +146,14 @@
   <script src="../../js/firebase-config.js"></script>
   <script src="../../js/suivi.js"></script>
   <script src="../../js/commun.js"></script>
-  <script src="../../js/quiz.js"></script>
-
-  <!-- Scripts propres à ce module -->
-  <script src="questions.js"></script>
-  <script src="animation.js"></script>
+  <script src="../../js/catalogue.js"></script>
+  <script src="../../js/applications.js"></script>
+  <!-- Le kit application, puis le contenu et les labos de CETTE application -->
+  <script src="../../js/application.js"></script>
+  <script src="contenu.js"></script>
+  <script src="labos.js"></script>
   <script>
-    // Lance le quiz avec les questions de questions.js.
-    demarrerQuiz({
-      conteneur: "#quiz",
-      moduleId: document.body.dataset.module,
-      questions: QUESTIONS
-    });
+    Application.demarrer(APPLICATION);
   </script>
 </body>
 </html>

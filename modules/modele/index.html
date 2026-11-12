@@ -5,106 +5,83 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- ====================================================================
-       MODÈLE DE MODULE — mode d'emploi
+       MODÈLE D'APPLICATION — mode d'emploi
        1. Duplique le dossier « modele » et renomme la copie
           (ex. « tmo-nom-de-la-notion » : minuscules, tirets, pas d'accents).
-       2. Dans cette page, modifie tout ce qui est signalé par « À ADAPTER ».
-       3. Écris tes questions dans questions.js.
-       4. Déclare le module dans js/catalogue.js pour qu'il apparaisse sur
-          la page de son option.
-       Le détail est dans le README, section « Ajouter un module ».
+       2. Écris le contenu dans contenu.js (notions, essentiel, questions).
+       3. Écris les labos : leur HTML ci-dessous (un <template> par module),
+          leur code dans labos.js.
+       4. Déclare l'application dans js/catalogue.js : son icône apparaît
+          sur la page de son option.
+       Le détail est dans docs/CHARTE-APPLICATIONS.md.
+
+       Cette page ne contient QUE les labos : le menu, l'accueil, les
+       notions, l'essentiel et l'évaluation sont construits par
+       js/application.js à partir de contenu.js.
        ==================================================================== -->
 
-  <!-- À ADAPTER : le titre affiché dans l'onglet du navigateur -->
-  <title>Titre du module — Révision BTS Audiovisuel</title>
+  <!-- À ADAPTER : le titre de l'onglet (il est aussi remplacé automatiquement) -->
+  <title>Nom de l’application — Révision BTS Audiovisuel</title>
+  <script src="../../js/theme.js"></script>
   <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/application.css">
 </head>
 
-<!-- À ADAPTER : data-module doit être IDENTIQUE à l'« id » déclaré dans
-     js/catalogue.js. C'est sous ce nom que les scores sont enregistrés. -->
-<body data-racine="../../" data-module="identifiant-a-changer">
+<body data-racine="../../">
 
-  <header id="entete"></header>
-
-  <main>
-    <!-- À ADAPTER : le lien et le nom de l'option (tiee.html ou image.html) -->
-    <p class="fil-ariane"><a href="../../index.html">Accueil</a> › <a href="../../tiee.html">Option TIEE</a> › Module</p>
-
-    <!-- À ADAPTER : TES ou TMO -->
-    <span class="etiquette">TES</span>
-
-    <!-- À ADAPTER : titre et phrase d'introduction -->
-    <h1>Titre du module</h1>
-    <p class="chapeau">Une phrase qui annonce ce que l'étudiant saura faire à la fin du module.</p>
-
-    <ul class="sommaire">
-      <li><a href="#cours">1. Rappel de cours</a></li>
-      <li><a href="#quiz-titre">2. Quiz</a></li>
-    </ul>
-
-    <!-- ===================== 1. RAPPEL DE COURS ===================== -->
-    <h2 id="cours">1. Rappel de cours</h2>
-    <div class="cours">
-      <!-- À ADAPTER : le contenu du rappel. Balises utiles :
-           <h3> sous-titre, <p> paragraphe, <ul><li> liste à puces,
-           <strong> mot important, <p class="formule"> formule encadrée. -->
-      <h3>Premier point</h3>
-      <p>Texte du rappel de cours.</p>
-      <ul>
-        <li><strong>Notion</strong> : sa définition.</li>
-        <li><strong>Autre notion</strong> : sa définition.</li>
-      </ul>
-      <p class="formule">Une formule à retenir = à écrire ici</p>
+  <!-- =================== LABO DU MODULE 1 ===================
+       Structure de référence : la scène à gauche (elle reste visible quand on
+       fait défiler les réglages), les réglages à droite.
+       Les identifiants commencent par le numéro du module (m1-…) pour ne
+       jamais entrer en collision avec ceux d'un autre labo. -->
+  <template data-labo="1">
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Titre de la scène</span><div id="m1-forme" aria-label="Forme"></div></div>
+          <canvas id="m1-scene" class="cv" width="1000" height="450" role="img" aria-label="À ADAPTER : décrire la scène pour les lecteurs d’écran"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Grandeur G</small><b class="acc" id="m1-g">—</b></div>
+          <div><small>Forme</small><b id="m1-f">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <p class="muted small">Une phrase qui dit ce que l’on règle.</p>
+          <label class="ctl"><span>Réglage A</span><input type="range" id="m1-a" min="1" max="10" step="0.5" value="3"><output id="m1-ao"></output></label>
+          <label class="ctl"><span>Réglage B</span><input type="range" id="m1-b" min="1" max="10" step="0.5" value="4"><output id="m1-bo"></output></label>
+        </div>
+        <div class="card">
+          <h3>Ce qu’il faut observer</h3>
+          <div id="m1-msg" class="note" aria-live="polite"></div>
+        </div>
+        <div class="card">
+          <h3>Calcul pas à pas</h3>
+          <div class="calc" id="m1-calc"></div>
+        </div>
+      </div>
     </div>
+  </template>
 
-    <!-- ===================== ANIMATION (facultative) =====================
-         Le bloc qui suit est désactivé : il est placé dans un commentaire.
-         Pour ajouter une animation ou une application interactive :
-         1. supprime la ligne « DÉBUT DU BLOC DÉSACTIVÉ » et la ligne
-            « FIN DU BLOC DÉSACTIVÉ » ci-dessous ;
-         2. crée un fichier animation.js dans ce dossier (inspire-toi de
-            modules/tes-signal-video-numerique/animation.js) ;
-         3. en bas de page, active de la même façon la balise <script> de
-            animation.js, puis ajoute un lien dans le sommaire. -->
+  <!-- Pas de <template data-labo="2"> : le module 2 n'a pas d'étape « Manipuler ». -->
 
-    <!-- DÉBUT DU BLOC DÉSACTIVÉ
-    <h2 id="animation">2. Animation</h2>
-    <div class="atelier">
-      <figure>
-        <canvas id="canvas-animation" width="960" height="480" role="img" aria-label="Description du schéma"></canvas>
-        <figcaption>Légende du schéma.</figcaption>
-      </figure>
-    </div>
-    FIN DU BLOC DÉSACTIVÉ -->
-
-    <!-- ===================== 2. QUIZ ===================== -->
-    <h2 id="quiz-titre">2. Quiz</h2>
-    <!-- Rien à modifier ici : le quiz s'affiche dans ce bloc -->
-    <div id="quiz"></div>
-  </main>
-
-  <footer id="pied"></footer>
-
-  <!-- Scripts communs à tout le site : ne pas modifier, ne pas changer l'ordre -->
+  <!-- Scripts communs : ne pas modifier, ne pas changer l'ordre -->
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
   <script src="../../js/firebase-config.js"></script>
   <script src="../../js/suivi.js"></script>
   <script src="../../js/commun.js"></script>
-  <script src="../../js/quiz.js"></script>
-
-  <!-- Scripts propres à ce module -->
-  <script src="questions.js"></script>
-  <!-- <script src="animation.js"></script> -->
+  <script src="../../js/catalogue.js"></script>
+  <script src="../../js/applications.js"></script>
+  <script src="../../js/application.js"></script>
+  <!-- Scripts propres à CETTE application -->
+  <script src="contenu.js"></script>
+  <script src="labos.js"></script>
   <script>
-    // Lance le quiz avec les questions de questions.js.
-    // L'identifiant du module est lu sur la balise <body> (data-module).
-    demarrerQuiz({
-      conteneur: "#quiz",
-      moduleId: document.body.dataset.module,
-      questions: QUESTIONS
-    });
+    Application.demarrer(APPLICATION);
   </script>
 </body>
 </html>

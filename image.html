@@ -4,24 +4,32 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Option IMAGE — Révision BTS Audiovisuel</title>
+  <meta name="description" content="Les applications de révision de l'option IMAGE (Métiers de l'image) : TES et TMO.">
+  <!-- theme.js en premier : il applique le thème clair ou sombre avant l'affichage -->
+  <script src="js/theme.js"></script>
   <link rel="stylesheet" href="css/style.css">
 </head>
 
-<!-- data-option="image" : indique à js/page-option.js quels modules afficher,
-     et à css/style.css quelle couleur d'accent utiliser. -->
-<body data-racine="" data-option="image">
+<!-- data-option="image" : indique à js/page-option.js quelles applications afficher.
+     data-page : met en évidence le bon lien dans l'en-tête. -->
+<body data-racine="" data-option="image" data-page="image">
 
   <header id="entete"></header>
 
   <main>
     <p class="fil-ariane"><a href="index.html">Accueil</a> › Option IMAGE</p>
-    <h1>Option IMAGE</h1>
-    <p class="chapeau">Tous les modules de révision de l'option, classés par épreuve.</p>
 
-    <!-- La liste est construite par js/page-option.js à partir de js/catalogue.js.
-         Pour ajouter un module, on ne touche pas à cette page : on complète le catalogue. -->
-    <div id="liste-modules">
-      <p class="discret">Chargement des modules…</p>
+    <div class="option-hero entree">
+      <span class="eyebrow">BTS Audiovisuel · Métiers de l'image</span>
+      <h1 class="display">Option IMAGE.<br><span class="grad" style="--spectre: linear-gradient(90deg, #ff9500 0%, #ff2d55 45%, #af52de 100%)">La lumière, la caméra, l'image.</span></h1>
+      <p class="lead">Chaque icône ouvre une <b>application de révision</b> : des notions expliquées simplement, des animations et des simulations à manipuler, l'essentiel à retenir, puis une <b>évaluation sur 20</b> à la fin de chaque module.</p>
+      <div class="resume-option" id="resume-option"></div>
+    </div>
+
+    <!-- La grille est construite par js/page-option.js à partir de js/catalogue.js.
+         Pour ajouter une application, on ne touche pas à cette page : on complète le catalogue. -->
+    <div id="liste-applications">
+      <p class="discret">Chargement des applications…</p>
     </div>
   </main>
 
@@ -34,6 +42,7 @@
   <script src="js/suivi.js"></script>
   <script src="js/commun.js"></script>
   <script src="js/catalogue.js"></script>
+  <script src="js/applications.js"></script>
   <script src="js/page-option.js"></script>
 </body>
 </html>
