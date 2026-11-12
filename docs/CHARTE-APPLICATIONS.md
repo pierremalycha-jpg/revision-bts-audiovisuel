@@ -14,6 +14,8 @@ Cette charte dit ce qu'il faut respecter, et pourquoi.
 4. **Déclare l'application** dans `js/catalogue.js` (id, option, épreuve, titre, icône, couleurs, nombre de modules). Son icône apparaît alors sur la page de l'option, sur l'accueil et dans « Ma progression ».
 5. **Teste** : ouvre `index.html` de l'application, ajoute `?enseignant` à l'adresse pour ouvrir tous les modules sans passer les évaluations, vérifie chaque étape en clair, en sombre et sur téléphone.
 
+> **Application commune à deux options** : dans le catalogue, `options: ["image", "tiee"]`. Son icône apparaît sur les deux pages, et le lien « Option… » du menu ramène l'élève à l'option d'où il vient (mémorisée par `js/page-option.js`) ; `option` dans `contenu.js` ne sert plus que par défaut. Exemple : `modules/tes-capteurs/`.
+
 > L'`id` de `contenu.js` doit être **identique** à celui du catalogue, et ne doit **plus changer** une fois l'application en ligne : les notes sont enregistrées sous ce nom (`id.1`, `id.2`…).
 
 ---
@@ -155,5 +157,6 @@ Règles de code (dans `labos.js`) :
 | `js/applications.js` | Icônes d'application et lecture de la progression (pages d'option, tableau de bord). |
 | `modules/modele/` | Le modèle à dupliquer, entièrement commenté. |
 | `modules/tes-signal-video-numerique/` | Une application complète construite avec le kit : à lire comme exemple. |
+| `modules/tes-capteurs/` | Application commune IMAGE et TIEE, six labos animés (canvas, boucles d'animation avec pause, mouvement réduit). |
 
 La photométrie, elle, reste un **fichier unique** autonome (elle fonctionne aussi hors ligne, avec son propre enregistrement, son relevé PDF et son tableau de bord enseignant). Le kit en reprend la forme ; il ne la remplace pas.

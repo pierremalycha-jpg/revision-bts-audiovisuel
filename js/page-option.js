@@ -11,6 +11,10 @@
 
 const OPTION_COURANTE = document.body.dataset.option;
 
+// On retient l'option visitée : une application commune à TIEE et IMAGE
+// saura ainsi vers quelle page renvoyer l'élève (voir js/application.js).
+try { sessionStorage.setItem("revision-bts-option", OPTION_COURANTE); } catch (e) { /* sans importance */ }
+
 // Fabrique l'icône cliquable d'une application.
 function creerIconeApplication(app, progression, rang) {
   const element = creerElement("li");
