@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Compression vidéo — Révision BTS Audiovisuel</title>
+  <meta name="description" content="Application de révision : débit et taux de compression, compression JPEG, compression MPEG (images I, P, B, GOP), codage entropique et CABAC, CBR et VBR, profils et niveaux, codecs et conteneurs.">
+  <script src="../../js/theme.js"></script>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/application.css">
+</head>
+
+<!-- Toute la page (menu, accueil, notions, essentiel, évaluation) est construite
+     par js/application.js à partir de contenu.js. Cette page ne contient que
+     les LABOS : un <template> par module, avec plusieurs labos chacun.
+     Identifiants : m + numéro du module + lettre du labo (m1a-…, m2b-…). -->
+<body data-racine="../../">
+
+  <!-- =================== MODULE 1 : DÉBIT ET TAUX DE COMPRESSION =================== -->
+  <template data-labo="1">
+    <div class="sous-labo"><span class="eyebrow">Labo 1 · Les redondances</span><h3>Où se cache l’information inutile ?</h3><p class="muted">Un codec ne « devine » rien : il repère ce qui se <b>répète</b> ou ce que l’œil <b>ne voit pas</b>. Choisissez une redondance et observez-la sur une image animée.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Image analysée</span><button class="btn small" id="m1a-pause" type="button">⏸ Pause</button></div>
+          <canvas id="m1a-cv" class="cv" width="1000" height="470" role="img" aria-label="Une image de test et l’analyse de la redondance choisie : valeurs de pixels voisins, différence entre deux images successives, histogramme des coefficients, ou simplification de la couleur et de la luminance"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Redondance</small><b class="acc" id="m1a-nom">—</b></div>
+          <div><small>Mesure</small><b id="m1a-mes">—</b></div>
+          <div><small>Outil du codec</small><b id="m1a-outil">—</b></div>
+          <div><small>Perte ?</small><b id="m1a-perte">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <div class="ctl"><span>Redondance</span><div id="m1a-type" aria-label="Type de redondance"></div></div>
+          <label class="ctl" id="m1a-ligne-force"><span>Simplification</span><input type="range" id="m1a-force" min="1" max="8" step="1" value="4"><output></output></label>
+        </div>
+        <div class="card">
+          <h3>Ce qu’il faut observer</h3>
+          <div id="m1a-msg" class="note" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 2 · Calculateur</span><h3>Débit, taux de compression et place occupée</h3><p class="muted">Choisissez un format et un codec. Le débit non compressé est <b>calculé</b> avec la formule du cours, le taux de compression et la place occupée en découlent.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Débits sur une échelle logarithmique</span><span id="m1b-titre"></span></div>
+          <canvas id="m1b-cv" class="cv" width="1000" height="470" role="img" aria-label="Le débit non compressé et le débit compressé placés sur une échelle de débits avec des liaisons de référence, la part des données conservées sur 100, et le remplissage d’une carte mémoire"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Non compressé</small><b id="m1b-brut">—</b></div>
+          <div><small>Compressé</small><b id="m1b-comp">—</b></div>
+          <div><small>Taux</small><b class="acc" id="m1b-taux">—</b></div>
+          <div><small>Données supprimées</small><b id="m1b-supp">—</b></div>
+          <div><small>Bits par pixel</small><b id="m1b-bpp">—</b></div>
+          <div><small>1 heure</small><b id="m1b-heure">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Le format</h3>
+          <label class="ctl"><span>Définition</span><select id="m1b-def"></select></label>
+          <div class="ctl"><span>Structure</span><div id="m1b-ech"></div></div>
+          <div class="ctl"><span>Quantification</span><div id="m1b-q"></div></div>
+          <label class="ctl"><span>Cadence</span><select id="m1b-f"></select></label>
+        </div>
+        <div class="card">
+          <h3>La compression</h3>
+          <label class="ctl"><span>Codec</span><select id="m1b-codec"></select></label>
+          <label class="ctl"><span>Débit</span><input type="range" id="m1b-d" min="0" max="1000" step="1" value="500"><output></output></label>
+          <p class="muted small" style="margin:10px 0 8px">Situations toutes prêtes :</p>
+          <div class="btnrow" id="m1b-situ">
+            <button class="chip" type="button" data-s="cine">Tournage fiction ProRes</button>
+            <button class="chip" type="button" data-s="repor">Reportage XDCAM</button>
+            <button class="chip" type="button" data-s="bluray">Blu-ray</button>
+            <button class="chip" type="button" data-s="web">Streaming 4K</button>
+          </div>
+        </div>
+        <div class="card"><h3>Calcul pas à pas</h3><div class="calc" id="m1b-calc" aria-live="polite"></div></div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m1b-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- =================== MODULE 2 : COMPRESSION JPEG =================== -->
+  <template data-labo="2">
+    <div class="sous-labo"><span class="eyebrow">Labo 1 · Un bloc dans la chaîne</span><h3>Suivre 64 pixels de la DCT jusqu’au code</h3><p class="muted">Touchez l’image pour choisir un bloc de 8 × 8 pixels (luminance). Ses valeurs passent par la <b>DCT</b>, la <b>quantification</b> et le <b>zigzag</b>. Baissez la qualité : les zéros envahissent le bloc, l’erreur augmente.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Pixels → DCT → quantification → reconstruction</span><button class="btn small" id="m2a-pause" type="button">⏸ Pause</button></div>
+          <canvas id="m2a-cv" class="cv" width="1000" height="640" role="img" aria-label="Une image de test avec le bloc choisi, les 64 valeurs de pixels, les 64 coefficients de la DCT, la table de quantification, les coefficients quantifiés, le bloc reconstruit et la lecture en zigzag"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Coefficients non nuls</small><b class="acc" id="m2a-nz">—</b></div>
+          <div><small>Bits du bloc</small><b id="m2a-bits">—</b></div>
+          <div><small>Taux (bloc)</small><b id="m2a-taux">—</b></div>
+          <div><small>Erreur max</small><b id="m2a-err">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Qualité</span><input type="range" id="m2a-q" min="1" max="100" step="1" value="50"><output></output></label>
+          <p class="muted small" style="margin:10px 0 8px">Choisir un bloc typique :</p>
+          <div class="btnrow" id="m2a-situ">
+            <button class="chip" type="button" data-s="ciel">Ciel (uni)</button>
+            <button class="chip" type="button" data-s="degrade">Dégradé</button>
+            <button class="chip" type="button" data-s="bord">Bord net</button>
+            <button class="chip" type="button" data-s="texte">Texte</button>
+            <button class="chip" type="button" data-s="feuillage">Feuillage</button>
+          </div>
+        </div>
+        <div class="card"><h3>Calcul pas à pas</h3><div class="calc" id="m2a-calc" aria-live="polite"></div></div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m2a-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 2 · Les 64 motifs</span><h3>Reconstruire un bloc, motif après motif</h3><p class="muted">Tout bloc de 8 × 8 est un <b>mélange</b> des 64 motifs de la DCT. Ajoutez-les un à un, dans l’ordre du zigzag : quelques motifs suffisent souvent à reconnaître le bloc.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Motifs de base · bloc reconstruit</span><button class="btn small" id="m2b-jouer" type="button">▶ Jouer</button></div>
+          <canvas id="m2b-cv" class="cv" width="1000" height="470" role="img" aria-label="Les 64 motifs de base de la DCT, le bloc d’origine, le bloc reconstruit avec les premiers coefficients et l’erreur restante"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Motifs utilisés</small><b class="acc" id="m2b-k">—</b></div>
+          <div><small>Énergie gardée</small><b id="m2b-en">—</b></div>
+          <div><small>Erreur moyenne</small><b id="m2b-err">—</b></div>
+          <div><small>Motif touché</small><b id="m2b-uv">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Coefficients</span><input type="range" id="m2b-k-in" min="1" max="64" step="1" value="6"><output></output></label>
+          <p class="muted small" style="margin:10px 0 8px">Le bloc à reconstruire :</p>
+          <div class="btnrow" id="m2b-situ">
+            <button class="chip" type="button" data-s="degrade">Dégradé</button>
+            <button class="chip" type="button" data-s="bord">Bord net</button>
+            <button class="chip" type="button" data-s="texte">Lettre</button>
+            <button class="chip" type="button" data-s="damier">Damier</button>
+            <button class="chip" type="button" data-s="feuillage">Feuillage</button>
+          </div>
+          <p class="muted small" style="margin:12px 0 0">Touchez un motif de la grille pour lire sa fréquence et son coefficient.</p>
+        </div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m2b-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 3 · Image entière</span><h3>Qualité, poids du fichier et artefacts</h3><p class="muted">Toute l’image passe dans un vrai codeur JPEG simplifié (DCT, tables standard, zigzag, estimation des codes de Huffman). Le poids <b>réel</b> du JPEG produit par votre navigateur est affiché pour comparaison. Touchez l’image pour déplacer la loupe.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Image décodée · loupe × 4</span><div id="m2c-vue" aria-label="Affichage"></div></div>
+          <canvas id="m2c-cv" class="cv" width="1000" height="420" role="img" aria-label="L’image de test après compression JPEG, et une loupe qui grossit quatre fois une zone pour voir les blocs et les halos"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Image brute</small><b id="m2c-brut">—</b></div>
+          <div><small>JPEG (estimé)</small><b class="acc" id="m2c-poids">—</b></div>
+          <div><small>JPEG du navigateur</small><b id="m2c-reel">—</b></div>
+          <div><small>Taux</small><b id="m2c-taux">—</b></div>
+          <div><small>PSNR</small><b id="m2c-psnr">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Qualité</span><input type="range" id="m2c-q" min="1" max="100" step="1" value="30"><output></output></label>
+          <div class="ctl"><span>Couleur</span><div id="m2c-ech" aria-label="Sous-échantillonnage de la couleur"></div></div>
+          <p class="muted small" style="margin:10px 0 8px">Réglages tout prêts :</p>
+          <div class="btnrow" id="m2c-situ">
+            <button class="chip" type="button" data-s="90">Photo de qualité (90)</button>
+            <button class="chip" type="button" data-s="50">Standard (50)</button>
+            <button class="chip" type="button" data-s="15">Web très léger (15)</button>
+            <button class="chip" type="button" data-s="3">Abîmé (3)</button>
+          </div>
+        </div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m2c-msg" class="note" aria-live="polite"></div><p class="muted small" style="margin:10px 0 0">PSNR : rapport signal sur bruit de crête, en décibels, calculé ici sur la luminance. Au-dessus de 40 dB, les défauts sont invisibles ; en dessous de 30 dB, ils sautent aux yeux.</p></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- =================== MODULE 3 : COMPRESSION MPEG =================== -->
+  <template data-labo="3">
+    <div class="sous-labo"><span class="eyebrow">Labo 1 · Estimation de mouvement</span><h3>Chercher où était chaque macrobloc dans l’image précédente</h3><p class="muted">Le codeur découpe l’image à coder en <b>macroblocs</b> de 16 × 16 et cherche, dans l’image de référence, le bloc le plus ressemblant. Il ne transmet que le <b>vecteur</b> et la <b>différence</b> (le résidu). Touchez un macrobloc de l’image à coder.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Référence · image à coder · prédiction · résidu</span><button class="btn small" id="m3a-pause" type="button">⏸ Pause</button></div>
+          <canvas id="m3a-cv" class="cv" width="1000" height="560" role="img" aria-label="L’image de référence avec la zone de recherche, l’image à coder avec les vecteurs de mouvement, l’image prédite, le résidu, et la recherche du meilleur bloc pour le macrobloc choisi"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Vecteur choisi</small><b class="acc" id="m3a-vec">—</b></div>
+          <div><small>Écart (SAD)</small><b id="m3a-sad">—</b></div>
+          <div><small>Macroblocs « skip »</small><b id="m3a-skip">—</b></div>
+          <div><small>Image I</small><b id="m3a-bi">—</b></div>
+          <div><small>Image P</small><b id="m3a-bp">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Mouvement</span><input type="range" id="m3a-v" min="0" max="24" step="1" value="6"><output></output></label>
+          <label class="ctl"><span>Recherche ±</span><input type="range" id="m3a-r" min="2" max="16" step="1" value="8"><output></output></label>
+          <label class="ctl"><span>Grain</span><input type="range" id="m3a-b" min="0" max="12" step="1" value="0"><output></output></label>
+          <div class="ctl"><span>Caméra</span><div id="m3a-cam" aria-label="Mouvement de caméra"></div></div>
+        </div>
+        <div class="card"><h3>Calcul pas à pas</h3><div class="calc" id="m3a-calc" aria-live="polite"></div></div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m3a-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 2 · Le GOP</span><h3>Images I, P et B : construire un groupe d’images</h3><p class="muted">Réglez la longueur <b>N</b> du GOP et la distance <b>M</b> entre images d’ancrage. Observez les références, l’<b>ordre de transmission</b>, le poids de chaque image, puis provoquez une <b>erreur</b> ou une <b>coupe</b> en touchant une image.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Ordre d’affichage · ordre de transmission · poids</span><button class="btn small" id="m3b-pause" type="button">⏸ Pause</button></div>
+          <canvas id="m3b-cv" class="cv" width="1000" height="500" role="img" aria-label="Une suite d’images I, P et B dans l’ordre d’affichage avec leurs flèches de référence, la même suite dans l’ordre de transmission, et la taille de chaque image"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Structure</small><b class="acc" id="m3b-struct">—</b></div>
+          <div><small>I / P / B</small><b id="m3b-ipb">—</b></div>
+          <div><small>Durée du GOP</small><b id="m3b-duree">—</b></div>
+          <div><small>Débit / tout-I</small><b id="m3b-gain">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>N (longueur)</span><input type="range" id="m3b-n" min="1" max="30" step="1" value="12"><output></output></label>
+          <label class="ctl"><span>M (ancrage)</span><input type="range" id="m3b-m" min="1" max="4" step="1" value="3"><output></output></label>
+          <div class="ctl"><span>GOP</span><div id="m3b-type" aria-label="GOP ouvert ou fermé"></div></div>
+          <div class="ctl"><span>Clic sur une image</span><div id="m3b-mode" aria-label="Effet d’un clic sur une image"></div></div>
+          <p class="muted small" style="margin:10px 0 8px">Structures réelles :</p>
+          <div class="btnrow" id="m3b-situ">
+            <button class="chip" type="button" data-s="intra">Tout-intra (ProRes)</button>
+            <button class="chip" type="button" data-s="xdcam">XDCAM HD (N = 12, M = 3)</button>
+            <button class="chip" type="button" data-s="tnt">Diffusion (N = 24, M = 3)</button>
+            <button class="chip" type="button" data-s="visio">Visio (IPPP)</button>
+          </div>
+        </div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m3b-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 3 · Les générations de codecs</span><h3>Des macroblocs fixes aux arbres de codage</h3><p class="muted">MPEG-2 découpe toute l’image en blocs de 16 × 16. Les codecs récents adaptent la taille des blocs au contenu : <b>grands</b> dans les zones calmes, <b>petits</b> sur les détails. C’est une des raisons pour lesquelles chaque génération divise le débit par deux environ.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Découpage de l’image</span><div id="m3c-codec" aria-label="Norme"></div></div>
+          <canvas id="m3c-cv" class="cv" width="1000" height="420" role="img" aria-label="L’image de test découpée en blocs selon la norme choisie, et le débit typique de chaque génération de codec pour une même qualité"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Norme</small><b class="acc" id="m3c-nom">—</b></div>
+          <div><small>Blocs</small><b id="m3c-n">—</b></div>
+          <div><small>Taille des blocs</small><b id="m3c-taille">—</b></div>
+          <div><small>Débit HD typique</small><b id="m3c-debit">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Seuil de détail</span><input type="range" id="m3c-s" min="1" max="10" step="1" value="5"><output></output></label>
+          <button class="btn small" id="m3c-rejouer" type="button" style="margin-top:6px">↻ Rejouer le découpage</button>
+        </div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m3c-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- =================== MODULE 4 : CODAGE ENTROPIQUE ET CABAC =================== -->
+  <template data-labo="4">
+    <div class="sous-labo"><span class="eyebrow">Labo 1 · Huffman</span><h3>Construire un code de Huffman, étape par étape</h3><p class="muted">On réunit toujours les <b>deux symboles les moins fréquents</b>. À la fin, le chemin depuis le sommet de l’arbre donne le code de chaque symbole : 0 à gauche, 1 à droite.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Arbre de Huffman · codes · message codé</span><button class="btn small" id="m4a-jouer" type="button">▶ Construire</button></div>
+          <canvas id="m4a-cv" class="cv" width="1000" height="520" role="img" aria-label="L’arbre de Huffman construit à partir des fréquences des symboles du message, la table des codes et le message codé en binaire"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Longueur fixe</small><b id="m4a-fixe">—</b></div>
+          <div><small>Huffman</small><b class="acc" id="m4a-huff">—</b></div>
+          <div><small>Limite (entropie)</small><b id="m4a-ent">—</b></div>
+          <div><small>Bits / symbole</small><b id="m4a-bps">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Le message</h3>
+          <label class="ctl"><span>Texte</span><input type="text" id="m4a-txt" maxlength="40" value="ABRACADABRA" style="grid-column:2/4" autocomplete="off" spellcheck="false"></label>
+          <p class="muted small" style="margin:10px 0 8px">Messages tout prêts :</p>
+          <div class="btnrow" id="m4a-situ">
+            <button class="chip" type="button" data-s="ABRACADABRA">ABRACADABRA</button>
+            <button class="chip" type="button" data-s="0000100002000010000300001000">Coefficients après quantification</button>
+            <button class="chip" type="button" data-s="ABCDEFGH">8 lettres équiprobables</button>
+            <button class="chip" type="button" data-s="AAAAAAAAAAAAAAB">Presque toujours A</button>
+          </div>
+          <div class="btnrow" style="margin-top:12px">
+            <button class="btn small" id="m4a-pas" type="button">Étape suivante</button>
+            <button class="btn small" id="m4a-zero" type="button">↺ Recommencer</button>
+          </div>
+        </div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m4a-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 2 · Le cœur du CABAC</span><h3>Binariser, choisir un contexte, coder par intervalles</h3><p class="muted">Le CABAC transforme chaque valeur en <b>bins</b> (0 ou 1), estime pour chaque bin la probabilité d’un 0 selon son <b>contexte</b>, puis découpe un <b>intervalle</b> : un bin très probable ne coûte presque rien. Chaque fois que l’intervalle est zoomé × 2, un bit sort.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Binarisation · contexte · intervalle · bits</span><button class="btn small" id="m4b-pause" type="button">⏸ Pause</button></div>
+          <canvas id="m4b-cv" class="cv" width="1000" height="560" role="img" aria-label="La chaîne du CABAC : valeur, binarisation en bins, choix du contexte et de sa probabilité, découpage de l’intervalle du codeur arithmétique, et courbes du nombre de bits émis"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Bins codés</small><b id="m4b-bins">—</b></div>
+          <div><small>Bits émis</small><b class="acc" id="m4b-bits">—</b></div>
+          <div><small>Bits par bin</small><b id="m4b-bpb">—</b></div>
+          <div><small>Entropie de la source</small><b id="m4b-h">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <div class="ctl"><span>Source</span><div id="m4b-src" aria-label="Type de source"></div></div>
+          <label class="ctl"><span>Part de 0</span><input type="range" id="m4b-p" min="50" max="98" step="1" value="85"><output></output></label>
+          <div class="ctl"><span>Modèle</span><div id="m4b-mod" aria-label="Modèle de probabilité"></div></div>
+          <label class="ctl"><span>Vitesse</span><input type="range" id="m4b-vit" min="1" max="40" step="1" value="6"><output></output></label>
+          <div class="btnrow" style="margin-top:10px">
+            <button class="btn small" id="m4b-pas" type="button">Bin suivant</button>
+            <button class="btn small" id="m4b-zero" type="button">↺ Recommencer</button>
+          </div>
+        </div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m4b-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- =================== MODULE 5 : CBR, VBR, PROFILS ET NIVEAUX =================== -->
+  <template data-labo="5">
+    <div class="sous-labo"><span class="eyebrow">Labo 1 · CBR ou VBR</span><h3>Une même séquence, quatre façons de répartir les bits</h3><p class="muted">La séquence enchaîne des plans calmes et des plans très chargés (feuillage, pluie de confettis). Comparez le <b>débit</b> et la <b>qualité</b> (le paramètre de quantification QP : plus il est grand, plus l’image est dégradée).</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Complexité · débit · qualité</span><button class="btn small" id="m5a-pause" type="button">⏸ Pause</button></div>
+          <canvas id="m5a-cv" class="cv" width="1000" height="560" role="img" aria-label="Une séquence de plans de complexité variable, le débit attribué au cours du temps, le paramètre de quantification qui en résulte, et un aperçu de l’image à la tête de lecture"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Débit moyen</small><b id="m5a-moy">—</b></div>
+          <div><small>Débit max</small><b id="m5a-max">—</b></div>
+          <div><small>Taille (1 h)</small><b class="acc" id="m5a-taille">—</b></div>
+          <div><small>QP moyen</small><b id="m5a-qp">—</b></div>
+          <div><small>QP le pire</small><b id="m5a-pire">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <div class="ctl"><span>Mode</span><div id="m5a-mode" aria-label="Mode de débit"></div></div>
+          <label class="ctl" id="m5a-l-d"><span>Débit cible</span><input type="range" id="m5a-d" min="2" max="40" step="0.5" value="10"><output></output></label>
+          <label class="ctl" id="m5a-l-max"><span>Débit max</span><input type="range" id="m5a-dmax" min="4" max="60" step="1" value="20"><output></output></label>
+          <label class="ctl" id="m5a-l-qp"><span>QP visé</span><input type="range" id="m5a-qpc" min="16" max="40" step="1" value="23"><output></output></label>
+          <p class="muted small" style="margin:10px 0 8px">Usages réels :</p>
+          <div class="btnrow" id="m5a-situ">
+            <button class="chip" type="button" data-s="live">Direct sur Internet (CBR)</button>
+            <button class="chip" type="button" data-s="bluray">Blu-ray (VBR 2 passes)</button>
+            <button class="chip" type="button" data-s="archive">Archive (qualité constante)</button>
+          </div>
+        </div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m5a-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 2 · Profils et niveaux</span><h3>Quel profil, quel niveau pour ce fichier ?</h3><p class="muted">Le <b>profil</b> dit quels <b>outils</b> de compression le décodeur doit connaître ; le <b>niveau</b> fixe la <b>charge</b> maximale (pixels par seconde, débit). Réglez le fichier : le profil et le niveau minimaux sont calculés avec les tables de la norme.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Boîte à outils · échelle des niveaux</span><div id="m5b-norme" aria-label="Norme"></div></div>
+          <canvas id="m5b-cv" class="cv" width="1000" height="520" role="img" aria-label="Les profils emboîtés comme des boîtes à outils, et l’échelle des niveaux avec leur limite de pixels par seconde et de débit, comparée au fichier réglé"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Profil minimal</small><b class="acc" id="m5b-profil">—</b></div>
+          <div><small>Niveau minimal</small><b class="acc" id="m5b-niveau">—</b></div>
+          <div><small>Notation</small><b id="m5b-note">—</b></div>
+          <div><small>Charge</small><b id="m5b-charge">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Le fichier</h3>
+          <label class="ctl"><span>Définition</span><select id="m5b-def"></select></label>
+          <label class="ctl"><span>Cadence</span><select id="m5b-f"></select></label>
+          <div class="ctl"><span>Structure</span><div id="m5b-ech"></div></div>
+          <div class="ctl"><span>Quantification</span><div id="m5b-q"></div></div>
+          <label class="ctl"><span>Débit</span><input type="range" id="m5b-d" min="0" max="1000" step="1" value="500"><output></output></label>
+          <div id="m5b-outils" style="margin-top:8px"></div>
+          <p class="muted small" style="margin:10px 0 8px">Fichiers réels :</p>
+          <div class="btnrow" id="m5b-situ">
+            <button class="chip" type="button" data-s="web">YouTube 1080p</button>
+            <button class="chip" type="button" data-s="bluray">Blu-ray 1080p</button>
+            <button class="chip" type="button" data-s="xavc">XAVC 4K 4:2:2</button>
+            <button class="chip" type="button" data-s="uhd">UHD HDR (HEVC)</button>
+          </div>
+        </div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m5b-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- =================== MODULE 6 : CODECS ET CONTENEURS =================== -->
+  <template data-labo="6">
+    <div class="sous-labo"><span class="eyebrow">Labo 1 · Ouvrir le conteneur</span><h3>Ce qu’il y a vraiment dans un fichier .mov, .mp4 ou .mxf</h3><p class="muted">Le conteneur est une <b>enveloppe</b> : il range des pistes (vidéo, audio, timecode, sous-titres) en morceaux <b>entrelacés</b> et un <b>index</b>. Au lecteur, le démultiplexeur sépare les pistes et confie chacune à <b>son</b> décodeur.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Fichier · flux entrelacé · décodeurs</span><button class="btn small" id="m6a-pause" type="button">⏸ Pause</button></div>
+          <canvas id="m6a-cv" class="cv" width="1000" height="500" role="img" aria-label="Un fichier conteneur ouvert montrant ses pistes, le flux de paquets entrelacés qui passe dans un démultiplexeur, puis dans un décodeur vidéo et un décodeur audio"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Fichier</small><b class="acc" id="m6a-nom">—</b></div>
+          <div><small>Débit total</small><b id="m6a-debit">—</b></div>
+          <div><small>Pistes</small><b id="m6a-pistes">—</b></div>
+          <div><small>Compatibilité</small><b id="m6a-compat">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <div class="ctl"><span>Conteneur</span><div id="m6a-cont" aria-label="Conteneur"></div></div>
+          <label class="ctl"><span>Codec vidéo</span><select id="m6a-vid"></select></label>
+          <label class="ctl"><span>Codec audio</span><select id="m6a-aud"></select></label>
+          <label class="ctl"><span>Pistes audio</span><input type="range" id="m6a-na" min="1" max="8" step="1" value="2"><output></output></label>
+          <div class="ctl"><span>Autres pistes</span><div class="btnrow" id="m6a-plus"><button class="chip" type="button" data-p="tc" aria-pressed="true">Timecode</button><button class="chip" type="button" data-p="st" aria-pressed="false">Sous-titres</button></div></div>
+          <p class="muted small" style="margin:10px 0 8px">Fichiers réels :</p>
+          <div class="btnrow" id="m6a-situ">
+            <button class="chip" type="button" data-s="rush">Rush cinéma</button>
+            <button class="chip" type="button" data-s="web">Livraison web</button>
+            <button class="chip" type="button" data-s="pad">PAD broadcast</button>
+            <button class="chip" type="button" data-s="dcp">DCP</button>
+            <button class="chip" type="button" data-s="tnt">Diffusion TNT</button>
+          </div>
+        </div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m6a-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 2 · Choisir son codec</span><h3>Débit, place sur le disque et pertes de génération</h3><p class="muted">Comparez les codecs de la chaîne de production (tournage, montage, diffusion). À droite, l’image est <b>réencodée</b> plusieurs fois, avec un petit traitement entre chaque passage (recadrage d’un pixel), comme lors d’allers-retours entre logiciels.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Débits à 1080 25p · image après réencodages</span><button class="btn small" id="m6b-jouer" type="button">▶ Réencoder</button></div>
+          <canvas id="m6b-cv" class="cv" width="1000" height="540" role="img" aria-label="Le débit de chaque codec en HD 1080 25p sur une échelle logarithmique, et l’image de test après plusieurs générations de compression avec le codec choisi"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Famille</small><b class="acc" id="m6b-nom">—</b></div>
+          <div><small>Débit</small><b id="m6b-debit">—</b></div>
+          <div><small>1 heure</small><b id="m6b-heure">—</b></div>
+          <div><small>Type</small><b id="m6b-type">—</b></div>
+          <div><small>PSNR</small><b id="m6b-psnr">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Codec</span><select id="m6b-codec"></select></label>
+          <label class="ctl"><span>Générations</span><input type="range" id="m6b-g" min="1" max="10" step="1" value="1"><output></output></label>
+        </div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m6b-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- Scripts communs : ne pas modifier, ne pas changer l'ordre -->
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="../../js/firebase-config.js"></script>
+  <script src="../../js/suivi.js"></script>
+  <script src="../../js/commun.js"></script>
+  <script src="../../js/catalogue.js"></script>
+  <script src="../../js/applications.js"></script>
+  <script src="../../js/application.js"></script>
+  <!-- Scripts propres à CETTE application -->
+  <script src="contenu.js"></script>
+  <script src="labos.js"></script>
+  <script>
+    Application.demarrer(APPLICATION);
+  </script>
+</body>
+</html>

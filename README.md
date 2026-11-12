@@ -24,6 +24,7 @@ La progression des étudiants est enregistrée avec Firebase. Le site est héber
 | Signal vidéo numérique — *Du signal aux bits.* | TES | 3 | `modules/tes-signal-video-numerique/` |
 | Capteurs d’image — *De la lumière aux électrons.* | TES | 6 | `modules/tes-capteurs/` |
 | Éclairage — *LED, gélatines et ombres.* | TES | 3 | `modules/tes-eclairage/` |
+| Compression vidéo — *Moins de bits, même image.* | TES | 6 | `modules/tes-compression-video/` |
 
 ## Choix techniques
 
@@ -98,7 +99,7 @@ Résumé (le détail est dans [docs/CHARTE-APPLICATIONS.md](docs/CHARTE-APPLICAT
 
 ## Contenu pédagogique : à valider
 
-L'application « Signal vidéo numérique » a été rédigée à partir de connaissances techniques générales, **pas à partir du référentiel du BTS**. Avant de la proposer aux étudiants, relis les notions et les questions, et ajuste le vocabulaire, le niveau et les notions à ce que le référentiel exige.
+Les applications « Signal vidéo numérique » et « Compression vidéo » ont été rédigées à partir de connaissances techniques générales, **pas à partir du référentiel du BTS**. Avant de les proposer aux étudiants, relis les notions et les questions, et ajuste le vocabulaire, le niveau et les notions à ce que le référentiel exige.
 
 ## Données enregistrées
 

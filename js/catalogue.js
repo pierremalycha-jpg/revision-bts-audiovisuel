@@ -87,6 +87,19 @@ const CATALOGUE = [
     suivi: "kit",
     page: "modules/tes-eclairage/index.html",
     disponible: true
+  },
+  {
+    id: "tes-compression-video",
+    epreuve: "TES",
+    titre: "Compression vidéo",
+    accroche: "Moins de bits, même image.",
+    description: "Débit et taux de compression, compression JPEG (DCT, quantification), compression MPEG (images I, P, B, GOP), codage entropique et CABAC, CBR et VBR, profils et niveaux, codecs et conteneurs.",
+    icone: "compression",
+    teinte: ["#64d2ff", "#5e5ce6", "#bf5af2"],
+    modules: 6,
+    suivi: "kit",
+    page: "modules/tes-compression-video/index.html",
+    disponible: true
   }
 
   // Pour ajouter une application, copie le bloc ci-dessous APRÈS une virgule,
@@ -148,6 +161,8 @@ const ICONES = {
   capteur: '<rect x="4.6" y="4.6" width="14.8" height="14.8" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="7.4" y="7.4" width="4.2" height="4.2" rx=".8" fill="currentColor" opacity=".55"/><rect x="12.4" y="7.4" width="4.2" height="4.2" rx=".8" fill="currentColor"/><rect x="7.4" y="12.4" width="4.2" height="4.2" rx=".8" fill="currentColor"/><rect x="12.4" y="12.4" width="4.2" height="4.2" rx=".8" fill="currentColor" opacity=".55"/><path d="M9 2v2.2M15 2v2.2M9 19.8V22M15 19.8V22M2 9h2.2M2 15h2.2M19.8 9H22M19.8 15H22" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>',
   // Un projecteur à lentille de Fresnel sur sa lyre, et son faisceau
   projecteur: '<path d="M3.5 8.2l9-3.4v12.4l-9-3.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12.5 7.2l8 -2.6M12.5 12h8.5M12.5 16.8l8 2.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" opacity=".75"/><path d="M8 15.6v4.2M5 19.8h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+  // Une image découpée en blocs, serrée entre deux flèches (compression)
+  compression: '<rect x="7" y="5.5" width="10" height="13" rx="2.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 5.8v12.4M7.3 12h9.4" stroke="currentColor" stroke-width="1.3" opacity=".7"/><rect x="8.6" y="7.2" width="2.6" height="3.4" rx=".6" fill="currentColor"/><path d="M1.8 12h3.4M3.6 9.9 5.6 12l-2 2.1M22.2 12h-3.4M20.4 9.9 18.4 12l2 2.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
   // Le signe « plus » (emplacement de la prochaine application)
   plus: '<path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
 };
