@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Éclairage — Révision BTS Audiovisuel</title>
+  <meta name="description" content="Application de révision : technologies LED (bicolore, RVB, RVBW), gélatines CTO, CTB, Plus et Minus Green et courbe de Planck, ombres et taille de la source.">
+  <script src="../../js/theme.js"></script>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/application.css">
+</head>
+
+<!-- Toute la page (menu, accueil, notions, essentiel, évaluation) est construite
+     par js/application.js à partir de contenu.js. Cette page ne contient que
+     les LABOS : un <template> par module, avec plusieurs labos chacun. -->
+<body data-racine="../../">
+
+  <!-- =================== LABOS DU MODULE 1 : LES LED =================== -->
+  <template data-labo="1">
+    <div class="sous-labo"><span class="eyebrow">Labo 1 · Anatomie</span><h3>À l’intérieur d’une LED blanche</h3><p class="muted">Vue en coupe d’une LED CMS (montée en surface), comme celles des panneaux. Suivez le trajet : électron → photon bleu → phosphore → lumière blanche… et chaleur.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Vue en coupe (très agrandie)</span><button class="btn small" id="e1-pause" type="button">⏸ Pause</button></div>
+          <canvas id="e1-anat" class="cv" width="1000" height="500" role="img" aria-label="Animation en coupe d’une LED : des électrons entrent par la cathode, la puce émet des photons bleus, le phosphore en convertit une partie en jaune, la chaleur descend dans le radiateur"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Courant</small><b id="e1-io">—</b></div>
+          <div><small>Lumière qui sort</small><b class="acc" id="e1-sortie">—</b></div>
+          <div><small>Bleu converti</small><b id="e1-conv">—</b></div>
+          <div><small>Chaleur (100 W)</small><b id="e1-chal">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Courant</span><input type="range" id="e1-i" min="0" max="100" step="1" value="60"><output></output></label>
+          <div class="ctl"><span>Phosphore</span><div id="e1-phos" aria-label="Couche de phosphore"></div></div>
+          <p class="muted small" style="margin:10px 0 0">* Pour un projecteur de 100 W : environ 40 W deviennent lumière, 60 W deviennent chaleur, évacuée à l’arrière.</p>
+        </div>
+        <div class="card">
+          <h3>Les pièces</h3>
+          <p class="muted small" style="margin-top:0">Touchez une pièce : elle est entourée sur la coupe.</p>
+          <div class="btnrow" id="e1-pieces"></div>
+          <div class="say small" id="e1-piece" aria-live="polite" style="margin:12px 0 0"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 2 · Mélangeur</span><h3>Bicolore, RVB, RVBW, RVBWW : que peut-on fabriquer ?</h3><p class="muted">Dosez chaque famille de LED. Le spectre, le point dans le diagramme des couleurs et le rendu de huit nuanciers sont <b>calculés</b> à chaque réglage.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Spectre · couleurs atteignables · rendu</span><div id="e1-tech" aria-label="Technologie de LED"></div></div>
+          <canvas id="e1-mix" class="cv" width="1000" height="480" role="img" aria-label="Spectre de la lumière produite, diagramme des couleurs avec le triangle des couleurs atteignables, et huit nuanciers rendus sous une lumière de référence puis sous la lumière réglée"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>TCC</small><b class="acc" id="e1-tcc">—</b></div>
+          <div><small>Duv (+ vert / − magenta)</small><b id="e1-duv">—</b></div>
+          <div><small>Fidélité*</small><b id="e1-fid">—</b></div>
+          <div><small>Lumière</small><b id="e1-flux">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Les canaux</h3>
+          <div id="e1-canaux"></div>
+          <p class="muted small" style="margin:12px 0 8px">Réglages tout prêts :</p>
+          <div class="btnrow" id="e1-cibles">
+            <button class="chip" type="button" data-s="t32">Blanc 3 200 K</button>
+            <button class="chip" type="button" data-s="t56">Blanc 5 600 K</button>
+            <button class="chip" type="button" data-s="rouge">Rouge saturé</button>
+            <button class="chip" type="button" data-s="rose">Rose pastel</button>
+            <button class="chip" type="button" data-s="cyan">Cyan</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Ce qu’il faut observer</h3>
+          <div id="e1-msg" class="note" aria-live="polite"></div>
+          <p class="muted small" style="margin:10px 0 0">* Indice simplifié, calculé comme l’IRC : les nuanciers sous la lumière sont comparés à ceux d’un corps noir de même température de couleur. 100 = identique.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 3 · Gradation</span><h3>Baisser une LED sans faire scintiller l’image</h3><p class="muted">Deux façons de faire varier une LED : baisser le <b>courant</b>, ou l’allumer et l’éteindre très vite (<b>PWM</b>). La caméra, elle, ne voit que la lumière reçue pendant sa pose.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Signal de commande et images enregistrées</span><button class="btn small" id="e1-pause3" type="button">⏸ Pause</button></div>
+          <canvas id="e1-pwm" class="cv" width="1000" height="340" role="img" aria-label="Le courant dans les LED au cours du temps, la durée de pose de la caméra, et la luminosité de huit images successives"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Niveau demandé</small><b id="e1-nivo">—</b></div>
+          <div><small>Fréquence</small><b id="e1-f">—</b></div>
+          <div><small>Rapport cyclique</small><b id="e1-cyc">—</b></div>
+          <div><small>Scintillement</small><b id="e1-scint">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Gradation</span><input type="range" id="e1-niv" min="5" max="100" step="1" value="40"><output></output></label>
+          <div class="ctl"><span>Pilotage</span><div id="e1-mode"></div></div>
+          <div class="ctl"><span>Obturateur</span><div id="e1-obtu"></div></div>
+        </div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="e1-msg3" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- =================== LABOS DU MODULE 2 : GÉLATINES =================== -->
+  <template data-labo="2">
+    <div class="sous-labo"><span class="eyebrow">Labo 1 · Le diagramme des blancs</span><h3>Poser une gélatine, c’est se déplacer sur la courbe de Planck</h3><p class="muted">Les gélatines <b>CTO</b> et <b>CTB</b> font glisser la lumière <b>le long</b> de la courbe ; les <b>Plus Green</b> et <b>Minus Green</b> la font monter ou descendre <b>de part et d’autre</b>. La caméra, elle, est réglée sur un point de la courbe : sa balance des blancs.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Diagramme · lumière · image</span><div id="e2-bal" aria-label="Balance des blancs de la caméra"></div></div>
+          <canvas id="e2-cv" class="cv" width="1000" height="450" role="img" aria-label="Diagramme des blancs avec la courbe de Planck, la position de la source avant et après gélatine, la balance des blancs de la caméra, et le rendu d’un visage et d’une charte grise"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Source</small><b id="e2-t0">—</b></div>
+          <div><small>Gélatine (mireds)</small><b id="e2-dm">—</b></div>
+          <div><small>Après</small><b class="acc" id="e2-t1">—</b></div>
+          <div><small>Duv (+ vert / − magenta)</small><b id="e2-duv">—</b></div>
+          <div><small>Perte</small><b id="e2-perte">—</b></div>
+          <div><small>Écart caméra (mireds)</small><b id="e2-ecart">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Source</span><select id="e2-src"></select></label>
+          <label class="ctl"><span>CTO / CTB</span><select id="e2-ct"></select></label>
+          <label class="ctl"><span>Vert / magenta</span><select id="e2-v"></select></label>
+          <p class="muted small" style="margin:12px 0 8px">Situations de tournage :</p>
+          <div class="btnrow" id="e2-situ">
+            <button class="chip" type="button" data-s="fenetre">Fenêtre dans un décor tungstène</button>
+            <button class="chip" type="button" data-s="th">Projecteur tungstène en extérieur jour</button>
+            <button class="chip" type="button" data-s="fluo">Décor en tubes fluo</button>
+            <button class="chip" type="button" data-s="bougie">Lumière de bougie</button>
+          </div>
+          <div class="say small" id="e2-consigne" hidden style="margin:12px 0 0"></div>
+        </div>
+        <div class="card"><h3>Calcul pas à pas</h3><div class="calc" id="e2-calc" aria-live="polite"></div></div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="e2-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 2 · Pourquoi les mireds ?</span><h3>La même gélatine ne fait pas le même nombre de kelvins</h3><p class="muted">Empilez des gélatines : chaque ¼ CTO ajoute toujours <b>+35 mireds</b>, des pas égaux sur la règle du bas. Sur la règle des kelvins, les pas sont tantôt minuscules, tantôt énormes.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Deux règles pour la même lumière</span></div>
+          <canvas id="e2-reg" class="cv" width="1000" height="330" role="img" aria-label="Une règle graduée en kelvins et une règle graduée en mireds, reliées entre elles, avec la position de la lumière après chaque gélatine"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Température</small><b class="acc" id="e2-rT">—</b></div>
+          <div><small>Mireds</small><b id="e2-rM">—</b></div>
+          <div><small>Pas en K</small><b id="e2-rdK">—</b></div>
+          <div><small>Pas en mireds</small><b id="e2-rdM">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card" id="e2-pas">
+          <h3>Empiler des gélatines</h3>
+          <div class="btnrow">
+            <button class="chip" type="button" data-s="35">+ ¼ CTO</button>
+            <button class="chip" type="button" data-s="70">+ ½ CTO</button>
+            <button class="chip" type="button" data-s="134">+ Full CTO</button>
+            <button class="chip" type="button" data-s="-35">+ ¼ CTB</button>
+            <button class="chip" type="button" data-s="-70">+ ½ CTB</button>
+            <button class="chip" type="button" data-s="-134">+ Full CTB</button>
+          </div>
+          <p class="muted small" style="margin:12px 0 0">Départ : <button class="linkbtn" type="button" data-s="zero">lumière du jour 5 600 K</button> · <button class="linkbtn" type="button" data-s="z32">tungstène 3 200 K</button></p>
+        </div>
+        <div class="card">
+          <h3>Ce qu’il faut observer</h3>
+          <div class="note">Partez de 5 600 K et ajoutez quatre ¼ CTO : sur la règle des mireds, quatre pas identiques de 35. En kelvins : environ −560, −480, −410, −360 K… Les kelvins ne conviennent pas pour additionner des corrections ; les <b>mireds</b>, si.</div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- =================== LABOS DU MODULE 3 : OMBRES =================== -->
+  <template data-labo="3">
+    <div class="sous-labo"><span class="eyebrow">Labo 1 · Rayons</span><h3>D’où vient la pénombre ?</h3><p class="muted">Vue de côté : une source de taille <b>D</b>, une tête, un mur. Chaque point du mur « voit » une partie plus ou moins grande de la source : toute la source (lumière), une partie (<b>pénombre</b>) ou rien (<b>ombre</b>).</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Vue de côté</span><div id="e3-ray" aria-label="Afficher les rayons limites"></div></div>
+          <canvas id="e3-cv" class="cv" width="1000" height="480" role="img" aria-label="Vue de côté d’une source, d’une tête et d’un mur, avec les rayons limites de l’ombre et de la pénombre, et la courbe de lumière reçue par le mur"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Taille apparente</small><b class="acc" id="e3-alpha">—</b></div>
+          <div><small>Pénombre</small><b id="e3-p">—</b></div>
+          <div><small>Ombre totale</small><b id="e3-u">—</b></div>
+          <div><small>Lumière</small><b id="e3-type">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Taille de la source D</span><input type="range" id="e3-D" min="0" max="200" step="1" value="15"><output id="e3-Do"></output></label>
+          <label class="ctl"><span>Source → tête d₁</span><input type="range" id="e3-d1" min="40" max="400" step="5" value="200"><output id="e3-d1o"></output></label>
+          <label class="ctl"><span>Tête → mur d₂</span><input type="range" id="e3-d2" min="10" max="250" step="5" value="100"><output id="e3-d2o"></output></label>
+          <p class="muted small" style="margin:12px 0 8px">Sources et situations :</p>
+          <div class="btnrow" id="e3-situ">
+            <button class="chip" type="button" data-s="ampoule">Ampoule nue</button>
+            <button class="chip" type="button" data-s="fresnel">Fresnel</button>
+            <button class="chip" type="button" data-s="soleil">Soleil (0,5°)</button>
+            <button class="chip" type="button" data-s="softbox">Boîte à lumière 60 cm</button>
+            <button class="chip" type="button" data-s="proche">La même, rapprochée</button>
+            <button class="chip" type="button" data-s="octa">Octa 1,5 m</button>
+            <button class="chip" type="button" data-s="mur">Tête collée au mur</button>
+          </div>
+        </div>
+        <div class="card"><h3>Calcul pas à pas</h3><div class="calc" id="e3-calc" aria-live="polite"></div></div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="e3-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 2 · Rendu</span><h3>La même tête, sous une petite et sous une grande source</h3><p class="muted">Une image calculée rayon par rayon : chaque point de la scène compte la part de la source qu’il voit. L’exposition est ajustée automatiquement : seule la <b>qualité</b> de la lumière change.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Image calculée</span><div id="e3-rsrc" aria-label="Type de source"></div></div>
+          <canvas id="e3-r" class="cv" width="960" height="600" role="img" aria-label="Rendu d’une sphère au-dessus d’un sol devant un mur, avec son ombre propre et son ombre portée, selon la taille et la distance de la source"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Taille apparente</small><b class="acc" id="e3-ralpha">—</b></div>
+          <div><small>Pénombre au sol ≈</small><b id="e3-rp">—</b></div>
+          <div><small>Lumière</small><b id="e3-rtype">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Taille de la source</span><input type="range" id="e3-rT" min="2" max="150" step="1" value="6"><output id="e3-rTo"></output></label>
+          <label class="ctl"><span>Distance</span><input type="range" id="e3-rd" min="50" max="400" step="5" value="250"><output id="e3-rdo"></output></label>
+          <label class="ctl"><span>Direction</span><input type="range" id="e3-ra" min="-80" max="80" step="1" value="45"><output id="e3-rao"></output></label>
+          <p class="muted small" style="margin:12px 0 8px">Comparer :</p>
+          <div class="btnrow" id="e3-rsitu">
+            <button class="chip" type="button" data-s="petite">Petite source</button>
+            <button class="chip" type="button" data-s="grande">Grande source</button>
+            <button class="chip" type="button" data-s="proche">Source proche</button>
+            <button class="chip" type="button" data-s="loin">Même source, loin</button>
+          </div>
+        </div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="e3-rmsg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- Scripts communs (même ordre que les autres applications) -->
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="../../js/firebase-config.js"></script>
+  <script src="../../js/suivi.js"></script>
+  <script src="../../js/commun.js"></script>
+  <script src="../../js/catalogue.js"></script>
+  <script src="../../js/applications.js"></script>
+  <script src="../../js/application.js"></script>
+  <script src="contenu.js"></script>
+  <script src="labos.js"></script>
+  <script>
+    Application.demarrer(APPLICATION);
+  </script>
+</body>
+</html>
