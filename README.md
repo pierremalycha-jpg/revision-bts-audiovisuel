@@ -33,7 +33,7 @@ La progression des étudiants est enregistrée avec Firebase. Le site est héber
 | Capteurs d’image — *De la lumière aux électrons.* | Connaissances › Caméra, éclairage, filtres | TES | 6 | `modules/tes-capteurs/` |
 | Éclairage — *LED, gélatines et ombres.* | Connaissances › Caméra, éclairage, filtres | TES | 3 | `modules/tes-eclairage/` |
 | Compression vidéo — *Moins de bits, même image.* | Connaissances › Le numérique | TES | 6 | `modules/tes-compression-video/` |
-| Microphones — *De la vibration à la tension.* | Connaissances › Son | TES | 8 | `modules/tes-microphones/` |
+| Microphones — *De la vibration à la tension.* | Connaissances › Son | TES | 9 | `modules/tes-microphones/` |
 
 ## Choix techniques
 
@@ -90,7 +90,7 @@ revision-bts-audiovisuel/
     ├── tes-compression-video/        Application avec un film de module
     │   ├── index.html, contenu.js, labos.js
     │   └── films/                    Les vidéos terminées (module-1.mp4 et son affiche)
-    └── tes-microphones/              Sous-catégorie « Son » : huit modules sur les microphones
+    └── tes-microphones/              Sous-catégorie « Son » : neuf modules sur les microphones
         └── index.html, contenu.js, labos.js
 ```
 

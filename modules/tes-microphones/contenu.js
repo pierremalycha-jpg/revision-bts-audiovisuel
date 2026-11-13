@@ -1,20 +1,23 @@
 /* ==========================================================================
    contenu.js — le contenu de l'application « Microphones »
    --------------------------------------------------------------------------
-   Huit modules :
+   Neuf modules :
      1. Du son au signal          pression acoustique, dB SPL, fréquence, λ
-     2. Technologies de micro     dynamique, ruban, électrostatique, électret, MEMS
-     3. Les capsules              pression, gradient de pression, double membrane,
+     2. Anatomie d'un micro       grille, mousse, membrane, bobine, suspension,
+                                  corps, XLR ; chaîne micro → préampli → console
+                                  → ampli → haut-parleur ; force de Laplace, Larsen
+     3. Technologies de micro     dynamique, ruban, électrostatique, électret, MEMS
+     4. Les capsules              pression, gradient de pression, double membrane,
                                   effet de proximité, taille de membrane
-     4. La directivité            diagrammes polaires, A + B·cos θ, indice de
+     5. La directivité            diagrammes polaires, A + B·cos θ, indice de
                                   directivité, facteur de distance, micro canon
-     5. Sensibilité, fiche technique   mV/Pa, dBV, bruit propre, SPL max, gain
-     6. Types de micros           main, cravate, serre-tête, canon, PZM, HF,
+     6. Sensibilité, fiche technique   mV/Pa, dBV, bruit propre, SPL max, gain
+     7. Types de micros           main, cravate, serre-tête, canon, PZM, HF,
                                   accessoires, distance critique, filtre en peigne
-     7. Liaisons et alimentations symétrique / asymétrique, XLR, fantôme P48,
+     8. Liaisons et alimentations symétrique / asymétrique, XLR, fantôme P48,
                                   T12, plug-in power, niveaux, micro numérique
                                   AES42 (modes synchrone et asynchrone)
-     8. Couples stéréophoniques   XY, Blumlein, MS, AB, ORTF, NOS
+     9. Couples stéréophoniques   XY, Blumlein, MS, AB, ORTF, NOS
 
    Ce fichier ne contient que du texte, des schémas (SVG) et les FORMULES
    PHYSIQUES partagées (objet MICRO, tableau DIRECTIVITES) : labos.js, chargé
@@ -172,7 +175,7 @@ const APPLICATION = {
   titre: "Microphones",
   accroche: "De la vibration à la tension.",
   epreuve: "TES",
-  intro: "Huit modules pour comprendre <b>comment un microphone transforme le son en tension</b> : la pression acoustique, les technologies de transduction, les capsules, la directivité, la fiche technique, les types de micros, les liaisons et les couples stéréophoniques. Chaque module se termine par une évaluation : obtenez au moins <b>12/20</b> pour débloquer le suivant.",
+  intro: "Neuf modules pour comprendre <b>comment un microphone transforme le son en tension</b> : la pression acoustique, l’anatomie d’un micro et la chaîne jusqu’au haut-parleur, les technologies de transduction, les capsules, la directivité, la fiche technique, les types de micros, les liaisons et les couples stéréophoniques. Chaque module se termine par une évaluation : obtenez au moins <b>12/20</b> pour débloquer le suivant.",
 
   modules: [
     /* ======================================================================
@@ -314,25 +317,25 @@ const APPLICATION = {
           () => {
             const p = C([0.05, 0.1, 0.2, 0.4]), L = MICRO.spl(p), k = C([2, 4]), L2 = L - 20 * Math.log10(k), p2 = p / k;
             return { type: "exercice", question: "Une comédienne parle à <b>30 cm</b> d’un micro ; la pression efficace y vaut <b>" + NB(p, 2) + " Pa</b>. On recule le micro à <b>" + NB(0.3 * k, 1) + " m</b> (on suppose le champ libre).", etapes: [
-              { question: "a) Quel est le niveau à 30 cm (dB SPL) ?", reponse: L, unite: "dB SPL", ecart: 0.5 },
-              { question: "b) Quel est le niveau à " + NB(0.3 * k, 1) + " m (dB SPL) ?", reponse: L2, unite: "dB SPL", ecart: 0.5 },
-              { question: "c) Quelle est alors la pression efficace (Pa) ?", reponse: p2, unite: "Pa" }
+              { question: "Quel est le niveau à 30 cm (dB SPL) ?", reponse: L, unite: "dB SPL", ecart: 0.5 },
+              { question: "Quel est le niveau à " + NB(0.3 * k, 1) + " m (dB SPL) ?", reponse: L2, unite: "dB SPL", ecart: 0.5 },
+              { question: "Quelle est alors la pression efficace (Pa) ?", reponse: p2, unite: "Pa" }
             ], solution: "a) 20 log(" + NB(p, 2) + " / 2·10⁻⁵) ≈ " + NB(L, 1) + " dB SPL. b) La distance est multipliée par " + k + " : 20 log(1/" + k + ") ≈ −" + NB(20 * Math.log10(k), 1) + " dB, soit " + NB(L2, 1) + " dB SPL. c) La pression est divisée par " + k + " : " + NB(p2, 3) + " Pa.", indice: "Multiplier la distance par k divise la pression par k." };
           },
           () => {
             const f = C([40, 50, 60, 80]), lam = MICRO.lambda(f), T = 1000 / f;
             return { type: "exercice", question: "Une grosse caisse produit une fondamentale de <b>" + f + " Hz</b>. On la capte avec un micro dont la membrane mesure 2,5 cm de diamètre (c = 343 m/s).", etapes: [
-              { question: "a) Quelle est la période de ce son (ms) ?", reponse: T, unite: "ms" },
-              { question: "b) Quelle est sa longueur d’onde (m) ?", reponse: lam, unite: "m" },
-              { question: "c) La membrane est-elle petite devant la longueur d’onde ?", bonne: "Oui, beaucoup plus petite", mauvaises: ["Non, elle est plus grande", "Elles sont du même ordre de grandeur"] }
+              { question: "Quelle est la période de ce son (ms) ?", reponse: T, unite: "ms" },
+              { question: "Quelle est sa longueur d’onde (m) ?", reponse: lam, unite: "m" },
+              { question: "La membrane est-elle petite devant la longueur d’onde ?", bonne: "Oui, beaucoup plus petite", mauvaises: ["Non, elle est plus grande", "Elles sont du même ordre de grandeur"] }
             ], solution: "a) T = 1 / " + f + " = " + NB(T, 1) + " ms. b) λ = 343 / " + f + " ≈ " + NB(lam, 2) + " m. c) 2,5 cm contre " + NB(lam, 1) + " m : la membrane est des centaines de fois plus petite, elle ne perturbe pas l’onde à cette fréquence.", indice: "T = 1/f et λ = c/f." };
           },
           () => {
             const L = C([82, 86, 90, 94]), p = MICRO.pa(L), L2 = L + 3.01;
             return { type: "exercice", question: "Un guitariste joue seul : on mesure <b>" + L + " dB SPL</b> à la place du micro. Un second guitariste, aussi fort, le rejoint.", etapes: [
-              { question: "a) Quelle pression efficace produit le premier guitariste (Pa) ?", reponse: p, unite: "Pa" },
-              { question: "b) Quel est le niveau total quand les deux jouent (dB SPL) ?", reponse: L2, unite: "dB SPL", ecart: 0.5 },
-              { question: "c) Pourquoi n’obtient-on pas +6 dB ?", bonne: "Les deux guitares ne sont pas corrélées : seules leurs puissances s’additionnent", mauvaises: ["Le micro sature au-delà de 3 dB", "Les décibels ne s’additionnent jamais", "Le second guitariste est forcément plus loin"] }
+              { question: "Quelle pression efficace produit le premier guitariste (Pa) ?", reponse: p, unite: "Pa" },
+              { question: "Quel est le niveau total quand les deux jouent (dB SPL) ?", reponse: L2, unite: "dB SPL", ecart: 0.5 },
+              { question: "Pourquoi n’obtient-on pas +6 dB ?", bonne: "Les deux guitares ne sont pas corrélées : seules leurs puissances s’additionnent", mauvaises: ["Le micro sature au-delà de 3 dB", "Les décibels ne s’additionnent jamais", "Le second guitariste est forcément plus loin"] }
             ], solution: "a) p = 2·10⁻⁵ × 10<sup>" + NB(L / 20, 1) + "</sup> ≈ " + NB(p, 2) + " Pa. b) Deux sources égales non corrélées : +3 dB, soit " + NB(L2, 1) + " dB SPL. c) +6 dB n’arrive que pour deux signaux identiques et en phase (les pressions s’ajoutent alors).", indice: "Deux sources non corrélées : on additionne les puissances." };
           }
         ]
@@ -340,7 +343,259 @@ const APPLICATION = {
     },
 
     /* ======================================================================
-       MODULE 2 — TECHNOLOGIES DE MICRO (TRANSDUCTION)
+       MODULE 2 — ANATOMIE D'UN MICROPHONE, DU CHANTEUR AU HAUT-PARLEUR
+       Schémas propres au module : coupe d'un micro (dynamique ou statique),
+       coupe d'un haut-parleur, synoptique de la chaîne électroacoustique.
+       ====================================================================== */
+    (function () {
+      let nFig = 0;
+      // Pièces numérotées, dans l'ordre des repères des schémas
+      const PIECES_DYN = ["Grille de protection", "Bonnette interne (mousse)", "Membrane", "Bobine mobile", "Aimant et pièces polaires", "Suspension anti-choc", "Corps (blindage)", "Transformateur de sortie", "Connecteur XLR mâle"];
+      const PIECES_STAT = ["Grille de protection", "Bonnette interne (mousse)", "Membrane métallisée", "Contre-électrode perforée", "Électronique (polarisation, convertisseur d’impédance)", "Suspension anti-choc", "Corps (blindage)", "Commutateurs (coupe-bas, atténuateur)", "Connecteur XLR mâle"];
+      const PIECES_HP = ["Saladier (châssis)", "Membrane (cône)", "Cache-noyau", "Suspension périphérique", "Spider (centreur)", "Bobine mobile", "Aimant", "Pièces polaires (noyau, plaque de champ)", "Bornes de raccordement"];
+
+      const badge = (n, x, y, x2, y2) => LIGNE(x, y, x2, y2, { c: "#ffd60a", w: 1.2 }) + '<circle cx="' + x2 + '" cy="' + y2 + '" r="2.4" fill="#ffd60a"/>' +
+        '<circle cx="' + x + '" cy="' + y + '" r="10" fill="#ffd60a"/>' + TXT(x, y + 4.5, n, { s: 12, c: "#0b0c0e", w: 700 });
+      const legende = (liste, y0, W) => {
+        let s = ""; const col = Math.ceil(liste.length / 2);
+        liste.forEach((t, i) => { const x = i < col ? 18 : W / 2 + 6, y = y0 + (i % col) * 17; s += TXT(x, y, (i + 1) + "  " + t, { s: 11.5, a: "start", w: 500 }); });
+        return s;
+      };
+
+      /* Coupe d'un micro de main, vu de côté. o.tech : "dyn" ou "stat" ; o.num : repères seuls (questions) */
+      function figMicro(o) {
+        o = o || {};
+        const stat = o.tech === "stat", id = "mg" + (++nFig), W = 660, Hh = o.num ? 250 : 368;
+        let s = "<defs><pattern id='" + id + "' width='6' height='6' patternUnits='userSpaceOnUse' patternTransform='rotate(45)'><line x1='0' y1='0' x2='0' y2='6' stroke='rgba(229,229,234,.45)' stroke-width='1.2'/></pattern></defs>";
+        // onde qui arrive
+        [22, 34, 46].forEach((x, i) => { s += '<path d="M' + x + ' 80 Q' + (x + 9) + ' 140 ' + x + ' 200" fill="none" stroke="#ff9f0a" stroke-width="2" opacity="' + (0.35 + i * 0.25) + '"/>'; });
+        // corps effilé
+        s += '<path d="M205 92 L600 114 L600 166 L205 188 Z" fill="#26292f" stroke="#8e8e93" stroke-width="1.5"/>';
+        // tête : grille et mousse
+        s += '<circle cx="135" cy="140" r="88" fill="url(#' + id + ')" stroke="#c7c7cc" stroke-width="2"/>';
+        s += '<circle cx="135" cy="140" r="78" fill="#15171b" stroke="rgba(255,255,255,.12)"/>';
+        s += '<circle cx="135" cy="140" r="78" fill="rgba(100,210,255,.07)"/>';
+        if (!stat) {
+          // capsule dynamique : membrane, bobine dans l'entrefer, aimant, pièces polaires
+          s += '<path d="M112 100 Q98 140 112 180" fill="none" stroke="#ffd60a" stroke-width="3"/>';
+          s += '<rect x="126" y="104" width="54" height="14" fill="#8e8e93"/><rect x="126" y="162" width="54" height="14" fill="#8e8e93"/><rect x="170" y="104" width="10" height="72" fill="#8e8e93"/>';
+          s += '<rect x="148" y="120" width="22" height="40" fill="#ff375f"/>' + TXT(159, 144, "N", { s: 10, c: "#fff" });
+          s += '<rect x="130" y="128" width="18" height="24" fill="#aeaeb2"/>';
+          s += '<rect x="122" y="119" width="14" height="8" rx="2" fill="#d4884a"/><rect x="122" y="153" width="14" height="8" rx="2" fill="#d4884a"/>';
+          s += LIGNE(110, 123, 122, 123, { c: "#ffd60a", w: 1.5 }) + LIGNE(110, 157, 122, 157, { c: "#ffd60a", w: 1.5 });
+          // transformateur
+          s += '<rect x="340" y="124" width="34" height="32" rx="3" fill="#3a3d44" stroke="#8e8e93"/><rect x="345" y="128" width="10" height="24" fill="#d4884a"/><rect x="359" y="128" width="10" height="24" fill="#d4884a"/>';
+        } else {
+          // capsule statique : membrane fine devant la contre-électrode perforée
+          s += '<rect x="104" y="98" width="30" height="84" rx="4" fill="none" stroke="#8e8e93" stroke-width="2"/>';
+          s += LIGNE(110, 102, 110, 178, { c: "#ffd60a", w: 2.4 });
+          for (let y = 102; y < 178; y += 10) s += '<rect x="117" y="' + y + '" width="9" height="7" fill="#aeaeb2"/>';
+          s += TXT(113, 96, "+ +", { s: 9, c: "#ff9f0a" });
+          // électronique
+          s += '<rect x="300" y="122" width="110" height="36" rx="3" fill="#1d3b2a" stroke="#30d158"/>';
+          [312, 334, 356, 378].forEach((x, i) => { s += '<rect x="' + x + '" y="' + (i % 2 ? 130 : 136) + '" width="14" height="' + (i % 2 ? 18 : 12) + '" rx="2" fill="' + (i === 1 ? "#5e5ce6" : "#8e8e93") + '"/>'; });
+          // commutateurs
+          s += '<rect x="450" y="101" width="34" height="10" rx="3" fill="#0a84ff"/><rect x="494" y="102" width="34" height="10" rx="3" fill="#0a84ff"/>';
+        }
+        // suspension anti-choc (élastomère en zigzag)
+        ["110", "170"].forEach(y => { s += '<path d="M182 ' + y + ' l5 -7 l5 14 l5 -14 l5 14 l5 -14 l5 7" fill="none" stroke="#30d158" stroke-width="2"/>'; });
+        // fils vers la sortie
+        s += '<path d="M' + (stat ? 134 : 136) + ' 136 L' + (stat ? 300 : 340) + ' 136 M' + (stat ? 410 : 374) + ' 134 L604 128 M' + (stat ? 134 : 136) + ' 144 L' + (stat ? 300 : 340) + ' 144 M' + (stat ? 410 : 374) + ' 146 L604 152" fill="none" stroke="#ff375f" stroke-width="1.3"/>';
+        // connecteur XLR
+        s += '<rect x="598" y="114" width="40" height="52" rx="4" fill="#3a3d44" stroke="#c7c7cc"/>';
+        [126, 140, 154].forEach((y, i) => { s += LIGNE(638, y, 654, y, { c: "#e5e5ea", w: 3 }) + TXT(626, y + 4, String([2, 1, 3][i]), { s: 9, c: "#8e8e93" }); });
+        // repères
+        const R = stat
+          ? [[62, 30, 85, 74], [38, 236, 82, 196], [100, 26, 110, 104], [146, 26, 121, 104], [356, 222, 356, 158], [210, 236, 196, 172], [290, 52, 290, 98], [490, 70, 470, 101], [628, 220, 622, 166]]
+          : [[62, 30, 85, 74], [38, 236, 82, 196], [100, 26, 108, 104], [146, 26, 129, 120], [196, 40, 164, 120], [210, 236, 196, 172], [290, 52, 290, 98], [357, 222, 357, 156], [628, 220, 622, 166]];
+        R.forEach((r, i) => { s += badge(i + 1, r[0], r[1], r[2], r[3]); });
+        s += TXT(30, 222, "son", { s: 11, c: "#ff9f0a" });
+        if (!o.num) s += LIGNE(16, 262, W - 16, 262, { c: "rgba(255,255,255,.15)" }) + legende(stat ? PIECES_STAT : PIECES_DYN, 282, W);
+        return SVG(W, Hh, s, "Coupe d’un micro " + (stat ? "électrostatique" : "dynamique") + " de main" + (o.num ? ", pièces repérées par des numéros de 1 à 9" : ", avec la légende de ses neuf pièces"));
+      }
+
+      /* Coupe d'un haut-parleur électrodynamique (le son part vers la droite) */
+      function figHP(o) {
+        o = o || {};
+        const W = 520, Hh = o.num ? 300 : 418;
+        let s = "";
+        // saladier
+        s += '<path d="M122 80 L310 28 L316 28 L316 34 M122 220 L310 272 L316 272 L316 266" fill="none" stroke="#8e8e93" stroke-width="2.5"/>';
+        s += LIGNE(190, 61, 190, 239, { c: "rgba(142,142,147,.35)", w: 1, d: "3 4" });
+        // moteur : plaque arrière, aimant (anneau, en coupe), plaque de champ, noyau
+        s += '<rect x="58" y="80" width="14" height="140" fill="#8e8e93"/>';
+        s += '<rect x="72" y="80" width="36" height="44" fill="#ff375f"/><rect x="72" y="176" width="36" height="44" fill="#ff375f"/>';
+        s += '<rect x="108" y="80" width="14" height="50" fill="#8e8e93"/><rect x="108" y="170" width="14" height="50" fill="#8e8e93"/>';
+        s += '<rect x="72" y="138" width="56" height="24" fill="#aeaeb2"/>';
+        // bobine sur son support (dans l'entrefer)
+        s += LIGNE(110, 134, 162, 134, { c: "#e5e5ea", w: 1.5 }) + LIGNE(110, 166, 162, 166, { c: "#e5e5ea", w: 1.5 });
+        s += '<rect x="111" y="131" width="15" height="6" rx="1.5" fill="#d4884a"/><rect x="111" y="163" width="15" height="6" rx="1.5" fill="#d4884a"/>';
+        // spider (centreur)
+        s += '<path d="M150 134 l-5 -8 l10 -8 l-10 -8 l10 -8 l-10 -8 l5 -8 l0 -12 M150 166 l-5 8 l10 8 l-10 8 l10 8 l-10 8 l5 8 l0 12" fill="none" stroke="#30d158" stroke-width="2"/>';
+        // membrane, cache-noyau, suspension
+        s += '<path d="M162 134 L302 40 M162 166 L302 260" stroke="#ffd60a" stroke-width="3" fill="none"/>';
+        s += '<path d="M162 134 Q186 150 162 166" fill="#5e5ce6" stroke="#bf5af2" stroke-width="2"/>';
+        s += '<path d="M302 40 Q312 26 316 34 M302 260 Q312 274 316 266" fill="none" stroke="#64d2ff" stroke-width="3"/>';
+        // bornes et fils
+        s += '<rect x="196" y="236" width="10" height="8" fill="#ff375f"/><rect x="212" y="240" width="10" height="8" fill="#0a84ff"/>';
+        s += '<path d="M201 236 Q170 200 120 166 M217 240 Q170 210 120 168" fill="none" stroke="#d4884a" stroke-width="1" opacity=".7"/>';
+        // ondes émises
+        [350, 385, 420].forEach((x, i) => { s += '<path d="M' + x + ' 80 Q' + (x + 18) + ' 150 ' + x + ' 220" fill="none" stroke="#ff9f0a" stroke-width="2" opacity="' + (0.85 - i * 0.25) + '"/>'; });
+        s += TXT(460, 154, "son", { s: 12, c: "#ff9f0a" });
+        const R = [[262, 26, 236, 55], [262, 118, 240, 82], [214, 150, 175, 150], [352, 22, 312, 31], [150, 50, 150, 88], [118, 270, 118, 170], [90, 46, 90, 92], [36, 150, 74, 150], [244, 282, 216, 248]];
+        R.forEach((r, i) => { s += badge(i + 1, r[0], r[1], r[2], r[3]); });
+        if (!o.num) s += LIGNE(16, 306, W - 16, 306, { c: "rgba(255,255,255,.15)" }) + legende(PIECES_HP, 326, W);
+        return SVG(W, Hh, s, "Coupe d’un haut-parleur électrodynamique" + (o.num ? ", pièces repérées par des numéros de 1 à 9" : ", avec la légende de ses neuf pièces"));
+      }
+
+      /* Synoptique : du chanteur à l'auditeur, avec les niveaux typiques */
+      function figChaine() {
+        const W = 680, Hh = 210;
+        const B = [["Chanteur", "74 dB SPL", "#ff9f0a"], ["Micro", "≈ 2 mV", "#ffd60a"], ["Préampli", "≈ 1,2 V", "#64d2ff"], ["Console", "≈ 0,45 V", "#64d2ff"], ["Ampli de puissance", "≈ 9 V · 1,1 A", "#bf5af2"], ["Haut-parleur", "10 W", "#ff375f"], ["Auditeur", "≈ 100 dB SPL à 1 m", "#ff9f0a"]];
+        let s = "";
+        const w = 84, gap = (W - 20 - 7 * w) / 6;
+        B.forEach((b, i) => {
+          const x = 10 + i * (w + gap);
+          s += '<rect x="' + x + '" y="62" width="' + w + '" height="46" rx="10" fill="#1c1e23" stroke="' + b[2] + '" stroke-width="2"/>';
+          const mots = b[0].split(" ");
+          if (mots.length > 2) { s += TXT(x + w / 2, 82, mots[0], { s: 11 }) + TXT(x + w / 2, 97, mots.slice(1).join(" "), { s: 11 }); }
+          else s += TXT(x + w / 2, 90, b[0], { s: 11.5 });
+          s += TXT(x + w / 2, 130, b[1].split(" à ")[0], { s: 10.5, w: 500, c: "#8e8e93" });
+          if (b[1].includes(" à ")) s += TXT(x + w / 2, 144, "à " + b[1].split(" à ")[1], { s: 10.5, w: 500, c: "#8e8e93" });
+          if (i < 6) {
+            const x1 = x + w + 2, x2 = x + w + gap - 2, acou = i === 0 || i === 5;
+            s += LIGNE(x1, 85, x2 - 5, 85, { c: acou ? "#ff9f0a" : "#64d2ff", w: 2, d: acou ? "4 3" : "" }) + '<path d="M' + x2 + ' 85 l-7 -4 v8 z" fill="' + (acou ? "#ff9f0a" : "#64d2ff") + '"/>';
+          }
+        });
+        s += TXT(10, 26, "Transducteur : micro (acoustique → électrique) puis haut-parleur (électrique → acoustique)", { s: 12, a: "start" });
+        s += LIGNE(10, 176, 34, 176, { c: "#ff9f0a", w: 2, d: "4 3" }) + TXT(40, 180, "onde sonore (pression)", { s: 11, a: "start", w: 500 });
+        s += LIGNE(220, 176, 244, 176, { c: "#64d2ff", w: 2 }) + TXT(250, 180, "signal électrique (tension, courant)", { s: 11, a: "start", w: 500 });
+        s += TXT(10, 200, "Exemple : micro de 20 mV/Pa, gain de 56 dB, fader à −9 dB, ampli de 26 dB (× 20), haut-parleur de 90 dB (1 W / 1 m) sur 8 Ω.", { s: 10.5, a: "start", w: 500, c: "#8e8e93" });
+        return SVG(W, Hh, s, "Synoptique de la chaîne électroacoustique, du chanteur à l’auditeur, avec les niveaux typiques à chaque étape");
+      }
+
+      // Trois mauvaises réponses prises dans une liste, différentes de la bonne
+      const autres = (liste, bonne, k) => liste.filter(x => x !== bonne).sort(() => Math.random() - 0.5).slice(0, k || 3);
+      const nbU = (v, d) => NB(v, d);
+
+      return {
+        titre: "Anatomie d’un microphone, du chanteur au haut-parleur",
+        nav: "Anatomie",
+        resume: "Pièces du micro, chaîne jusqu’au haut-parleur",
+        intro: "Avant d’entrer dans les technologies, ouvrons un micro. De la <b>grille</b> au <b>connecteur XLR</b>, chaque pièce a un rôle. Puis suivons le son jusqu’au bout de la chaîne : le micro le transforme en tension, le préampli et l’ampli l’amplifient, et le <b>haut-parleur</b> le retransforme en son. Le haut-parleur fonctionne comme un micro dynamique… à l’envers.",
+
+        notions: {
+          titre: "Les pièces d’un micro, et le chemin du son",
+          intro: "Un micro de main contient une <b>tête</b> (grille, mousse, capsule), un <b>corps</b> (suspension, électronique ou transformateur, blindage) et une <b>sortie</b> (connecteur). La chaîne électroacoustique commence par un transducteur (le micro) et finit par un autre (le haut-parleur).",
+          mots: [
+            { t: "Anatomie d’un micro dynamique", ic: "🎤", q: "Que trouve-t-on dans un micro dynamique de main ?", d: figMicro({ tech: "dyn" }) + "Le son traverse la <b>grille</b> et la mousse, fait bouger la <b>membrane</b> ; la bobine qui lui est collée se déplace dans l’entrefer de l’aimant et une tension apparaît. Elle sort par les broches 2 et 3 de la XLR (directement, ou à travers un transformateur sur certains modèles).", c: "Une boîte aux lettres blindée : le courrier (le son) passe par la fente (la grille), tombe dans le mécanisme (la capsule), et ressort sous une autre forme par le câble.", r: "Longueur ≈ 15 à 20 cm · capsule ≈ 2 à 3 cm de diamètre · pas d’alimentation." },
+            { t: "Anatomie d’un micro statique", ic: "🎙️", q: "Qu’est-ce qui change dans un micro statique (à condensateur) ?", d: figMicro({ tech: "stat" }) + "La capsule est un <b>condensateur</b> : une membrane métallisée très fine devant une contre-électrode perforée. Le corps contient une <b>électronique</b> (tension de polarisation, convertisseur d’impédance, étage de sortie), alimentée par le fantôme 48 V, et souvent des commutateurs (coupe-bas, atténuateur).", c: "Le même boîtier qu’un dynamique, mais avec un petit « amplificateur de poche » à l’intérieur.", r: "Membrane de quelques µm · électronique alimentée en 48 V · sensibilité ≈ 10 fois celle d’un dynamique." },
+            { t: "Grille de protection", ic: "🛡️", q: "À quoi sert la grille d’un micro ?", d: "Un treillis métallique qui <b>protège la capsule</b> des chocs, des postillons et de la poussière. Elle est assez ouverte pour laisser passer le son presque sans le modifier ; souvent doublée d’une mousse, elle réduit aussi les <b>plosives</b> (« p », « b »).", c: "La grille d’une cheminée : elle arrête les braises sans empêcher de voir le feu.", r: "Treillis d’acier ou de laiton · souvent deux couches · une mousse à l’intérieur." },
+            { t: "Bonnette interne (mousse)", ic: "🧽", q: "Pourquoi y a-t-il de la mousse sous la grille ?", d: "Une mousse à cellules ouvertes ralentit les <b>souffles</b> (respiration, plosives, vent léger) avant qu’ils ne frappent la membrane, tout en laissant passer les ondes sonores. Contre le vent en extérieur, elle ne suffit pas : il faut une bonnette extérieure ou une fourrure.", c: "Un rideau de douche à petits trous : il arrête les éclaboussures, pas le bruit de l’eau.", r: "Efficace contre les plosives à quelques cm · insuffisante contre le vent extérieur." },
+            { t: "Membrane (diaphragme)", ic: "🥁", q: "Quel est le rôle de la membrane ?", d: "Une feuille très fine et légère qui <b>bouge sous l’effet de la pression acoustique</b>. Elle transforme les variations de pression en mouvement mécanique : c’est l’entrée de la capsule. Plus elle est légère, mieux elle suit les attaques rapides.", c: "La peau d’un tambour, mais à l’envers : au lieu d’être frappée pour faire du son, elle est poussée par le son.", r: "Statique : quelques µm, métallisée · dynamique : plastique de quelques dizaines de µm, plus la bobine." },
+            { t: "Bobine mobile et aimant", ic: "🧲", q: "Comment la bobine et l’aimant produisent-ils une tension ?", d: "La bobine, collée à la membrane, se déplace dans l’<b>entrefer</b> : un espace étroit où les pièces polaires concentrent le champ de l’aimant. Un fil qui se déplace dans un champ magnétique voit apparaître une tension : e = B·l·v (module 3).", c: "La dynamo d’un vélo : le mouvement produit l’électricité.", r: "Entrefer ≈ 1 mm · aimant au néodyme · tension ≈ quelques mV pour une voix proche." },
+            { t: "Suspension anti-choc", ic: "🪀", q: "À quoi sert la suspension interne de la capsule ?", d: "Des pièces en <b>élastomère</b> (caoutchouc) relient la capsule au corps. Elles absorbent les vibrations transmises par la main, le pied ou la perche : ce sont les <b>bruits de manipulation</b>. Une suspension extérieure (« araignée ») joue le même rôle pour les micros de studio.", c: "Les amortisseurs d’une voiture : la route bouge, l’habitacle reste calme.", r: "Bruits de manipulation surtout dans le grave · on les complète par un coupe-bas." },
+            { t: "Corps et blindage", ic: "🧱", q: "Pourquoi le corps d’un micro est-il en métal ?", d: "Le corps protège mécaniquement l’intérieur et forme une <b>cage de Faraday</b> : un blindage contre les parasites électriques (ronflement du secteur, émetteurs radio). Il est relié à la masse, en général par la broche 1 de la XLR.", c: "Un ascenseur en métal où le téléphone ne capte plus : le métal arrête les ondes électromagnétiques.", r: "Laiton, zamak ou aluminium · relié à la broche 1 (masse) dans la plupart des micros." },
+            { t: "Électronique ou transformateur de sortie", ic: "🔧", q: "Que fait l’électronique dans le corps d’un micro ?", d: "Dans un <b>statique</b>, elle produit la tension de polarisation, convertit l’impédance énorme de la capsule en basse impédance et attaque la ligne symétrique ; elle consomme l’alimentation fantôme. Dans un <b>dynamique</b>, il n’y en a pas : la bobine est reliée aux broches 2 et 3, parfois à travers un <b>transformateur</b> qui adapte l’impédance.", c: "Un traducteur à la sortie d’une conférence : il rend le message compréhensible par l’appareil suivant.", r: "Sortie basse impédance ≈ 150 à 200 Ω · consommation d’un statique ≈ quelques mA." },
+            { t: "Connecteur XLR", ic: "🔌", q: "Par où sort le signal ?", d: "Par une embase <b>XLR mâle à 3 broches</b> : 1 = masse, 2 = point chaud, 3 = point froid. Le signal est <b>symétrique</b> : il voyage sur deux fils et résiste aux parasites (module 8).", c: "Une prise à détrompeur : elle ne se branche que dans un sens, et chaque broche a un rôle fixe.", r: "Sorties sur fiche mâle, entrées sur fiche femelle · câble micro : femelle côté micro, mâle côté console." },
+            { t: "Préamplificateur micro", ic: "🎚️", q: "Pourquoi faut-il un préamplificateur ?", d: "Le micro délivre quelques <b>millivolts</b> (niveau micro). Le préampli, en tête de chaque voie de console ou d’enregistreur, les amplifie de 20 à 70 dB environ pour atteindre le <b>niveau ligne</b> (≈ 1,2 V, +4 dBu) qu’attendent la console, le convertisseur et l’ampli. Il fournit aussi l’alimentation fantôme.", c: "Une loupe : elle grossit un petit détail pour qu’on puisse le lire, sans changer ce qu’il dit.", r: "Niveau micro ≈ 0,1 à 50 mV · niveau ligne ≈ 1,2 V · gain ≈ 20 à 70 dB." },
+            { t: "Amplificateur de puissance", ic: "🔋", q: "Que fait l’amplificateur de puissance ?", d: "Il transforme le niveau ligne en un signal capable de <b>fournir du courant</b> au haut-parleur : plusieurs volts à plusieurs dizaines de volts, sous plusieurs ampères. La puissance électrique vaut P = U²/R, où R est l’impédance du haut-parleur.", c: "Le préampli est un mégaphone pour l’oreille de la console ; l’ampli est un moteur qui pousse les membranes.", r: "Gain en tension souvent ≈ 26 à 32 dB · 10 W sur 8 Ω ≈ 8,9 V et 1,1 A." },
+            { t: "Haut-parleur", ic: "🔊", q: "Comment un haut-parleur produit-il du son ?", d: figHP() + "Le courant de l’ampli traverse la <b>bobine mobile</b>, placée dans l’entrefer d’un aimant. Une force apparaît (force de Laplace, F = B·I·l) : la bobine pousse et tire la <b>membrane</b>, qui comprime et détend l’air. Le spider et la suspension la ramènent au repos et la gardent centrée.", c: "Un piston qui pousse l’air, commandé par un électroaimant.", r: "Impédance nominale 4 ou 8 Ω · sensibilité ≈ 85 à 100 dB (1 W / 1 m) · rendement souvent ≈ 1 %." },
+            { t: "Force de Laplace", s: "F", u: "N", ic: "➡️", q: "Quelle force fait bouger la bobine d’un haut-parleur ?", d: "Un conducteur de longueur l parcouru par un courant I dans un champ magnétique B subit une force <b>F = B·I·l</b>, perpendiculaire au fil et au champ. Son sens change avec celui du courant : la membrane avance et recule au rythme du signal.", c: "Deux aimants qui se repoussent : ici, l’un des deux est la bobine traversée par le courant.", r: "B ≈ 1 T dans l’entrefer · produit B·l ≈ 10 T·m pour un boomer · I ≈ 1 A → F ≈ 10 N." },
+            { t: "Transducteur réversible", ic: "🔁", q: "Pourquoi dit-on qu’un haut-parleur est un micro dynamique à l’envers ?", d: "Les deux ont le même <b>moteur électrodynamique</b> : une bobine dans un aimant, collée à une membrane. Le micro transforme un mouvement en tension (induction, e = B·l·v) ; le haut-parleur transforme un courant en force (Laplace, F = B·I·l). Un haut-parleur peut d’ailleurs servir de micro (médiocre) : certains techniciens s’en servent devant une grosse caisse.", c: "Un moteur électrique qu’on fait tourner à la main devient une dynamo.", r: "Micro : acoustique → électrique · haut-parleur : électrique → acoustique." },
+            { t: "Effet Larsen", ic: "📢", q: "Qu’est-ce que l’effet Larsen ?", d: "Une <b>boucle</b> : le micro capte le son du haut-parleur qui diffuse ce même micro. Si, à une fréquence, le son revient plus fort qu’il n’est parti (gain de boucle ≥ 1), il s’amplifie à chaque tour : sifflement ou ronflement. Remèdes : éloigner le micro des haut-parleurs, l’orienter pour que les haut-parleurs soient dans son angle de rejet, baisser le gain, égaliser.", c: "Deux miroirs face à face : l’image se répète à l’infini.", r: "Retour de scène placé à 180° d’un cardioïde, ou vers ≈ 125° d’un supercardioïde (module 5)." }
+          ],
+          formules: [
+            { q: "Comment calcule-t-on la force qui fait bouger la membrane d’un haut-parleur ?", f: "F = B · I · l", say: "F est égal à B fois I fois l", rows: [["F", "force de Laplace", "N (newton)", "ce qui pousse la bobine et la membrane"], ["B", "champ magnétique dans l’entrefer", "T (tesla)", "fixé par l’aimant"], ["I", "courant dans la bobine", "A (ampère)", "fourni par l’ampli"], ["l", "longueur du fil dans le champ", "m", "fixée par la bobine"]], ex: "B = 1 T, l = 10 m, I = 1 A : F = 1 × 1 × 10 = 10 N." },
+            { q: "Comment calcule-t-on le gain d’un amplificateur en décibels ?", f: "G = 20 log (U<sub>s</sub> / U<sub>e</sub>)", say: "G est égal à vingt fois le logarithme de U s sur U e", rows: [["G", "gain en tension", "dB", "positif : amplification"], ["U<sub>s</sub>", "tension de sortie", "V", "ce qui sort"], ["U<sub>e</sub>", "tension d’entrée", "V", "ce qui entre"]], ex: "Le micro donne 2 mV, on veut 1,228 V (+4 dBu) : G = 20 log(1,228 / 0,002) = 20 log 614 ≈ 55,8 dB." },
+            { q: "Quelle puissance l’ampli fournit-il au haut-parleur ?", f: "P = U² / R", say: "P est égal à U au carré divisé par R", rows: [["P", "puissance électrique", "W", "ce que reçoit le haut-parleur"], ["U", "tension efficace aux bornes", "V", "fournie par l’ampli"], ["R", "impédance du haut-parleur", "Ω", "4 ou 8 Ω le plus souvent"]], ex: "U = 8,94 V sur 8 Ω : P = 8,94² / 8 ≈ 80 / 8 = 10 W. Le courant vaut I = U / R ≈ 1,1 A." },
+            { q: "Quel niveau sonore donne un haut-parleur ?", f: "L = S<sub>HP</sub> + 10 log P − 20 log d", say: "L est égal à la sensibilité, plus dix log de P, moins vingt log de d", rows: [["L", "niveau à la distance d", "dB SPL", "ce qu’entend l’auditeur"], ["S<sub>HP</sub>", "sensibilité du haut-parleur", "dB (1 W / 1 m)", "lue sur la fiche"], ["P", "puissance électrique", "W", "fournie par l’ampli"], ["d", "distance", "m", "en champ libre"]], ex: "S = 90 dB (1 W / 1 m), P = 10 W, d = 4 m : L = 90 + 10 − 12 = 88 dB SPL." }
+          ]
+        },
+
+        manipuler: {
+          titre: "Ouvrir un micro, puis suivre le son jusqu’à l’auditeur",
+          intro: "Dans le premier labo, une onde traverse le micro : touchez une pièce pour savoir à quoi elle sert, ou passez en <b>vue éclatée</b>. Dans le second, suivez le signal du chanteur jusqu’à l’oreille de l’auditeur et réglez chaque étage : <b>gain</b>, fader, puissance."
+        },
+
+        essentiel: {
+          definitions: [
+            "<b>Grille</b> : protège la capsule ; avec la mousse, elle réduit les plosives.",
+            "<b>Membrane</b> : transforme la pression en mouvement.",
+            "<b>Bobine et aimant</b> (dynamique) ou <b>contre-électrode</b> (statique) : transforment le mouvement en tension.",
+            "<b>Suspension</b> : isole la capsule des bruits de manipulation ; <b>corps</b> : blindage relié à la masse.",
+            "<b>Préampli</b> : niveau micro → niveau ligne ; <b>ampli de puissance</b> : fournit tension et courant au haut-parleur.",
+            "<b>Haut-parleur</b> : bobine mobile + aimant + membrane ; transforme le courant en son (force de Laplace).",
+            "<b>Effet Larsen</b> : boucle micro → haut-parleur → micro dont le gain atteint 1."
+          ],
+          formules: [["F = B · I · l", "force de Laplace (haut-parleur)"], ["G = 20 log(U<sub>s</sub> / U<sub>e</sub>)", "gain en dB"], ["P = U² / R", "puissance dans le haut-parleur"], ["L = S<sub>HP</sub> + 10 log P − 20 log d", "niveau produit par un haut-parleur"]],
+          reperes: ["Niveau micro ≈ quelques mV ; niveau ligne ≈ 1,2 V (+4 dBu) ; haut-parleur ≈ quelques V à quelques dizaines de V.", "Gain d’un préampli ≈ 20 à 70 dB.", "Haut-parleur : 4 ou 8 Ω, sensibilité ≈ 85 à 100 dB (1 W / 1 m), rendement souvent ≈ 1 %.", "Doubler la puissance : +3 dB ; ×10 : +10 dB."],
+          pieges: ["Le préampli ne peut pas alimenter un haut-parleur : il ne fournit pas de courant. Il faut un ampli de puissance.", "Micro : induction (e = B·l·v) ; haut-parleur : Laplace (F = B·I·l). Ne pas inverser.", "Puissance et tension : 10 log pour la puissance, 20 log pour la tension.", "La grille et la mousse ne protègent pas du vent extérieur : il faut une bonnette ou une fourrure."]
+        },
+
+        evaluation: {
+          lire: [
+            () => { const n = H(1, 9), b = PIECES_DYN[n - 1]; return { type: "qcm", figure: figMicro({ tech: "dyn", num: true }), question: "Sur cette coupe de micro dynamique, que désigne le repère <b>" + n + "</b> ?", bonne: b, mauvaises: autres(PIECES_DYN, b), explication: "Repère " + n + " : " + b.toLowerCase() + ". Dans l’ordre : grille, mousse, membrane, bobine, aimant, suspension, corps, transformateur, XLR : du son qui entre au signal qui sort.", indice: "Les repères suivent le trajet du son, de la gauche (la grille) vers la droite (la sortie)." }; },
+            () => { const n = H(1, 9), b = PIECES_STAT[n - 1]; return { type: "qcm", figure: figMicro({ tech: "stat", num: true }), question: "Sur cette coupe de micro statique, que désigne le repère <b>" + n + "</b> ?", bonne: b, mauvaises: autres(PIECES_STAT, b), explication: "Repère " + n + " : " + b.toLowerCase() + ". Le statique remplace la bobine et l’aimant par un condensateur (membrane + contre-électrode) et ajoute une électronique.", indice: "Les repères suivent le trajet du son, de la grille vers le connecteur." }; },
+            () => { const n = H(1, 9), b = PIECES_HP[n - 1]; return { type: "qcm", figure: figHP({ num: true }), question: "Sur cette coupe de haut-parleur, que désigne le repère <b>" + n + "</b> ?", bonne: b, mauvaises: autres(PIECES_HP, b), explication: "Repère " + n + " : " + b.toLowerCase() + ". Le moteur (aimant, pièces polaires, bobine) est à gauche ; la membrane, le cache-noyau et la suspension poussent l’air vers la droite.", indice: "L’aimant est à l’arrière, la membrane est le grand cône." }; },
+            () => { const S = C([87, 89, 90, 92, 95, 97]), R = C([4, 8]), Pm = C([100, 150, 200, 300]); return { type: "nombre", figure: figFiche("Haut-parleur 30 cm (type)", [["Impédance nominale", R + " Ω"], ["Sensibilité (1 W / 1 m)", S + " dB SPL"], ["Puissance admissible", Pm + " W"], ["Bande passante", "45 Hz – 3 kHz"]]), question: "Quelle est la sensibilité de ce haut-parleur ?", reponse: S, unite: "dB", ecart: 0, explication: "On lit " + S + " dB SPL : c’est le niveau mesuré à 1 m pour 1 W électrique.", indice: "Cherchez la ligne « 1 W / 1 m »." }; },
+            { type: "qcm", figure: figChaine(), question: "Sur ce synoptique, quel appareil fait passer le signal du <b>niveau micro</b> au <b>niveau ligne</b> ?", bonne: "Le préampli", mauvaises: ["L’ampli de puissance", "Le haut-parleur", "Le micro lui-même"], explication: "Le préampli amplifie les quelques mV du micro jusqu’à ≈ 1,2 V. L’ampli de puissance vient après : il fournit le courant au haut-parleur.", indice: "Regardez où la tension passe de 2 mV à 1,2 V." }
+          ],
+          comprendre: [
+            ["La grille d’un micro protège la capsule et, avec sa mousse, atténue les plosives.", true, "Elle arrête chocs et postillons ; la mousse freine les souffles des « p » et des « b »."],
+            ["La suspension interne de la capsule sert à amplifier le son.", false, "Elle n’amplifie rien : elle isole la capsule des vibrations du corps (bruits de manipulation).", "Pensez aux amortisseurs d’une voiture."],
+            ["Le corps métallique du micro sert aussi de blindage contre les parasites électriques.", true, "Relié à la masse, il forme une cage de Faraday autour de la capsule et de l’électronique."],
+            ["Un micro dynamique et un haut-parleur électrodynamique reposent sur le même moteur : une bobine dans un aimant.", true, "Le micro utilise l’induction (mouvement → tension), le haut-parleur la force de Laplace (courant → mouvement)."],
+            ["Le préamplificateur micro peut alimenter directement un haut-parleur.", false, "Il fournit une tension de niveau ligne, presque pas de courant. Il faut un amplificateur de puissance.", "Que faut-il au haut-parleur en plus d’une tension ?"],
+            ["Un haut-parleur transforme presque toute la puissance électrique reçue en son.", false, "Son rendement est faible, souvent de l’ordre de 1 % : le reste chauffe surtout la bobine."],
+            ["Dans un haut-parleur, le spider maintient la bobine centrée dans l’entrefer.", true, "Avec la suspension périphérique, il guide la membrane et la ramène au repos."],
+            ["Dans un micro dynamique, c’est la force de Laplace qui crée la tension de sortie.", false, "C’est l’induction : e = B·l·v. La force de Laplace (F = B·I·l) est celle du haut-parleur.", "Le micro reçoit un mouvement, le haut-parleur reçoit un courant."],
+            ["L’effet Larsen apparaît quand le son du haut-parleur revient dans le micro plus fort qu’il n’est parti.", true, "Le gain de boucle dépasse 1 : le son s’amplifie à chaque tour."],
+            ["Un micro statique contient une électronique qu’il faut alimenter.", true, "Polarisation et convertisseur d’impédance : c’est le rôle de l’alimentation fantôme."],
+            ["Doubler la puissance envoyée à un haut-parleur double le niveau sonore en dB.", false, "Doubler la puissance ajoute 3 dB (10 log 2), pas le double des dB."]
+          ],
+          qcm: [
+            ["Quelle pièce transforme la pression acoustique en mouvement ?", "La membrane", ["La grille", "Le transformateur", "Le connecteur XLR"], "La membrane bouge sous la pression ; la bobine (ou le condensateur) transforme ensuite ce mouvement en tension."],
+            ["À quoi sert la suspension anti-choc de la capsule ?", "À réduire les bruits de manipulation", ["À augmenter la sensibilité", "À protéger du vent", "À créer la directivité"], "Elle découple la capsule du corps : les vibrations de la main n’atteignent presque plus la membrane."],
+            ["Quel appareil fournit le courant nécessaire au haut-parleur ?", "L’amplificateur de puissance", ["Le préamplificateur", "L’alimentation fantôme", "Le convertisseur numérique"], "Le préampli et la console travaillent en niveau ligne ; seul l’ampli de puissance fournit des ampères."],
+            ["Dans un haut-parleur, quelle pièce pousse l’air ?", "La membrane (cône)", ["L’aimant", "Le saladier", "Le spider"], "La bobine pousse la membrane, qui comprime et détend l’air devant elle."],
+            ["Quelle loi fait bouger la bobine d’un haut-parleur ?", "La force de Laplace, F = B·I·l", ["L’induction, e = B·l·v", "La loi d’Ohm, U = R·I", "La loi du carré inverse"], "Un courant dans un champ magnétique subit une force : c’est la force de Laplace."],
+            ["Dans quel ordre le signal traverse-t-il la chaîne ?", "Micro → préampli → console → ampli → haut-parleur", ["Micro → ampli → préampli → console → haut-parleur", "Micro → console → haut-parleur → ampli", "Préampli → micro → console → ampli → haut-parleur"], "Le préampli remonte le niveau micro, la console mélange, l’ampli de puissance attaque le haut-parleur."],
+            ["Par quelles broches sort le signal d’un micro symétrique ?", "Les broches 2 et 3", ["Les broches 1 et 2", "La broche 1 seule", "Les broches 1 et 3"], "2 = point chaud, 3 = point froid ; la broche 1 est la masse (blindage)."],
+            ["Pourquoi le corps d’un micro est-il relié à la masse ?", "Pour blinder la capsule contre les parasites", ["Pour alimenter la capsule", "Pour régler la directivité", "Pour évacuer la chaleur"], "Relié à la broche 1, le boîtier métallique forme une cage de Faraday."],
+            ["Comment limiter l’effet Larsen avec un micro cardioïde et un retour de scène ?", "Placer le retour à 180° de l’axe du micro", ["Placer le retour face au micro", "Monter le gain du préampli", "Placer le retour à 90° du micro"], "À 180°, le cardioïde est dans son angle d’annulation : il capte le moins de son du retour."]
+          ],
+          calculer: [
+            () => { const U = C([0.5, 1, 2, 4, 5, 8]) / 1000; const G = 20 * Math.log10(1.228 / U); return { type: "nombre", question: "Un micro délivre <b>" + nbU(U * 1000, 1) + " mV</b>. Quel gain (dB) le préampli doit-il donner pour atteindre +4 dBu (1,228 V) ?", reponse: G, unite: "dB", explication: "G = 20 log(1,228 / " + nbU(U, 4) + ") = 20 log(" + nbU(1.228 / U, 0) + ") ≈ " + nbU(G, 1) + " dB.", indice: "G = 20 log(U sortie / U entrée), tensions dans la même unité." }; },
+            () => { const R = C([4, 8]), U = C([4, 6, 8, 10, 12, 16, 20]); const P = U * U / R; return { type: "nombre", question: "Un ampli applique <b>" + U + " V</b> efficaces à un haut-parleur de <b>" + R + " Ω</b>. Quelle puissance reçoit-il ?", reponse: P, unite: "W", explication: "P = U² / R = " + U + "² / " + R + " = " + (U * U) + " / " + R + " = " + nbU(P, 1) + " W.", indice: "P = U² / R." }; },
+            () => { const S = C([86, 88, 90, 92, 95]), P = C([2, 5, 10, 20, 50, 100]); const L = S + 10 * Math.log10(P); return { type: "nombre", question: "Haut-parleur de sensibilité <b>" + S + " dB (1 W / 1 m)</b>, alimenté par <b>" + P + " W</b>. Quel niveau à 1 m ?", reponse: L, unite: "dB SPL", ecart: 0.3, explication: "L = " + S + " + 10 log " + P + " = " + S + " + " + nbU(10 * Math.log10(P), 1) + " ≈ " + nbU(L, 1) + " dB SPL.", indice: "Ajoutez 10 log P à la sensibilité." }; },
+            () => { const L1 = C([94, 100, 104, 110]), d = C([2, 4, 5, 8, 10]); const L = L1 - 20 * Math.log10(d); return { type: "nombre", question: "Un haut-parleur produit <b>" + L1 + " dB SPL à 1 m</b>. Quel niveau à <b>" + d + " m</b>, en champ libre ?", reponse: L, unite: "dB SPL", ecart: 0.3, explication: "L = " + L1 + " − 20 log " + d + " = " + L1 + " − " + nbU(20 * Math.log10(d), 1) + " ≈ " + nbU(L, 1) + " dB SPL.", indice: "−6 dB à chaque doublement de distance : −20 log d." }; },
+            () => { const B = C([0.8, 1, 1.2]), l = C([5, 8, 10, 12]), I = C([0.5, 1, 2, 3]); const F = B * I * l; return { type: "nombre", question: "Bobine de haut-parleur : B = <b>" + nbU(B, 1) + " T</b>, l = <b>" + l + " m</b> de fil dans le champ, I = <b>" + nbU(I, 1) + " A</b>. Quelle force ?", reponse: F, unite: "N", explication: "F = B·I·l = " + nbU(B, 1) + " × " + nbU(I, 1) + " × " + l + " = " + nbU(F, 1) + " N.", indice: "F = B · I · l." }; },
+            () => { const S = C([2, 5, 10, 20, 25]), L = C([74, 80, 86, 94, 100]); const U = S * MICRO.pa(L); return { type: "nombre", question: "Micro de <b>" + S + " mV/Pa</b> devant une source de <b>" + L + " dB SPL</b>. Quelle tension délivre-t-il (en mV) ?", reponse: U, unite: "mV", explication: "p = 2·10⁻⁵ × 10^(" + L + "/20) = " + nbU(MICRO.pa(L), 3) + " Pa ; U = " + S + " × " + nbU(MICRO.pa(L), 3) + " ≈ " + nbU(U, 2) + " mV.", indice: "Convertissez d’abord les dB SPL en pascals." }; }
+          ],
+          exercice: [
+            () => { const S = C([10, 15, 20, 25]), L = C([70, 74, 80]); const p = MICRO.pa(L), U = S * p, G = 20 * Math.log10(1.228 / (U / 1000)); return { type: "exercice", question: "Une voix de <b>" + L + " dB SPL</b> arrive sur un micro statique de <b>" + S + " mV/Pa</b>. On veut +4 dBu (1,228 V) en sortie de préampli.", etapes: [
+              { question: "Pression acoustique (Pa) ?", reponse: p, unite: "Pa" },
+              { question: "Tension délivrée par le micro (mV) ?", reponse: U, unite: "mV" },
+              { question: "Gain du préampli (dB) ?", reponse: G, unite: "dB" }
+            ], solution: "a) p = 2·10⁻⁵ × 10^(" + L + "/20) ≈ " + nbU(p, 3) + " Pa. b) U = " + S + " × " + nbU(p, 3) + " ≈ " + nbU(U, 2) + " mV. c) G = 20 log(1,228 / " + nbU(U / 1000, 5) + ") ≈ " + nbU(G, 1) + " dB.", indice: "p = p0 × 10^(L/20), puis U = S × p, puis G = 20 log(Us / Ue)." }; },
+            () => { const R = C([4, 8]), U = C([8, 10, 12, 16, 20]), S = C([88, 90, 92, 95]), d = C([2, 4, 8]); const P = U * U / R, L1 = S + 10 * Math.log10(P), Ld = L1 - 20 * Math.log10(d); return { type: "exercice", question: "Un ampli applique <b>" + U + " V</b> à une enceinte de <b>" + R + " Ω</b>, de sensibilité <b>" + S + " dB (1 W / 1 m)</b>. Un auditeur est à <b>" + d + " m</b>.", etapes: [
+              { question: "Puissance reçue (W) ?", reponse: P, unite: "W" },
+              { question: "Niveau à 1 m (dB SPL) ?", reponse: L1, unite: "dB SPL", ecart: 0.3 },
+              { question: "Niveau chez l’auditeur (dB SPL) ?", reponse: Ld, unite: "dB SPL", ecart: 0.3 }
+            ], solution: "a) P = " + U + "² / " + R + " = " + nbU(P, 1) + " W. b) L = " + S + " + 10 log " + nbU(P, 1) + " ≈ " + nbU(L1, 1) + " dB SPL. c) " + nbU(L1, 1) + " − 20 log " + d + " ≈ " + nbU(Ld, 1) + " dB SPL.", indice: "P = U²/R, puis + 10 log P, puis − 20 log d." }; },
+            () => { const ordre = ["Membrane", "Bobine", "Transformateur", "Connecteur XLR"]; return { type: "exercice", question: "On suit le son dans un micro dynamique de main, de la grille jusqu’au câble.", etapes: [
+              { question: "Quelle pièce le son rencontre-t-il juste après la grille et la mousse ?", bonne: "La membrane", mauvaises: ["La bobine", "L’aimant", "Le transformateur"] },
+              { question: "Quelle grandeur la bobine produit-elle ?", bonne: "Une tension (induction)", mauvaises: ["Une force (Laplace)", "Une pression", "Un champ magnétique"] },
+              { question: "Par quelles broches de la XLR le signal sort-il ?", bonne: "2 et 3", mauvaises: ["1 et 2", "1 et 3", "1 seule"] }
+            ], solution: "a) La membrane, qui bouge sous la pression. b) Une tension, par induction (e = B·l·v). c) Broches 2 (chaud) et 3 (froid) ; la 1 est la masse. Ordre : " + ordre.join(" → ") + ".", indice: "Pression → mouvement → tension → câble." }; }
+          ]
+        }
+      };
+    })(),
+
+    /* ======================================================================
+       MODULE 3 — TECHNOLOGIES DE MICRO (TRANSDUCTION)
        ====================================================================== */
     {
       titre: "Technologies de micro",
@@ -481,27 +736,27 @@ const APPLICATION = {
             const D = C([16, 20, 25]), d0 = C([20, 25, 30]), U0 = C([48, 60]), dd = C([8, 10, 12]);
             const S = Math.PI * Math.pow(D / 2000, 2), Cp = 8.85e-12 * S / (d0 * 1e-6) * 1e12, dU = U0 * dd / (d0 * 1000) * 1000;
             return { type: "exercice", question: "Une capsule statique : membrane de <b>" + D + " mm</b> de diamètre, distance au repos <b>" + d0 + " µm</b>, polarisation <b>" + U0 + " V</b> à charge constante. Une pression de 1 Pa déplace la membrane de <b>" + dd + " nm</b>.", etapes: [
-              { question: "a) Surface de la membrane (en cm²) ?", reponse: S * 1e4, unite: "cm²" },
-              { question: "b) Capacité de la capsule (en pF) ?", reponse: Cp, unite: "pF" },
-              { question: "c) Tension produite pour 1 Pa, c’est-à-dire la sensibilité (en mV/Pa) ?", reponse: dU, unite: "mV/Pa" }
+              { question: "Surface de la membrane (en cm²) ?", reponse: S * 1e4, unite: "cm²" },
+              { question: "Capacité de la capsule (en pF) ?", reponse: Cp, unite: "pF" },
+              { question: "Tension produite pour 1 Pa, c’est-à-dire la sensibilité (en mV/Pa) ?", reponse: dU, unite: "mV/Pa" }
             ], solution: "a) S = π × (" + NB(D / 20, 2) + " cm)² ≈ " + NB(S * 1e4, 2) + " cm². b) C = 8,85·10⁻¹² × " + NB(S, 6) + " / " + d0 + "·10⁻⁶ ≈ " + NB(Cp, 0) + " pF. c) ΔU = " + U0 + " × " + dd + " nm / " + d0 + " µm ≈ " + NB(dU, 1) + " mV, soit une sensibilité de " + NB(dU, 1) + " mV/Pa : une valeur typique de micro statique.", indice: "S = π r² ; C = ε<sub>0</sub>S/d ; ΔU = U<sub>0</sub>·Δd/d<sub>0</sub>." };
           },
           () => {
             const Sd = C([1.8, 2, 2.5]), Ss = C([15, 20, 25]), L = C([74, 80, 86, 94]), p = MICRO.pa(L);
             return { type: "exercice", question: "Une voix produit <b>" + L + " dB SPL</b> à l’emplacement du micro. On compare un dynamique de <b>" + NB(Sd, 1) + " mV/Pa</b> et un statique de <b>" + Ss + " mV/Pa</b>.", etapes: [
-              { question: "a) Pression efficace au micro (Pa) ?", reponse: p, unite: "Pa" },
-              { question: "b) Tension délivrée par le dynamique (mV) ?", reponse: Sd * p, unite: "mV" },
-              { question: "c) Tension délivrée par le statique (mV) ?", reponse: Ss * p, unite: "mV" },
-              { question: "d) Lequel demandera le plus de gain au préampli ?", bonne: "Le dynamique", mauvaises: ["Le statique", "Les deux autant"] }
+              { question: "Pression efficace au micro (Pa) ?", reponse: p, unite: "Pa" },
+              { question: "Tension délivrée par le dynamique (mV) ?", reponse: Sd * p, unite: "mV" },
+              { question: "Tension délivrée par le statique (mV) ?", reponse: Ss * p, unite: "mV" },
+              { question: "Lequel demandera le plus de gain au préampli ?", bonne: "Le dynamique", mauvaises: ["Le statique", "Les deux autant"] }
             ], solution: "a) p = 2·10⁻⁵ × 10<sup>" + NB(L / 20, 1) + "</sup> ≈ " + NB(p, 3) + " Pa. b) " + NB(Sd, 1) + " × " + NB(p, 3) + " ≈ " + NB(Sd * p, 3) + " mV. c) " + Ss + " × " + NB(p, 3) + " ≈ " + NB(Ss * p, 2) + " mV. d) Le dynamique délivre " + NB(Ss / Sd, 1) + " fois moins de tension : il faut ≈ " + NB(20 * Math.log10(Ss / Sd), 0) + " dB de gain en plus.", indice: "Tension = sensibilité × pression." };
           },
           () => {
             const n = C([50, 80, 100, 120]), Dc = C([1.5, 2, 2.5]), B = C([1, 1.2]), v = C([0.5, 1, 2]);
             const l = n * Math.PI * Dc / 100, e = B * l * v;
             return { type: "exercice", question: "La bobine d’un micro dynamique compte <b>" + n + " spires</b> de <b>" + NB(Dc, 1) + " cm</b> de diamètre, toutes dans l’entrefer où B = <b>" + NB(B, 1) + " T</b>. La membrane se déplace à <b>" + NB(v, 1) + " mm/s</b>.", etapes: [
-              { question: "a) Longueur de fil dans le champ (m) ?", reponse: l, unite: "m" },
-              { question: "b) Tension produite (mV) ?", reponse: e, unite: "mV" },
-              { question: "c) Si la membrane va deux fois plus vite, la tension :", bonne: "double", mauvaises: ["ne change pas", "est divisée par deux", "est multipliée par quatre"] }
+              { question: "Longueur de fil dans le champ (m) ?", reponse: l, unite: "m" },
+              { question: "Tension produite (mV) ?", reponse: e, unite: "mV" },
+              { question: "Si la membrane va deux fois plus vite, la tension :", bonne: "double", mauvaises: ["ne change pas", "est divisée par deux", "est multipliée par quatre"] }
             ], solution: "a) l = n × π × D = " + n + " × π × " + NB(Dc / 100, 3) + " ≈ " + NB(l, 2) + " m. b) e = " + NB(B, 1) + " × " + NB(l, 2) + " × " + NB(v / 1000, 4) + " ≈ " + NB(e, 2) + " mV. c) e = B·l·v est proportionnelle à la vitesse : elle double.", indice: "Une spire mesure π × D." };
           }
         ]
@@ -509,13 +764,13 @@ const APPLICATION = {
     },
 
     /* ======================================================================
-       MODULE 3 — LES CAPSULES : pression, gradient de pression, proximité
+       MODULE 4 — LES CAPSULES : pression, gradient de pression, proximité
        ====================================================================== */
     {
       titre: "Les capsules : pression et gradient de pression",
       nav: "Capsules",
       resume: "Pression, gradient, proximité",
-      intro: "Le module 2 expliquait comment le mouvement de la membrane devient une tension. Ce module regarde <b>autour de la membrane</b> : est-elle ouverte d’un seul côté ou des deux ? C’est cette construction acoustique qui décide de la directivité du micro… et de l’effet de proximité qui gonfle les graves quand on parle tout près.",
+      intro: "Le module 3 expliquait comment le mouvement de la membrane devient une tension. Ce module regarde <b>autour de la membrane</b> : est-elle ouverte d’un seul côté ou des deux ? C’est cette construction acoustique qui décide de la directivité du micro… et de l’effet de proximité qui gonfle les graves quand on parle tout près.",
 
       notions: {
         titre: "La construction acoustique de la capsule",
@@ -632,19 +887,19 @@ const APPLICATION = {
           ],
           exercice: [
             () => { const r = C([0.03, 0.05]), f = 100; const G1 = MICRO.proximite(0.5, r, f), G2 = MICRO.proximite(0.5, 0.3, f); return { type: "exercice", question: "Un comédien enregistre une voix off avec un micro <b>cardioïde</b>, la bouche à <b>" + NB(r * 100, 0) + " cm</b>. Sa voix sonne trop grave. (c = 343 m/s)", etapes: [
-              { question: "a) Renforcement à 100 Hz à " + NB(r * 100, 0) + " cm ?", reponse: G1, unite: "dB", ecart: 0.4 },
-              { question: "b) Renforcement à 100 Hz si le comédien recule à 30 cm ?", reponse: G2, unite: "dB", ecart: 0.4 },
-              { question: "c) Sans le faire reculer, quelle solution supprime le problème à la source ?", bonne: "Prendre un micro omnidirectionnel", mauvaises: ["Prendre un micro en huit", "Monter le gain du préampli", "Tourner le micro de 180°"] }
+              { question: "Renforcement à 100 Hz à " + NB(r * 100, 0) + " cm ?", reponse: G1, unite: "dB", ecart: 0.4 },
+              { question: "Renforcement à 100 Hz si le comédien recule à 30 cm ?", reponse: G2, unite: "dB", ecart: 0.4 },
+              { question: "Sans le faire reculer, quelle solution supprime le problème à la source ?", bonne: "Prendre un micro omnidirectionnel", mauvaises: ["Prendre un micro en huit", "Monter le gain du préampli", "Tourner le micro de 180°"] }
             ], solution: "a) B = 0,5, k = 2π × 100 / 343 ≈ 1,83 ; G = 10 log(1 + (0,5 / (1,83 × " + NB(r, 2) + "))²) ≈ +" + NB(G1, 1) + " dB. b) À 0,3 m : ≈ +" + NB(G2, 1) + " dB. c) Un omni (capsule à pression, B = 0) n’a pas d’effet de proximité ; sinon, enclencher un coupe-bas.", indice: "Effet de proximité : G = 10 log(1 + (B/kr)²)." }; },
             () => { const m = C([-0.5, -0.27, 0.4]); const A = (1 + m) / 2, nom = m === -0.5 ? "Hypercardioïde" : m === 0.4 ? "Infracardioïde" : "Supercardioïde"; return { type: "exercice", question: "Un micro à double membrane est réglé avec un dosage de la membrane arrière <b>m = " + NB(m, 2).replace("-", "−") + "</b>.", etapes: [
-              { question: "a) Part de pression A ?", reponse: A, unite: "", ecart: 0.01 },
-              { question: "b) Atténuation à 90° (20 log A) ?", reponse: 20 * Math.log10(A), unite: "dB", ecart: 0.3 },
-              { question: "c) Quelle directivité obtient-on ?", bonne: nom, mauvaises: ["Cardioïde", "Omnidirectionnelle", "Bidirectionnelle (en huit)"].concat(nom === "Infracardioïde" ? [] : ["Infracardioïde"]).slice(0, 3) }
+              { question: "Part de pression A ?", reponse: A, unite: "", ecart: 0.01 },
+              { question: "Atténuation à 90° (20 log A) ?", reponse: 20 * Math.log10(A), unite: "dB", ecart: 0.3 },
+              { question: "Quelle directivité obtient-on ?", bonne: nom, mauvaises: ["Cardioïde", "Omnidirectionnelle", "Bidirectionnelle (en huit)"].concat(nom === "Infracardioïde" ? [] : ["Infracardioïde"]).slice(0, 3) }
             ], solution: "a) A = (1 + m) / 2 = " + NB(A, 3) + ". b) À 90°, cos θ = 0 donc r = A : 20 log " + NB(A, 3) + " ≈ " + db(A) + ". c) A ≈ " + NB(A, 2) + " : " + nom.toLowerCase() + ".", indice: "À 90°, il ne reste que la part de pression A." }; },
             () => { const dmm = C([10, 12, 15]); const tau = dmm / 1000 / MICRO.c * 1e6; return { type: "exercice", question: "On construit une capsule cardioïde. Le trajet extérieur entre l’avant et l’arrière de la membrane est de <b>" + dmm + " mm</b>. (c = 343 m/s)", etapes: [
-              { question: "a) Retard du son venant de 180° entre l’arrière et l’avant de la membrane (µs) ?", reponse: tau, unite: "µs" },
-              { question: "b) Retard interne que doit créer le labyrinthe (µs) ?", reponse: tau, unite: "µs" },
-              { question: "c) Que vaut alors la force sur la membrane pour un son venant de 180° ?", bonne: "Elle vaut zéro : les deux pressions sont identiques", mauvaises: ["Elle est doublée : les deux pressions s’ajoutent", "Elle est égale à celle d’un son venant de face", "Elle est inversée, mais de même niveau"] }
+              { question: "Retard du son venant de 180° entre l’arrière et l’avant de la membrane (µs) ?", reponse: tau, unite: "µs" },
+              { question: "Retard interne que doit créer le labyrinthe (µs) ?", reponse: tau, unite: "µs" },
+              { question: "Que vaut alors la force sur la membrane pour un son venant de 180° ?", bonne: "Elle vaut zéro : les deux pressions sont identiques", mauvaises: ["Elle est doublée : les deux pressions s’ajoutent", "Elle est égale à celle d’un son venant de face", "Elle est inversée, mais de même niveau"] }
             ], solution: "a) Δ / c = " + NB(dmm / 1000, 3) + " / 343 ≈ " + NB(tau, 1) + " µs. b) Pour un cardio (A/B = 1), le retard interne égale ce trajet : ≈ " + NB(tau, 1) + " µs. c) Le son venant de 180° arrive à l’arrière en même temps qu’à l’avant (par le labyrinthe) : la différence vaut zéro, c’est l’annulation du cardioïde.", indice: "Pour un cardio, le retard interne compense exactement le trajet extérieur." }; }
           ]
         };
@@ -652,7 +907,7 @@ const APPLICATION = {
     },
 
     /* ======================================================================
-       MODULE 4 — LA DIRECTIVITÉ
+       MODULE 5 — LA DIRECTIVITÉ
        ====================================================================== */
     {
       titre: "La directivité",
@@ -780,19 +1035,19 @@ const APPLICATION = {
           ],
           exercice: [
             () => { return { type: "exercice", question: "Un chanteur utilise un micro <b>hypercardioïde</b>. Un retour de scène est posé au sol, juste devant lui, donc à <b>180°</b> de l’axe du micro.", etapes: [
-              { question: "a) Atténuation du retour par le micro (dB) ?", reponse: -6.02, unite: "dB", ecart: 0.3 },
-              { question: "b) Quelle directivité serait sourde à ce retour ?", bonne: "Cardioïde", mauvaises: ["Supercardioïde", "Bidirectionnelle (en huit)"] },
-              { question: "c) Avec l’hypercardioïde, où placer deux retours pour qu’il les rejette au mieux ?", bonne: "Vers ±110° de l’axe", mauvaises: ["Vers ±90° de l’axe", "Juste derrière le micro (180°)"] }
+              { question: "Atténuation du retour par le micro (dB) ?", reponse: -6.02, unite: "dB", ecart: 0.3 },
+              { question: "Quelle directivité serait sourde à ce retour ?", bonne: "Cardioïde", mauvaises: ["Supercardioïde", "Bidirectionnelle (en huit)"] },
+              { question: "Avec l’hypercardioïde, où placer deux retours pour qu’il les rejette au mieux ?", bonne: "Vers ±110° de l’axe", mauvaises: ["Vers ±90° de l’axe", "Juste derrière le micro (180°)"] }
             ], solution: "a) r(180°) = 0,25 − 0,75 = −0,5 → 20 log 0,5 ≈ −6 dB (polarité inversée). b) Le cardioïde : r(180°) = 0. c) cos θ₀ = −1/3 → θ₀ ≈ 109,5° : on place les retours vers ±110°.", indice: "r(180°) = A − B." }; },
             () => { const L = C([0.2, 0.25, 0.3]); const f = MICRO.c / L; return { type: "exercice", question: "Un ingénieur du son tourne un reportage dans une rue avec un micro canon de <b>" + NB(L * 100, 0) + " cm</b> (capsule hypercardioïde). Le bruit de la circulation, surtout grave (≈ 150 Hz), arrive à 90° de l’axe. (c = 343 m/s)", etapes: [
-              { question: "a) À partir de quelle fréquence le tube devient-il efficace (Hz) ?", reponse: f, unite: "Hz" },
-              { question: "b) Le tube aide-t-il à rejeter le bruit de la circulation à 150 Hz ?", bonne: "Non : à 150 Hz, seule la capsule agit", mauvaises: ["Oui : un canon rejette tout ce qui vient de côté", "Oui, mais seulement avec l’alimentation fantôme"] },
-              { question: "c) Atténuation de la capsule hypercardioïde à 90° (dB) ?", reponse: -12.04, unite: "dB", ecart: 0.3 }
+              { question: "À partir de quelle fréquence le tube devient-il efficace (Hz) ?", reponse: f, unite: "Hz" },
+              { question: "Le tube aide-t-il à rejeter le bruit de la circulation à 150 Hz ?", bonne: "Non : à 150 Hz, seule la capsule agit", mauvaises: ["Oui : un canon rejette tout ce qui vient de côté", "Oui, mais seulement avec l’alimentation fantôme"] },
+              { question: "Atténuation de la capsule hypercardioïde à 90° (dB) ?", reponse: -12.04, unite: "dB", ecart: 0.3 }
             ], solution: "a) f ≈ c/L = 343 / " + NB(L, 2) + " ≈ " + NB(f, 0) + " Hz. b) 150 Hz est bien en dessous : λ ≈ 2,3 m, bien plus longue que le tube ; seule la capsule agit. c) r(90°) = A = 0,25 → 20 log 0,25 ≈ −12 dB.", indice: "Comparez 150 Hz à c/L." }; },
             () => { const x = C([0.4, 0.5, 0.6]); return { type: "exercice", question: "Dans une église, un omni placé à <b>" + NB(x * 100, 0) + " cm</b> d’un chanteur donne le bon équilibre entre voix et réverbération. On veut capter la même proportion de salle avec un micro directif.", etapes: [
-              { question: "a) Facteur de directivité d’un cardioïde ?", reponse: 3, unite: "", ecart: 0.05 },
-              { question: "b) Distance équivalente du cardioïde (m) ?", reponse: Math.sqrt(3) * x, unite: "m" },
-              { question: "c) Distance équivalente d’un hypercardioïde (m) ?", reponse: 2 * x, unite: "m" }
+              { question: "Facteur de directivité d’un cardioïde ?", reponse: 3, unite: "", ecart: 0.05 },
+              { question: "Distance équivalente du cardioïde (m) ?", reponse: Math.sqrt(3) * x, unite: "m" },
+              { question: "Distance équivalente d’un hypercardioïde (m) ?", reponse: 2 * x, unite: "m" }
             ], solution: "a) DF = 1 / (0,25 + 0,25/3) = 3. b) √3 × " + NB(x, 1) + " ≈ " + NB(Math.sqrt(3) * x, 2) + " m. c) DF = 4 → √4 × " + NB(x, 1) + " = " + NB(2 * x, 2) + " m.", indice: "Facteur de distance = √DF." }; }
           ]
         };
@@ -800,7 +1055,7 @@ const APPLICATION = {
     },
 
     /* ======================================================================
-       MODULE 5 — SENSIBILITÉ ET FICHE TECHNIQUE
+       MODULE 6 — SENSIBILITÉ ET FICHE TECHNIQUE
        ====================================================================== */
     {
       titre: "Sensibilité et fiche technique",
@@ -944,19 +1199,19 @@ const APPLICATION = {
           () => {
             const S = C([15, 20, 25]), L = C([70, 74, 78]), p = MICRO.pa(L), U = S * p, Lm = MICRO.dbu(U / 1000);
             return { type: "exercice", question: "Interview en plateau : un micro statique de <b>" + S + " mV/Pa</b> capte une voix à <b>" + L + " dB SPL</b>. Le préampli doit sortir <b>+4 dBu</b>.", etapes: [
-              { question: "a) Pression acoustique de la voix (en Pa) ?", reponse: p, unite: "Pa" },
-              { question: "b) Tension délivrée par le micro (en mV) ?", reponse: U, unite: "mV" },
-              { question: "c) Niveau du micro en dBu ?", reponse: Lm, unite: "dBu", ecart: 0.4 },
-              { question: "d) Gain à régler au préampli ?", reponse: 4 - Lm, unite: "dB", ecart: 0.6 }
+              { question: "Pression acoustique de la voix (en Pa) ?", reponse: p, unite: "Pa" },
+              { question: "Tension délivrée par le micro (en mV) ?", reponse: U, unite: "mV" },
+              { question: "Niveau du micro en dBu ?", reponse: Lm, unite: "dBu", ecart: 0.4 },
+              { question: "Gain à régler au préampli ?", reponse: 4 - Lm, unite: "dB", ecart: 0.6 }
             ], solution: "a) p = 2·10⁻⁵ × 10<sup>" + L + "/20</sup> = " + NB(p, 3) + " Pa. b) U = " + S + " × " + NB(p, 3) + " = " + NB(U, 2) + " mV. c) 20 log(" + NB(U / 1000, 4) + " / 0,775) = " + NB(Lm, 1).replace("-", "−") + " dBu. d) G = 4 − (" + NB(Lm, 1).replace("-", "−") + ") = " + NB(4 - Lm, 1) + " dB.", indice: "p = 2·10⁻⁵ × 10<sup>L/20</sup>, puis U = S × p." };
           },
           () => {
             const Sd = C([1.5, 2, 2.5]), Ss = C([15, 20, 25]), bp = H(9, 16), max = H(130, 138), ecart = MICRO.dbv(Ss) - MICRO.dbv(Sd);
             return { type: "exercice", question: "Pour enregistrer une ambiance calme, vous hésitez entre un micro dynamique de <b>" + NB(Sd, 1) + " mV/Pa</b> et un micro statique de <b>" + Ss + " mV/Pa</b> (bruit propre <b>" + bp + " dB(A)</b>, SPL max <b>" + max + " dB</b>).", etapes: [
-              { question: "a) De combien de dB le statique est-il plus sensible ?", reponse: ecart, unite: "dB", ecart: 0.4 },
-              { question: "b) Rapport signal/bruit du statique (re 94 dB) ?", reponse: 94 - bp, unite: "dB", ecart: 0 },
-              { question: "c) Dynamique du statique ?", reponse: max - bp, unite: "dB", ecart: 0 },
-              { question: "d) Quel micro choisir pour cette ambiance calme ?", bonne: "Le statique : plus sensible, il demande moins de gain", mauvaises: ["Le dynamique : sans électronique, il n’a aucun bruit", "Les deux se valent : seule la directivité compte"] }
+              { question: "De combien de dB le statique est-il plus sensible ?", reponse: ecart, unite: "dB", ecart: 0.4 },
+              { question: "Rapport signal/bruit du statique (re 94 dB) ?", reponse: 94 - bp, unite: "dB", ecart: 0 },
+              { question: "Dynamique du statique ?", reponse: max - bp, unite: "dB", ecart: 0 },
+              { question: "Quel micro choisir pour cette ambiance calme ?", bonne: "Le statique : plus sensible, il demande moins de gain", mauvaises: ["Le dynamique : sans électronique, il n’a aucun bruit", "Les deux se valent : seule la directivité compte"] }
             ], solution: "a) 20 log(" + Ss + " / " + NB(Sd, 1) + ") = " + NB(ecart, 1) + " dB. b) 94 − " + bp + " = " + (94 - bp) + " dB. c) " + max + " − " + bp + " = " + (max - bp) + " dB. d) Sur une source faible, le dynamique impose " + NB(ecart, 0) + " dB de gain en plus : le bruit du préampli devient audible. Le statique est le bon choix.", indice: "Écart en dB = 20 log(rapport des sensibilités)." };
           }
         ]
@@ -964,7 +1219,7 @@ const APPLICATION = {
     },
 
     /* ======================================================================
-       MODULE 6 — TYPES DE MICROS ET PRISE DE SON
+       MODULE 7 — TYPES DE MICROS ET PRISE DE SON
        ====================================================================== */
     {
       titre: "Types de micros et prise de son",
@@ -1104,19 +1359,19 @@ const APPLICATION = {
           () => {
             const V = C([150, 200, 300, 500]), T = C([0.6, 0.8, 1, 1.2]), d = C([0.5, 0.8, 2.5, 3]), rH = MICRO.rayonReverberation(V, T), dc = Math.sqrt(3) * rH, dr = 20 * Math.log10(dc / d);
             return { type: "exercice", question: "Vous enregistrez une conférence dans une salle de <b>" + V + " m³</b> (T = <b>" + NB(T, 1) + " s</b>) avec un micro <b>cardioïde</b> (DF = 3) placé à <b>" + NB(d, 1) + " m</b> de l’orateur.", etapes: [
-              { question: "a) Rayon de réverbération de la salle ?", reponse: rH, unite: "m" },
-              { question: "b) Distance critique du micro cardioïde ?", reponse: dc, unite: "m" },
-              { question: "c) Rapport direct / réverbéré à " + NB(d, 1) + " m ?", reponse: dr, unite: "dB", ecart: 0.4 },
-              { question: "d) Quel champ domine dans la prise de son ?", bonne: dr > 0 ? "Le champ direct : la voix sera nette" : "Le champ réverbéré : la voix sera lointaine", mauvaises: [dr > 0 ? "Le champ réverbéré : la voix sera lointaine" : "Le champ direct : la voix sera nette", "Aucun : ils sont toujours égaux"] }
+              { question: "Rayon de réverbération de la salle ?", reponse: rH, unite: "m" },
+              { question: "Distance critique du micro cardioïde ?", reponse: dc, unite: "m" },
+              { question: "Rapport direct / réverbéré à " + NB(d, 1) + " m ?", reponse: dr, unite: "dB", ecart: 0.4 },
+              { question: "Quel champ domine dans la prise de son ?", bonne: dr > 0 ? "Le champ direct : la voix sera nette" : "Le champ réverbéré : la voix sera lointaine", mauvaises: [dr > 0 ? "Le champ réverbéré : la voix sera lointaine" : "Le champ direct : la voix sera nette", "Aucun : ils sont toujours égaux"] }
             ], solution: "a) 0,057 × √(" + V + " / " + NB(T, 1) + ") = " + NB(rH, 2) + " m. b) 1,73 × " + NB(rH, 2) + " = " + NB(dc, 2) + " m. c) 20 log(" + NB(dc, 2) + " / " + NB(d, 1) + ") = " + NB(dr, 1).replace("-", "−") + " dB. d) " + (dr > 0 ? "Positif : le direct domine." : "Négatif : la réverbération domine ; il faut rapprocher le micro ou en prendre un plus directif."), indice: "Commencez par r<sub>H</sub> ≈ 0,057 √(V / T)." };
           },
           () => {
             const D = C([17.15, 25, 34.3]), tau = D / 100 / MICRO.c, f0 = 1 / (2 * tau);
             return { type: "exercice", question: "Un micro sur pied est placé au-dessus d’une table de débat. La réflexion sur la table parcourt <b>" + NB(D, 1) + " cm</b> de plus que le son direct.", etapes: [
-              { question: "a) Retard de la réflexion (en ms) ?", reponse: tau * 1000, unite: "ms" },
-              { question: "b) Fréquence du premier creux ?", reponse: f0, unite: "Hz" },
-              { question: "c) Fréquence du deuxième creux ?", reponse: 3 * f0, unite: "Hz" },
-              { question: "d) Quelle solution supprime ce défaut ?", bonne: "Remplacer le micro par un micro de surface posé sur la table", mauvaises: ["Monter le gain du préampli", "Ajouter une fourrure anti-vent"] }
+              { question: "Retard de la réflexion (en ms) ?", reponse: tau * 1000, unite: "ms" },
+              { question: "Fréquence du premier creux ?", reponse: f0, unite: "Hz" },
+              { question: "Fréquence du deuxième creux ?", reponse: 3 * f0, unite: "Hz" },
+              { question: "Quelle solution supprime ce défaut ?", bonne: "Remplacer le micro par un micro de surface posé sur la table", mauvaises: ["Monter le gain du préampli", "Ajouter une fourrure anti-vent"] }
             ], solution: "a) τ = " + NB(D / 100, 4) + " / 343 = " + NB(tau * 1000, 3) + " ms. b) 1 / (2τ) = " + NB(f0, 0) + " Hz. c) 3 / (2τ) = " + NB(3 * f0, 0) + " Hz. d) Au ras de la table, le direct et le réfléchi arrivent en phase : plus de creux (et +6 dB).", indice: "Les creux sont à f, 3f, 5f…" };
           }
         ]
@@ -1124,7 +1379,7 @@ const APPLICATION = {
     },
 
     (function () {
-      /* ---- Schémas propres au module 7 ---------------------------------------- */
+      /* ---- Schémas propres au module 8 ---------------------------------------- */
       // Liaison symétrique ou asymétrique : micro → câble → entrée, avec un parasite
       function figLiaison(sym) {
         let s = TXT(260, 22, sym ? "Liaison symétrique" : "Liaison asymétrique", { s: 14 });
@@ -1275,19 +1530,19 @@ const APPLICATION = {
           ],
           exercice: [
             () => { const I = C([3, 4, 5, 6]), Umin = C([9, 12, 15]), U = MICRO.fantome(48, 6.8, I), ok = U >= Umin; return { type: "exercice", question: "Un micro statique consomme <b>" + I + " mA</b> et fonctionne à partir de <b>" + Umin + " V</b>. La console fournit du P48 (2 × 6,8 kΩ).", etapes: [
-              { question: "a) Quelle est la résistance équivalente vue par le micro ?", reponse: 3.4, unite: "kΩ" },
-              { question: "b) Quelle tension arrive à ses bornes ?", reponse: U, unite: "V" },
-              { question: "c) Le micro fonctionne-t-il ?", bonne: ok ? "Oui, la tension dépasse son minimum" : "Non, la tension est sous son minimum", mauvaises: [ok ? "Non, la tension est sous son minimum" : "Oui, la tension dépasse son minimum", "On ne peut pas savoir sans la longueur du câble"] }
+              { question: "Quelle est la résistance équivalente vue par le micro ?", reponse: 3.4, unite: "kΩ" },
+              { question: "Quelle tension arrive à ses bornes ?", reponse: U, unite: "V" },
+              { question: "Le micro fonctionne-t-il ?", bonne: ok ? "Oui, la tension dépasse son minimum" : "Non, la tension est sous son minimum", mauvaises: [ok ? "Non, la tension est sous son minimum" : "Oui, la tension dépasse son minimum", "On ne peut pas savoir sans la longueur du câble"] }
             ], solution: "a) 6,8 / 2 = 3,4 kΩ. b) 48 − " + I + " × 3,4 = " + NB(U, 1) + " V. c) " + NB(U, 1) + " V " + (ok ? "≥ " : "< ") + Umin + " V : " + (ok ? "il fonctionne." : "il ne fonctionne pas correctement."), indice: "Les deux résistances de 6,8 kΩ sont en parallèle." }; },
             () => { const S = C([-55, -50, -45]), P = C([-50, -45, -40]), T = C([60, 70]); return { type: "exercice", question: "Sur scène, un câble de 40 m passe près d’un gradateur. Le micro délivre <b>" + S + " dBu</b> ; le câble capte un parasite de <b>" + P + " dBu</b>.", etapes: [
-              { question: "a) En liaison asymétrique, quel est le rapport signal / parasite à l’arrivée ?", reponse: S - P, unite: "dB", ecart: 0.5 },
-              { question: "b) En liaison symétrique, avec un TRMC de " + T + " dB, quel parasite reste-t-il ?", reponse: P - T, unite: "dBu", ecart: 0.5 },
-              { question: "c) Quel est alors le rapport signal / parasite ?", reponse: S - P + T, unite: "dB", ecart: 0.5 }
+              { question: "En liaison asymétrique, quel est le rapport signal / parasite à l’arrivée ?", reponse: S - P, unite: "dB", ecart: 0.5 },
+              { question: "En liaison symétrique, avec un TRMC de " + T + " dB, quel parasite reste-t-il ?", reponse: P - T, unite: "dBu", ecart: 0.5 },
+              { question: "Quel est alors le rapport signal / parasite ?", reponse: S - P + T, unite: "dB", ecart: 0.5 }
             ], solution: "a) " + S + " − (" + P + ") = " + (S - P) + " dB : le parasite est aussi fort que la voix, ou presque. b) " + P + " − " + T + " = " + (P - T) + " dBu. c) " + S + " − (" + (P - T) + ") = " + (S - P + T) + " dB : le parasite devient inaudible.", indice: "En asymétrique, rien ne retire le parasite." }; },
             () => { const L = C([-10, -6]), Lu = L + 2.21, ecart = 4 - Lu; return { type: "exercice", question: "Un lecteur grand public sort à <b>" + L + " dBV</b> ; il est branché sur une entrée de console réglée pour +4 dBu.", etapes: [
-              { question: "a) Quel est le niveau du lecteur en dBu ?", reponse: Lu, unite: "dBu", ecart: 0.2 },
-              { question: "b) Combien de dB de gain faut-il ajouter pour atteindre +4 dBu ?", reponse: ecart, unite: "dB", ecart: 0.3 },
-              { question: "c) Sa tension de sortie vaut environ :", bonne: NB(MICRO.voltsDbv(L), 3) + " V", mauvaises: [NB(MICRO.voltsDbu(L), 3) + " V", "1,228 V"] }
+              { question: "Quel est le niveau du lecteur en dBu ?", reponse: Lu, unite: "dBu", ecart: 0.2 },
+              { question: "Combien de dB de gain faut-il ajouter pour atteindre +4 dBu ?", reponse: ecart, unite: "dB", ecart: 0.3 },
+              { question: "Sa tension de sortie vaut environ :", bonne: NB(MICRO.voltsDbv(L), 3) + " V", mauvaises: [NB(MICRO.voltsDbu(L), 3) + " V", "1,228 V"] }
             ], solution: "a) " + L + " + 2,2 = " + NB(Lu, 1) + " dBu. b) 4 − (" + NB(Lu, 1) + ") ≈ " + NB(ecart, 1) + " dB. c) 10^(" + L + "/20) = " + NB(MICRO.voltsDbv(L), 3) + " V.", indice: "0 dBV = +2,2 dBu." }; }
           ]
         }
@@ -1295,7 +1550,7 @@ const APPLICATION = {
     })(),
 
     (function () {
-      /* ---- Outils propres au module 8 -------------------------------------------
+      /* ---- Outils propres au module 9 -------------------------------------------
          Angles : 0° = axe du couple (vers la scène), positif à DROITE.
          Un couple = { A directivité, ang angle entre les axes (°), d écartement (m) }.
          Micro gauche orienté à −ang/2, micro droit à +ang/2. */
@@ -1439,21 +1694,21 @@ const APPLICATION = {
           ],
           exercice: [
             () => { const d = C([0.4, 0.5, 0.6]), th = C([20, 30]), dt = d * Math.sin(th * Math.PI / 180) / MICRO.c * 1000, dec = Math.min(100, dt * 100), f = 1000 / (2 * dt); return { type: "exercice", question: "Un couple AB d’omnis écartés de <b>" + NB(d * 100, 0) + " cm</b> capte un violon placé à <b>" + th + "°</b> à droite, loin du couple.", etapes: [
-              { question: "a) Quelle est la différence de temps, en ms ?", reponse: dt, unite: "ms" },
-              { question: "b) Avec le modèle du labo (ΔL ≈ 0 ici), quel est le décalage de la source fantôme, en % ?", reponse: dec, unite: "%", tolerance: 0.05 },
-              { question: "c) En mono, où tombe le premier creux du filtre en peigne pour ce violon ?", reponse: f, unite: "Hz" }
+              { question: "Quelle est la différence de temps, en ms ?", reponse: dt, unite: "ms" },
+              { question: "Avec le modèle du labo (ΔL ≈ 0 ici), quel est le décalage de la source fantôme, en % ?", reponse: dec, unite: "%", tolerance: 0.05 },
+              { question: "En mono, où tombe le premier creux du filtre en peigne pour ce violon ?", reponse: f, unite: "Hz" }
             ], solution: "a) Δt = " + NB(d, 2) + " × sin " + th + "° / 343 = " + NB(dt, 3) + " ms. b) " + NB(dt, 3) + " / 1 ms ≈ " + NB(dec, 0) + " %. c) f = 1 / (2Δt) ≈ " + NB(f, 0) + " Hz.", indice: "Les omnis captent le même niveau : seul Δt compte." }; },
             () => { const th = C([15, 20, 30]), rD = gainMic(0.5, 45, th), rG = gainMic(0.5, -45, th), l = 20 * Math.log10(rD / rG); return { type: "exercice", question: "Un couple XY de cardioïdes ouverts à 90° capte un chanteur à <b>" + th + "°</b> à droite.", etapes: [
-              { question: "a) Sensibilité relative du micro droit (axe à +45°) dans cette direction ?", reponse: rD, unite: "", tolerance: 0.02 },
-              { question: "b) Sensibilité relative du micro gauche (axe à −45°) ?", reponse: rG, unite: "", tolerance: 0.02 },
-              { question: "c) Différence de niveau ΔL ?", reponse: l, unite: "dB", tolerance: 0.06 },
-              { question: "d) Ce couple est-il compatible mono ?", bonne: "Oui : capsules au même point, pas de Δt", mauvaises: ["Non : filtre en peigne dû à Δt", "Non : les cardioïdes s’annulent en mono"] }
+              { question: "Sensibilité relative du micro droit (axe à +45°) dans cette direction ?", reponse: rD, unite: "", tolerance: 0.02 },
+              { question: "Sensibilité relative du micro gauche (axe à −45°) ?", reponse: rG, unite: "", tolerance: 0.02 },
+              { question: "Différence de niveau ΔL ?", reponse: l, unite: "dB", tolerance: 0.06 },
+              { question: "Ce couple est-il compatible mono ?", bonne: "Oui : capsules au même point, pas de Δt", mauvaises: ["Non : filtre en peigne dû à Δt", "Non : les cardioïdes s’annulent en mono"] }
             ], solution: "a) 0,5 + 0,5 cos " + (45 - th) + "° = " + NB(rD, 3) + ". b) 0,5 + 0,5 cos " + (45 + th) + "° = " + NB(rG, 3) + ". c) 20 log(" + NB(rD, 3) + " / " + NB(rG, 3) + ") = " + NB(l, 1) + " dB. d) Oui.", indice: "Angle source – axe : 45° − θ à droite, 45° + θ à gauche." }; },
             () => { const M = H(8, 16), S = H(2, 6); return { type: "exercice", question: "Un couple MS délivre M = <b>" + M + " mV</b> et S = <b>" + S + " mV</b> pour une source placée à gauche.", etapes: [
-              { question: "a) Tension de la voie gauche G ?", reponse: M + S, unite: "mV", ecart: 0.01 },
-              { question: "b) Tension de la voie droite D ?", reponse: M - S, unite: "mV", ecart: 0.01 },
-              { question: "c) Somme mono G + D ?", reponse: 2 * M, unite: "mV", ecart: 0.01 },
-              { question: "d) Pour élargir l’image au mixage, on…", bonne: "monte le niveau de S", mauvaises: ["monte le niveau de M", "inverse la polarité de M"] }
+              { question: "Tension de la voie gauche G ?", reponse: M + S, unite: "mV", ecart: 0.01 },
+              { question: "Tension de la voie droite D ?", reponse: M - S, unite: "mV", ecart: 0.01 },
+              { question: "Somme mono G + D ?", reponse: 2 * M, unite: "mV", ecart: 0.01 },
+              { question: "Pour élargir l’image au mixage, on…", bonne: "monte le niveau de S", mauvaises: ["monte le niveau de M", "inverse la polarité de M"] }
             ], solution: "a) " + M + " + " + S + " = " + (M + S) + " mV. b) " + M + " − " + S + " = " + (M - S) + " mV. c) " + (2 * M) + " mV = 2M : S a disparu. d) On monte S.", indice: "G = M + S, D = M − S." }; }
           ]
         }
