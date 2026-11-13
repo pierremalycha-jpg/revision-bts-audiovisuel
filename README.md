@@ -7,7 +7,7 @@ Plateforme de révision pour les étudiants du BTS Audiovisuel du Lycée Henri M
 
 Chaque notion a sa propre **application de révision**. La page d'accueil présente les applications sous forme d'**icônes**, rangées en trois catégories :
 
-1. **Apport de connaissances** — comprendre les notions techniques, avec deux sous-catégories : *Caméra, éclairage, filtres* et *Le numérique* ;
+1. **Apport de connaissances** — comprendre les notions techniques, avec trois sous-catégories : *Caméra, éclairage, filtres*, *Le numérique* et *Son* ;
 2. **Outils** — préparer ses projets (plans de feu, schémas de câblage, synoptiques de régie, workflows) : à venir ;
 3. **Applications pratiques** — simulateurs (régie, caméra, car régie) : à venir.
 
@@ -33,6 +33,7 @@ La progression des étudiants est enregistrée avec Firebase. Le site est héber
 | Capteurs d’image — *De la lumière aux électrons.* | Connaissances › Caméra, éclairage, filtres | TES | 6 | `modules/tes-capteurs/` |
 | Éclairage — *LED, gélatines et ombres.* | Connaissances › Caméra, éclairage, filtres | TES | 3 | `modules/tes-eclairage/` |
 | Compression vidéo — *Moins de bits, même image.* | Connaissances › Le numérique | TES | 6 | `modules/tes-compression-video/` |
+| Microphones — *De la vibration à la tension.* | Connaissances › Son | TES | 8 | `modules/tes-microphones/` |
 
 ## Choix techniques
 
@@ -86,9 +87,11 @@ revision-bts-audiovisuel/
     │   ├── index.html
     │   ├── contenu.js
     │   └── labos.js
-    └── tes-compression-video/        Application avec un film de module
-        ├── index.html, contenu.js, labos.js
-        └── films/                    Les vidéos terminées (module-1.mp4 et son affiche)
+    ├── tes-compression-video/        Application avec un film de module
+    │   ├── index.html, contenu.js, labos.js
+    │   └── films/                    Les vidéos terminées (module-1.mp4 et son affiche)
+    └── tes-microphones/              Sous-catégorie « Son » : huit modules sur les microphones
+        └── index.html, contenu.js, labos.js
 ```
 
 ## Tester le site sur ton ordinateur
@@ -113,7 +116,7 @@ Résumé (le détail est dans [docs/CHARTE-APPLICATIONS.md](docs/CHARTE-APPLICAT
 
 ## Contenu pédagogique : à valider
 
-Les applications « Signal vidéo numérique » et « Compression vidéo » ont été rédigées à partir de connaissances techniques générales, **pas à partir du référentiel du BTS**. Avant de les proposer aux étudiants, relis les notions et les questions, et ajuste le vocabulaire, le niveau et les notions à ce que le référentiel exige.
+Les applications « Signal vidéo numérique », « Compression vidéo » et « Microphones » ont été rédigées à partir de connaissances techniques générales, **pas à partir du référentiel du BTS**. Avant de les proposer aux étudiants, relis les notions et les questions, et ajuste le vocabulaire, le niveau et les notions à ce que le référentiel exige.
 
 ## Données enregistrées
 
