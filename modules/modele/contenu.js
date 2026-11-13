@@ -35,6 +35,7 @@ const APPLICATION = {
   // Facultatif :
   // noteMinimale: 12,   // note pour valider un module (12 par défaut)
   // deblocage: false,   // false = tous les modules ouverts dès le départ
+  // epure: false,      // false = ancienne présentation (une longue page) au lieu de l'interface épurée
 
   modules: [
     /* ======================================================================
@@ -56,7 +57,9 @@ const APPLICATION = {
       // film: { src: "films/module-1.mp4", affiche: "films/module-1.jpg", duree: "2 min", chapitres: [[0, "Première notion"], [40, "Deuxième notion"]] },
 
       /* ---- 1. COMPRENDRE : les mots et les formules ------------------------
-         Chaque mot devient une question dépliable. Champs d'un mot :
+         Chaque mot devient une tuile qui ouvre sa fiche. Dans la fiche, la
+         définition est visible ; la comparaison et les repères sont derrière
+         des « petits + ». Champs d'un mot :
            t   le mot (obligatoire)          d   la définition (obligatoire)
            s   son symbole (facultatif)      u   son unité (facultatif)
            ic  un émoji, pour le repérer     q   la question affichée (sinon : « Mot : de quoi s’agit-il ? »)

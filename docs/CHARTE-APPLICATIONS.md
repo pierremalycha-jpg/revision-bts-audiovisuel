@@ -2,6 +2,8 @@
 
 L'application **Photométrie** (`modules/tes-photometrie/`) est la **référence** de la plateforme. Toute nouvelle application reprend sa direction artistique, sa structure, son ton, ses animations et sa façon d'évaluer. Le **kit application** (`js/application.js` et `css/application.css`) fournit tout cela d'office : une nouvelle application décrit son contenu, le kit fait le reste.
 
+Depuis novembre 2026, toutes les applications du kit utilisent l'**interface épurée** (section 2) : un module montre **une étape à la fois**, les notions sont des **tuiles** qui ouvrent leur fiche dans une **fenêtre**, et les détails sont derrière des **petits +**. C'est le modèle à suivre pour toute nouvelle application ; le kit le fait tout seul.
+
 Cette charte dit ce qu'il faut respecter, et pourquoi.
 
 ---
@@ -32,14 +34,34 @@ Cette charte dit ce qu'il faut respecter, et pourquoi.
 
 ### Le module : toujours les mêmes quatre étapes, dans le même ordre
 
-La barre du haut les affiche et suit le défilement. L'élève sait toujours où il en est.
+Une barre numérotée, sous le titre du module, les affiche (1 Comprendre · 2 Manipuler · 3 Retenir · 4 S'évaluer) ; elle réapparaît dans la barre du haut quand on descend. L'élève sait toujours où il en est.
 
 | Étape | Contenu | Règle |
 |---|---|---|
-| **Comprendre** | Les **mots** et les **formules**, présentés en **questions dépliables**. | Chaque mot : une définition simple, une **comparaison** avec la vie de tous les jours, des **repères** chiffrés. Chaque formule : comment la **lire à voix haute**, un tableau « symbole · nom · unité · rôle », un **exemple chiffré**. |
+| **Comprendre** | Les **mots** et les **formules**, présentés en **tuiles** qui ouvrent chacune leur **fiche**. | Chaque mot : une définition simple, une **comparaison** avec la vie de tous les jours, des **repères** chiffrés. Chaque formule : comment la **lire à voix haute**, un tableau « symbole · nom · unité · rôle », un **exemple chiffré**. |
 | **Manipuler** | Le **labo** : animation ou simulation. | Une scène **toujours visible**, des réglages à côté, des valeurs calculées dessous, une explication qui **suit les réglages**. |
 | **Retenir** | L'essentiel avant l'évaluation. | Quatre questions : définitions, formules, repères, **pièges**. Court : ce qui tombe à l'évaluation, rien de plus. |
 | **S'évaluer** | 10 questions, 2 points chacune, note sur 20. | Les valeurs changent à chaque tentative. Correction détaillée. **12/20** ouvre le module suivant. |
+
+### L'interface épurée (la présentation de toutes les applications)
+
+Principe : **ne pas noyer l'élève**. En arrivant sur un module, il voit le titre, le film en une carte, la barre des étapes et la première étape, rien d'autre. Rien n'est supprimé : tout le contenu reste à **un clic**, et ce qui est secondaire (une comparaison, un tableau de symboles, un calcul détaillé) attend derrière un « + » que l'élève le demande.
+
+Le kit l'applique d'office ; une application n'a rien à écrire pour l'obtenir. Pour revenir à l'ancienne présentation (une seule longue page, les notions en questions dépliables) : `epure: false` dans `contenu.js`, ou `?classique` à la fin de l'adresse pour comparer le temps d'une visite.
+
+| Élément | Présentation épurée |
+|---|---|
+| **Étapes** | Une seule à la fois. Une barre numérotée (1 Comprendre · 2 Manipuler · 3 Retenir · 4 S'évaluer) sous le titre ; « Étape suivante » en bas. L'étape entre en glissant dans le sens du parcours. |
+| **Film** | Une carte compacte (vignette, durée, « Regarder »). Il s'ouvre dans une fenêtre qui grandit depuis la vignette, avec ses chapitres, et démarre à l'ouverture. |
+| **Comprendre** | Les mots et les formules en **tuiles** (icône + mot, ou la formule). Une tuile ouvre sa **fiche** dans une fenêtre ; on les feuillette avec ← →, les points du bas ou en glissant le doigt. Une coche verte marque les fiches déjà lues. |
+| **Dans une fiche** | La définition (ou la formule et sa lecture à voix haute) reste visible ; la comparaison, les repères, le tableau des symboles et l'exemple chiffré sont derrière des **petits +**. |
+| **Manipuler** | Plusieurs labos : des **onglets**, un labo à la fois, et « Labo suivant » en bas. Une carte qui contient un `.calc` (« Calcul pas à pas ») est repliée derrière un +. « Ce qu'il faut observer » reste toujours visible. |
+| **S'évaluer** | Les règles détaillées derrière un +. Dans la correction, les erreurs sont ouvertes, les bonnes réponses repliées. |
+| **Téléphone** | Les fenêtres montent du bas de l'écran. |
+
+Ce qui reste **toujours visible**, parce que c'est le cœur de l'apprentissage : la définition d'un mot, une formule et sa lecture à voix haute, la scène et les réglages d'un labo, « Ce qu'il faut observer », les erreurs dans la correction.
+
+Le kit fournit aussi aux labos `Application.plus(titre, html, { ouvert })` (un détail replié) et `Application.fenetre({ origine, contenu })` (une fenêtre qui s'ouvre depuis un élément). Les fiches déjà lues sont mémorisées sur l'appareil de l'élève.
 
 ### Le film du module (avant les quatre étapes)
 
@@ -103,6 +125,9 @@ Elles servent à **comprendre**, jamais à décorer.
 |---|---|---|
 | Apparition douce des blocs au défilement | Partout | Le kit |
 | Entrée de page (glissement léger) | Changement de module | Le kit |
+| Étape qui glisse dans le sens du parcours | Changement d'étape, d'onglet de labo, de fiche | Le kit |
+| Fenêtre qui grandit depuis l'élément cliqué et s'y referme (monte du bas sur téléphone) | Fiches, film, lexique | `Application.fenetre(...)` |
+| Petit + qui tourne en − et détail qui se déplie en douceur | Fiches, labos, évaluation | `Application.plus(...)` |
 | Valeur qui « rebondit » quand elle change | Valeurs des labos | `Application.afficher(el, texte)` |
 | Pastille glissante des contrôles segmentés | Labos, barre des étapes | `Application.segment(...)` |
 | Curseurs remplis de bleu jusqu'au pouce | Labos | Le kit (automatique) |
@@ -142,6 +167,9 @@ Règles de code (dans `labos.js`) :
 5. Une explication (`.note ok / warn / bad`) dit ce que l'élève doit remarquer **pour les réglages actuels**.
 6. Proposer des **situations toutes prêtes** (boutons `.chip`) : « cas normal », « cas limite », « erreur typique ».
 7. Accessibilité : `role="img"` et `aria-label` décrivant la scène ; `aria-live="polite"` sur l'explication.
+8. **Plusieurs labos** dans un module : chacun commence par un titre `<div class="sous-labo"><span class="eyebrow">Labo 1 · Nom court</span><h3>…</h3><p class="muted">…</p></div>`. Le kit en fait des **onglets** (« Labo 1 / Nom court ») : garde le nom court… court (deux ou trois mots).
+9. La carte **« Calcul pas à pas »** (celle qui contient un `.calc`) est repliée derrière un + : elle détaille, elle ne doit pas être indispensable pour comprendre la scène. « Ce qu'il faut observer » reste, elle, toujours visible.
+10. Un labo démarre **masqué** (l'élève arrive sur « Comprendre »). Ne mesure donc rien à l'initialisation (pas de `clientWidth`) ; une animation s'arrête quand sa scène est cachée (`el.offsetParent === null`) et repart dans `Application.surAffichage(n, …)`, que le kit appelle quand le labo redevient visible.
 
 ---
 
@@ -154,6 +182,8 @@ Règles de code (dans `labos.js`) :
 - [ ] Chaque banque de questions contient plus de questions que le tirage n'en prend.
 - [ ] Les questions « Calculer » ont des valeurs tirées au sort et une explication avec le calcul.
 - [ ] Testé avec `?enseignant` : tous les modules, clair et sombre, ordinateur et téléphone.
+- [ ] Chaque fiche s'ouvre et se lit seule (la définition ne renvoie pas à « la question ci-dessus ») ; les + s'ouvrent.
+- [ ] Chaque onglet de labo s'affiche, et ses animations repartent quand on revient dessus.
 - [ ] Aucune erreur dans la console du navigateur (F12).
 - [ ] Le contenu a été relu par rapport au référentiel du BTS.
 
@@ -177,3 +207,5 @@ Règles de code (dans `labos.js`) :
 | `modules/tes-microphones/` | Physique partagée entre le cours et les labos (objet `MICRO` et tableau `DIRECTIVITES` en tête de `contenu.js`, réutilisés par `labos.js`), diagrammes polaires en SVG (`figPolaire`) et sur canvas (`O.polaireGrille`, `O.polaireCourbe`), fiches techniques en SVG (`figFiche`) pour les questions « Lire ». |
 
 La photométrie, elle, reste un **fichier unique** autonome (elle fonctionne aussi hors ligne, avec son propre enregistrement, son relevé PDF et son tableau de bord enseignant). Le kit en reprend la forme ; il ne la remplace pas.
+
+Elle a reçu la même **interface épurée** que les applications du kit (une étape à la fois, notions en tuiles et fiches, petits +, fenêtres qui grandissent depuis le bouton cliqué). Ce code est écrit dans son propre fichier (objet `Epure`, juste avant `Lessons`, et styles « INTERFACE ÉPURÉE » à la fin de sa feuille de style) pour qu'elle continue de fonctionner hors connexion. Toute évolution de l'interface épurée du kit (`js/application.js`, `css/application.css`) est à reporter aussi à cet endroit. `?classique` y rend également l'ancienne présentation.

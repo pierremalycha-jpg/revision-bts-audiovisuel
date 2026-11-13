@@ -7,8 +7,8 @@
      Accueil de l'application  héros, progression, parcours des modules
      En haut de chaque module  le film du module (facultatif) : une vidéo courte,
                                en musique et sans voix, qui résume l'essentiel
-     Pour chaque module, quatre étapes, dans cet ordre :
-       1. Comprendre   les mots et les formules, en questions dépliables
+     Pour chaque module, quatre étapes, dans cet ordre (une à la fois à l'écran) :
+       1. Comprendre   les mots et les formules, en tuiles qui ouvrent leur fiche
        2. Manipuler    animations et simulations (le « labo » du module)
        3. Retenir      l'essentiel avant l'évaluation
        4. S'évaluer    10 questions, notées sur 20 ; 12/20 ouvre le module suivant
@@ -48,7 +48,12 @@ const Application = (function () {
     menu: '<svg class="ico" viewBox="0 0 20 20" aria-hidden="true"><rect x="2.6" y="3.6" width="14.8" height="12.8" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7.6 3.8v12.4" stroke="currentColor" stroke-width="1.6"/></svg>',
     cadenas: '<svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 7V5.2a3 3 0 0 1 6 0V7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><rect x="3.2" y="7" width="9.6" height="7" rx="2" fill="currentColor"/></svg>',
     coche: '<svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.6 8.4l2.9 2.9 5.9-6.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    valide: '<svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    valide: '<svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    croix: '<svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    lecture: '<svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.2 3.4v9.2a.6.6 0 0 0 .9.5l7.2-4.6a.6.6 0 0 0 0-1L6.1 2.9a.6.6 0 0 0-.9.5z" fill="currentColor"/></svg>',
+    gauche: '<svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    droite: '<svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    info: '<svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7.2v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="4.9" r=".95" fill="currentColor"/></svg>'
   };
 
   const ETAPES = { comprendre: "Comprendre", manipuler: "Manipuler", retenir: "Retenir", evaluer: "S’évaluer" };
@@ -64,6 +69,13 @@ const Application = (function () {
   const labosLances = {};
   const auAffichage = {};    // fonctions à rappeler à chaque affichage d'un module
   const evaluations = {};    // état de l'évaluation de chaque module
+  /* Interface épurée (voir la section « INTERFACE ÉPURÉE ») : c'est la
+     présentation par défaut de toutes les applications. « epure: false » dans
+     contenu.js, ou « ?classique » dans l'adresse, rend l'ancienne présentation
+     (une seule longue page, les notions en questions dépliables). */
+  let EPURE = false;
+  const etapeDe = {};        // étape affichée dans chaque module (interface épurée)
+  const fiches = {};         // les fiches « mots » et « formules » de chaque module
 
   /* ==========================================================================
      PROGRESSION ET DÉBLOCAGE
@@ -110,6 +122,11 @@ const Application = (function () {
 
   // Fenêtre par-dessus la page (lexique). Échap ou clic à côté pour fermer.
   function feuille(html, auMontage) {
+    if (EPURE) {
+      const f = fenetre({ origine: document.activeElement, contenu: html, classe: "fen-feuille" });
+      if (auMontage) auMontage(f.corps, f.fermer);
+      return f.fermer;
+    }
     const ov = document.createElement("div"); ov.className = "sheet-ov";
     ov.innerHTML = '<div class="sheet" role="dialog" aria-modal="true"><button class="sheet-x" aria-label="Fermer">×</button>' + html + "</div>";
     document.body.appendChild(ov);
@@ -120,6 +137,89 @@ const Application = (function () {
     requestAnimationFrame(() => ov.classList.add("in"));
     if (auMontage) auMontage($(".sheet", ov), fermer);
     return fermer;
+  }
+
+  /* Fenêtre dynamique (interface épurée) : elle GRANDIT depuis l'élément
+     cliqué (une tuile, une icône) et se REFERME vers lui. Sur téléphone, elle
+     monte du bas de l'écran. Échap, la croix ou un clic à côté la ferment.
+       fenetre({ origine: el, contenu: "html" ou un nœud, classe, titre,
+                 auMontage(corps, fermer), avantFermeture(), clavier(e) })
+       → { corps, fermer(), origine(el) }
+     Une seule fenêtre à la fois : en ouvrir une referme la précédente. */
+  let fenetreCourante = null;
+  function fenetre(o) {
+    if (fenetreCourante) fenetreCourante.fermer(true);
+    let origine = o.origine && o.origine.getBoundingClientRect ? o.origine : null;
+    const ov = document.createElement("div"); ov.className = "fen-ov";
+    ov.innerHTML = '<div class="fen ' + (o.classe || "") + '" role="dialog" aria-modal="true"' + (o.titre ? ' aria-label="' + echapper(o.titre) + '"' : "") + ' tabindex="-1">' +
+      '<button class="fen-x" type="button" aria-label="Fermer">' + PICTO.croix + '</button><div class="fen-c"></div></div>';
+    const fen = $(".fen", ov), corps = $(".fen-c", ov);
+    if (typeof o.contenu === "string") corps.innerHTML = o.contenu; else if (o.contenu) corps.appendChild(o.contenu);
+    document.body.appendChild(ov);
+    document.documentElement.classList.add("fen-ouverte");
+
+    // Point de départ : le centre de l'élément cliqué, à sa taille.
+    function depuisOrigine() {
+      const visible = origine && origine.isConnected && origine.offsetParent !== null;
+      const r = visible ? origine.getBoundingClientRect() : null;
+      const enVue = r && r.bottom > 0 && r.top < window.innerHeight;
+      const cx = fen.offsetLeft + fen.offsetWidth / 2, cy = fen.offsetTop + fen.offsetHeight / 2;
+      const dx = enVue ? r.left + r.width / 2 - cx : 0, dy = enVue ? r.top + r.height / 2 - cy : 24;
+      const s = enVue ? Math.min(0.9, Math.max(0.18, r.width / fen.offsetWidth)) : 0.94;
+      fen.style.setProperty("--fx", dx.toFixed(1) + "px"); fen.style.setProperty("--fy", dy.toFixed(1) + "px"); fen.style.setProperty("--fs", s.toFixed(3));
+    }
+    depuisOrigine();
+    void fen.offsetWidth;
+    requestAnimationFrame(() => ov.classList.add("in"));
+    const avant = document.activeElement;
+    setTimeout(() => { const x = $(".fen-x", ov); if (ov.isConnected) (fen.querySelector("[autofocus]") || x).focus({ preventScroll: true }); }, 60);
+
+    let fermee = false;
+    function fermer(immediat) {
+      if (fermee) return; fermee = true;
+      if (o.avantFermeture) o.avantFermeture();
+      document.removeEventListener("keydown", clavier, true);
+      if (fenetreCourante === api) fenetreCourante = null;
+      document.documentElement.classList.remove("fen-ouverte");
+      if (immediat === true || mouvementReduit()) { ov.remove(); return; }
+      depuisOrigine();
+      ov.classList.remove("in"); ov.classList.add("out");
+      setTimeout(() => ov.remove(), 380);
+      const retour = origine && origine.isConnected ? origine : avant;
+      if (retour && retour.focus) retour.focus({ preventScroll: true });
+    }
+    function clavier(e) {
+      if (e.key === "Escape") { e.stopPropagation(); fermer(); return; }
+      if (e.key === "Tab") { // le focus reste dans la fenêtre
+        const f = $$('button, [href], input, select, textarea, video, [tabindex]:not([tabindex="-1"])', fen).filter(x => !x.disabled && x.offsetParent !== null);
+        if (!f.length) return;
+        if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+        else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+        return;
+      }
+      if (o.clavier) o.clavier(e);
+    }
+    document.addEventListener("keydown", clavier, true);
+    ov.addEventListener("click", e => { if (e.target === ov || e.target.closest(".fen-x, [data-fermer]")) fermer(); });
+    const api = { corps: corps, fen: fen, fermer: fermer, origine: el => { origine = el; } };
+    fenetreCourante = api;
+    if (o.auMontage) o.auMontage(corps, fermer);
+    return api;
+  }
+
+  /* Le « petit + » : un détail replié, qui se déplie (et se replie) en douceur.
+       plus("Une comparaison", "html", { ouvert: false, cls: "" })
+     Le clic est géré une fois pour toutes dans demarrer(). */
+  function plus(titre, corps, o) {
+    o = o || {};
+    return '<div class="plus' + (o.ouvert ? " ouvert" : "") + (o.cls ? " " + o.cls : "") + '"><button type="button" class="plus-b" aria-expanded="' + !!o.ouvert + '"><i class="plus-i" aria-hidden="true"></i><span>' + titre + '</span></button>' +
+      '<div class="plus-c"><div><div class="plus-in">' + corps + "</div></div></div></div>";
+  }
+  function basculerPlus(bloc, etat) {
+    const ouvrir = etat === undefined ? !bloc.classList.contains("ouvert") : !!etat;
+    bloc.classList.toggle("ouvert", ouvrir);
+    const b = bloc.querySelector(".plus-b"); if (b) b.setAttribute("aria-expanded", String(ouvrir));
+    if (ouvrir) setTimeout(() => { remplirCurseurs(bloc); $$(".seg.glisse", bloc).forEach(s => s._placer && s._placer()); }, 20);
   }
 
   // Une question dépliable (<details>) : la forme de toutes les notions.
@@ -279,11 +379,15 @@ const Application = (function () {
     let html = '<div class="pagehead"><span class="kicker">Module ' + n + "</span><h2>" + m.titre + "</h2>" + (m.intro ? "<p>" + m.intro + "</p>" : "") + "</div>";
 
     // Le film du module : la vidéo qui résume l'essentiel (facultative)
-    if (m.film && m.film.src) html += blocFilm(m.film, n);
+    if (m.film && m.film.src) html += EPURE ? blocFilmCompact(m.film, n) : blocFilm(m.film, n);
+
+    // Interface épurée : la barre des étapes, sous le titre (une étape à la fois)
+    if (EPURE) html += '<nav class="pas-barre" aria-label="Étapes du module ' + n + '"><div class="pas" id="pas-' + n + '"></div></nav>';
 
     // 1. Comprendre
     const N = m.notions;
-    if (N) {
+    if (N && EPURE) html += etapeComprendreEpuree(N, n);
+    else if (N) {
       const mots = N.mots || [], formules = N.formules || [];
       html += '<div class="etape etape-comprendre" data-etape="comprendre">' +
         '<div class="etape-hd"><div><span class="eyebrow">Les notions à connaître · module ' + n + "</span><h3>" + (N.titre || "Les notions") + "</h3>" + (N.intro ? '<p class="lead3">' + N.intro + "</p>" : "") + '<p class="qa-tip">Cliquez sur une question pour afficher sa réponse.</p></div><button class="btn small" data-tout-ouvrir>Tout ouvrir</button></div>' +
@@ -324,6 +428,7 @@ const Application = (function () {
 
     if (modele) $("#labo-" + n).appendChild(modele.content.cloneNode(true));
     brancherFilm(sec);
+    if (EPURE) epurerModule(sec, n);
   }
 
   /* --- Le film du module ---------------------------------------------------
@@ -335,15 +440,18 @@ const Application = (function () {
      Les chapitres, à côté de la vidéo (dessous sur petit écran), permettent
      d'aller droit à une notion. */
   function minutes(s) { return Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0"); }
-  function blocFilm(f, n) {
+  function corpsFilm(f, n) {
     const chapitres = (f.chapitres || []).map(c => '<button type="button" class="chip" data-film-t="' + c[0] + '"><small>' + minutes(c[0]) + "</small>" + echapper(c[1]) + "</button>").join("");
-    return '<div class="film' + (chapitres ? "" : " sans-chapitres") + '" id="film-' + n + '">' +
-      '<div class="film-hd"><span class="eyebrow">Le film du module' + (f.duree ? " · " + echapper(f.duree) : "") + '</span><span class="film-note">' + (f.intro || "L’essentiel du module, pas à pas, en images et en musique (sans voix).") + "</span></div>" +
-      '<div class="film-corps"><div class="stg film-stg"><video class="film-v" controls playsinline preload="none"' + (f.affiche ? ' poster="' + echapper(f.affiche) + '"' : "") +
+    return '<div class="film-corps"><div class="stg film-stg"><video class="film-v" controls playsinline preload="none"' + (f.affiche ? ' poster="' + echapper(f.affiche) + '"' : "") +
       ' aria-label="Film du module ' + n + ' : animation musicale sans voix, tout le texte est affiché à l’écran"><source src="' + echapper(f.src) + '" type="video/mp4">' +
       "Votre navigateur ne peut pas lire cette vidéo.</video></div>" +
       (chapitres ? '<div class="film-chap" role="group" aria-label="Chapitres du film"><b class="film-chap-t">Chapitres</b>' + chapitres + "</div>" : "") +
-      "</div></div>";
+      "</div>";
+  }
+  function blocFilm(f, n) {
+    return '<div class="film' + ((f.chapitres || []).length ? "" : " sans-chapitres") + '" id="film-' + n + '">' +
+      '<div class="film-hd"><span class="eyebrow">Le film du module' + (f.duree ? " · " + echapper(f.duree) : "") + '</span><span class="film-note">' + (f.intro || "L’essentiel du module, pas à pas, en images et en musique (sans voix).") + "</span></div>" +
+      corpsFilm(f, n) + "</div>";
   }
   function brancherFilm(sec) {
     const video = $(".film-v", sec); if (!video) return;
@@ -380,6 +488,270 @@ const Application = (function () {
   }
 
   /* ==========================================================================
+     INTERFACE ÉPURÉE  (par défaut ; « epure: false » dans contenu.js pour l'ancienne)
+     --------------------------------------------------------------------------
+     Le même contenu, présenté pour ne pas noyer l'élève :
+       - une ÉTAPE à la fois (Comprendre, Manipuler, Retenir, S'évaluer), avec
+         une barre d'étapes sous le titre et « Étape suivante » en bas ;
+       - le FILM en une carte compacte, qui s'ouvre en grand dans une fenêtre ;
+       - les NOTIONS en tuiles (icône + mot, ou la formule) : chaque tuile
+         ouvre sa fiche dans une fenêtre, qu'on feuillette avec ← → ;
+       - dans une fiche, les détails (comparaison, repères, symboles, exemple)
+         derrière des « petits + » ;
+       - plusieurs LABOS dans un module : des onglets, un labo à la fois ; le
+         « Calcul pas à pas » replié derrière un « + » ;
+       - l'ÉVALUATION : règles et explications de la correction repliées.
+     Rien n'est supprimé : tout reste à un clic.
+     ========================================================================== */
+
+  // --- Le film : une carte compacte -----------------------------------------
+  function blocFilmCompact(f, n) {
+    const nbc = (f.chapitres || []).length;
+    return '<div class="film film-compact" id="film-' + n + '">' +
+      '<button type="button" class="film-carte" data-film-ouvrir="' + n + '">' +
+      '<span class="film-vign"' + (f.affiche ? " style=\"background-image:url('" + echapper(f.affiche) + "')\"" : "") + '><i class="film-play">' + PICTO.lecture + "</i>" + (f.duree ? "<em>" + echapper(f.duree) + "</em>" : "") + "</span>" +
+      '<span class="film-txt"><span class="eyebrow">Le film du module</span><b>L’essentiel en images et en musique</b><small>' + (nbc ? nbc + " chapitres · " : "") + "sans voix, tout est écrit à l’écran</small></span>" +
+      '<span class="film-go">' + PICTO.lecture + "<span>Regarder</span></span></button>" +
+      '<div class="film-salle' + (nbc ? "" : " sans-chapitres") + '" hidden>' + corpsFilm(f, n) + "</div></div>";
+  }
+  function ouvrirFilm(n, bouton) {
+    const salle = $("#film-" + n + " .film-salle"); if (!salle) return;
+    const corps = $(".film-corps", salle), video = $(".film-v", corps);
+    const cadre = document.createElement("div"); cadre.className = "film-fen" + (salle.classList.contains("sans-chapitres") ? " sans-chapitres" : "");
+    cadre.innerHTML = '<div class="fen-hd"><span class="eyebrow">Module ' + n + " · le film" + (A.modules[n - 1].film.duree ? " · " + echapper(A.modules[n - 1].film.duree) : "") + "</span><h3>" + echapper(stripHtml(A.modules[n - 1].titre)) + "</h3></div>";
+    cadre.appendChild(corps);
+    fenetre({
+      origine: $(".film-vign", bouton) || bouton, contenu: cadre, classe: "fen-film", titre: "Film du module " + n,
+      avantFermeture: () => { if (!video.paused) video.pause(); salle.appendChild(corps); }
+    });
+    // L'élève a demandé le film : il démarre quand la fenêtre a fini de s'ouvrir.
+    setTimeout(() => { if (!corps.closest(".film-salle")) { const p = video.play(); if (p && p.catch) p.catch(() => { /* lecture refusée : bouton lecture */ }); } }, mouvementReduit() ? 0 : 420);
+  }
+
+  // --- Les notions en tuiles et en fiches -------------------------------------
+  function etapeComprendreEpuree(N, n) {
+    const mots = N.mots || [], formules = N.formules || [];
+    fiches[n] = mots.map(d => ({ type: "mot", d: d })).concat(formules.map(f => ({ type: "fx", f: f })));
+    let k = 0;
+    const tm = mots.map(d => tuileMot(d, n, k++)).join(""), tf = formules.map(f => tuileFormule(f, n, k++)).join("");
+    return '<div class="etape etape-comprendre" data-etape="comprendre">' +
+      '<div class="etape-hd"><div><span class="eyebrow">Les notions à connaître</span><h3>' + (N.titre || "Les notions") + "</h3>" + (N.intro ? '<p class="lead3">' + N.intro + "</p>" : "") + "</div>" +
+      '<button class="btn small" data-fiches-parcourir="' + n + '">' + PICTO.lecture + " Parcourir les fiches</button></div>" +
+      (mots.length ? '<div class="fiches-bloc"><h4 class="qa-h">Les mots à connaître<small data-fiches-compte="mot"></small></h4><div class="fiches">' + tm + "</div></div>" : "") +
+      (formules.length ? '<div class="fiches-bloc"><h4 class="qa-h">Les formules<small data-fiches-compte="fx"></small></h4><div class="fiches fiches-fx">' + tf + "</div></div>" : "") +
+      '<p class="qa-tip">' + PICTO.info + " Touchez une tuile pour ouvrir sa fiche. Dans la fiche, les flèches ← → passent à la suivante.</p></div>";
+  }
+  function tuileMot(d, n, k) {
+    const sous = [d.s ? "symbole " + d.s : "", d.u || ""].filter(Boolean).join(" · ");
+    return '<button type="button" class="fiche" data-fiche="' + n + ":" + k + '"><span class="fiche-ic" aria-hidden="true">' + (d.ic || "•") + '</span><span class="fiche-t"><b>' + d.t + "</b>" + (sous ? "<small>" + sous + "</small>" : "") + '</span><i class="fiche-vu" title="Fiche déjà lue">' + PICTO.coche + "</i></button>";
+  }
+  function tuileFormule(f, n, k) {
+    return '<button type="button" class="fiche fiche-fx" data-fiche="' + n + ":" + k + '"><span class="fiche-ic" aria-hidden="true"><i>ƒ</i></span><span class="fiche-t"><b class="fiche-f">' + f.f + "</b>" + (f.q ? "<small>" + insecables(stripHtml(f.q)) + "</small>" : "") + '</span><i class="fiche-vu" title="Fiche déjà lue">' + PICTO.coche + "</i></button>";
+  }
+  function contenuFiche(n, k) {
+    const x = fiches[n][k], total = fiches[n].length;
+    if (x.type === "mot") {
+      const d = x.d;
+      const tags = (d.s ? '<span class="pill">symbole ' + d.s + "</span>" : "") + (d.u ? '<span class="pill etiquette-neutre">unité : ' + d.u + "</span>" : "");
+      return '<div class="fc"><div class="fc-hd"><span class="fc-ic" aria-hidden="true">' + (d.ic || "•") + '</span><div><span class="eyebrow">Les mots à connaître</span><h3>' + d.t + "</h3>" + (tags ? '<div class="fc-tags">' + tags + "</div>" : "") + "</div></div>" +
+        (d.q ? '<p class="fc-q">' + insecables(d.q) + "</p>" : "") +
+        '<div class="fc-d"><p>' + d.d + "</p></div>" +
+        '<div class="fc-plus">' + (d.c ? plus("Une comparaison pour comprendre", d.c, { cls: "plus-cmp" }) : "") + (d.r ? plus("Des repères chiffrés", d.r, { cls: "plus-rep" }) : "") + "</div></div>";
+    }
+    const f = x.f;
+    const table = f.rows ? '<table class="fx-t">' + f.rows.map(r => '<tr><td class="sym">' + r[0] + '</td><td class="nm">' + r[1] + '</td><td class="u">' + (r[2] || "—") + '</td><td class="role">' + (r[3] || "") + "</td></tr>").join("") + "</table>" : "";
+    return '<div class="fc"><div class="fc-hd"><span class="fc-ic" aria-hidden="true"><i>ƒ</i></span><div><span class="eyebrow">Les formules</span><h3>' + insecables(f.q || "La formule") + "</h3></div></div>" +
+      '<div class="fx-f">' + f.f + "</div>" + (f.say ? '<div class="fx-say">Se lit : « ' + f.say + " »</div>" : "") +
+      '<div class="fc-plus">' + (table ? plus("Que veut dire chaque lettre ?", table, { cls: "plus-sym" }) : "") + (f.ex ? plus("Un exemple chiffré", '<div class="fx-ex">' + f.ex + "</div>", { cls: "plus-ex" }) : "") + "</div></div>";
+  }
+  function ouvrirFiche(n, k, origine) {
+    const total = (fiches[n] || []).length; if (!total) return;
+    let i = k;
+    const f = fenetre({
+      origine: origine, classe: "fen-fiche", titre: "Fiche du module " + n,
+      contenu: '<div class="fc-zone"></div><div class="fc-nav"><button type="button" class="fc-fl" data-fc="-1" aria-label="Fiche précédente">' + PICTO.gauche + '</button><div class="fc-pos" aria-live="polite"><span></span><div class="fc-pts"></div></div><button type="button" class="fc-fl" data-fc="1" aria-label="Fiche suivante">' + PICTO.droite + "</button></div>",
+      clavier: e => {
+        if (e.target.closest && e.target.closest("input, select, textarea, video")) return;
+        if (e.key === "ArrowRight") { e.preventDefault(); aller(1); } else if (e.key === "ArrowLeft") { e.preventDefault(); aller(-1); }
+      }
+    });
+    const zone = $(".fc-zone", f.corps);
+    $(".fc-pts", f.corps).innerHTML = fiches[n].map((x, j) => '<i data-fc-i="' + j + '"' + (x.type === "fx" ? ' class="fx"' : "") + "></i>").join("");
+    function montrer(dir) {
+      zone.innerHTML = contenuFiche(n, i);
+      zone.classList.remove("in-d", "in-g");
+      if (dir && !mouvementReduit()) { void zone.offsetWidth; zone.classList.add(dir > 0 ? "in-d" : "in-g"); }
+      zone.scrollTop = 0;
+      $(".fc-pos span", f.corps).textContent = (i + 1) + " / " + total;
+      $$(".fc-pts i", f.corps).forEach((p, j) => p.classList.toggle("on", j === i));
+      $('[data-fc="-1"]', f.corps).disabled = i === 0;
+      $('[data-fc="1"]', f.corps).disabled = i === total - 1;
+      f.origine($('[data-fiche="' + n + ":" + i + '"]'));
+      marquerVue(n, i);
+    }
+    function aller(d) { const j = i + d; if (j < 0 || j >= total) return; i = j; montrer(d); }
+    f.corps.addEventListener("click", e => {
+      const b = e.target.closest("[data-fc]"); if (b) { aller(+b.dataset.fc); return; }
+      const p = e.target.closest("[data-fc-i]"); if (p) { const j = +p.dataset.fcI; if (j !== i) { const d = j > i ? 1 : -1; i = j; montrer(d); } }
+    });
+    // Sur téléphone : glisser le doigt vers la gauche ou la droite
+    let x0 = null, y0 = null;
+    zone.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+    zone.addEventListener("touchend", e => {
+      if (x0 === null) return;
+      const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) aller(dx < 0 ? 1 : -1);
+    }, { passive: true });
+    montrer(0);
+  }
+
+  // Les fiches déjà lues (petite coche verte sur la tuile), gardées sur l'appareil.
+  const CLE_VUES = () => "revision-bts-fiches-" + A.id;
+  let vues = null;
+  function lireVues() {
+    if (vues) return vues;
+    try { vues = new Set(JSON.parse(localStorage.getItem(CLE_VUES()) || "[]")); } catch (e) { vues = new Set(); }
+    return vues;
+  }
+  function marquerVue(n, k) {
+    const v = lireVues(), cle = n + ":" + k;
+    if (!v.has(cle)) { v.add(cle); try { localStorage.setItem(CLE_VUES(), JSON.stringify(Array.from(v))); } catch (e) { /* rien */ } }
+    compterVues(n);
+  }
+  function compterVues(n) {
+    const sec = $("#tab-m" + n); if (!sec || !fiches[n]) return;
+    const v = lireVues();
+    $$("[data-fiche]", sec).forEach(t => t.classList.toggle("vue", v.has(t.dataset.fiche)));
+    ["mot", "fx"].forEach(type => {
+      const el = $('[data-fiches-compte="' + type + '"]', sec); if (!el) return;
+      const ks = fiches[n].map((x, k) => x.type === type ? k : -1).filter(k => k >= 0);
+      const lues = ks.filter(k => v.has(n + ":" + k)).length;
+      el.textContent = ks.length + " fiche" + (ks.length > 1 ? "s" : "") + (lues ? " · " + lues + " lue" + (lues > 1 ? "s" : "") : "");
+      el.classList.toggle("ok", lues === ks.length);
+    });
+  }
+
+  // --- Mise en forme du module : étapes, labos en onglets, cartes repliées ---
+  function epurerModule(sec, n) {
+    const etapes = $$(":scope > .etape", sec);
+    if (!etapes.length) return;
+    const cles = etapes.map(e => e.dataset.etape);
+
+    // La barre des étapes, numérotées
+    segment($("#pas-" + n, sec), cles.map((c, i) => [c, '<i class="pas-n">' + (i + 1) + "</i><span>" + ETAPES[c] + "</span>"]), cles[0], c => montrerEtape(n, c, true, true));
+
+    // En bas de chaque étape : revenir, ou passer à l'étape suivante
+    etapes.forEach((e, i) => {
+      const prec = cles[i - 1], suiv = cles[i + 1];
+      if (!prec && !suiv) return;
+      const nav = document.createElement("div"); nav.className = "pas-suite";
+      nav.innerHTML = (prec ? '<button type="button" class="btn" data-pas-aller="' + prec + '">' + PICTO.gauche + " " + ETAPES[prec] + "</button>" : "<span></span>") +
+        (suiv ? '<button type="button" class="btn primary" data-pas-aller="' + suiv + '"><small>Étape ' + (i + 2) + "</small> " + ETAPES[suiv] + " " + PICTO.droite + "</button>" : "");
+      e.appendChild(nav);
+    });
+
+    const zone = $("#labo-" + n, sec);
+    if (zone) organiserLabos(zone);
+
+    // Évaluation : la correction est dessinée plus tard (voir dessinerEvaluation)
+    etapeDe[n] = cles[0];
+    montrerEtape(n, cles[0], false, false);
+    compterVues(n);
+  }
+
+  function organiserLabos(zone) {
+    const n = +zone.id.slice(6); // « labo-3 » → 3
+    // « Calcul pas à pas » : replié derrière un « + »
+    $$(".lab-ctl .card", zone).forEach(card => {
+      if (!$(".calc", card)) return;
+      const h = $(":scope > h3", card), titre = h ? h.innerHTML : "Calcul pas à pas";
+      if (h) h.remove();
+      const reste = document.createDocumentFragment();
+      while (card.firstChild) reste.appendChild(card.firstChild);
+      card.classList.add("plus", "carte-plus");
+      card.innerHTML = '<button type="button" class="plus-b" aria-expanded="false"><i class="plus-i" aria-hidden="true"></i><span>' + titre + '</span></button><div class="plus-c"><div><div class="plus-in"></div></div></div>';
+      $(".plus-in", card).appendChild(reste);
+    });
+
+    // Plusieurs labos : des onglets, un labo à la fois
+    if ($$(":scope > .sous-labo", zone).length < 2) return;
+    const panneaux = []; let courant = null;
+    Array.from(zone.children).forEach(el => {
+      if (el.classList.contains("sous-labo") || !courant) { courant = document.createElement("div"); courant.className = "labo-p"; panneaux.push(courant); }
+      courant.appendChild(el);
+    });
+    const libelle = (p, i) => {
+      const sl = $(".sous-labo", p), eb = sl && $(".eyebrow", sl), h = sl && $("h3", sl);
+      const t = eb ? eb.textContent : h ? h.textContent : "Labo " + (i + 1);
+      const morceaux = t.split(" · ");
+      return morceaux.length > 1 ? { court: morceaux[0], nom: morceaux.slice(1).join(" · ") } : { court: "Labo " + (i + 1), nom: t };
+    };
+    const noms = panneaux.map(libelle);
+    const onglets = document.createElement("div"); onglets.className = "labo-onglets";
+    onglets.innerHTML = '<div class="labo-seg" role="tablist" aria-label="Les labos du module"></div>';
+    zone.appendChild(onglets);
+    panneaux.forEach((p, i) => {
+      zone.appendChild(p);
+      if (i < panneaux.length - 1) {
+        const s = document.createElement("div"); s.className = "labo-suite";
+        s.innerHTML = '<button type="button" class="btn" data-labo-suivant="' + (i + 1) + '">' + echapper(noms[i + 1].court) + " : " + echapper(noms[i + 1].nom) + " " + PICTO.droite + "</button>";
+        p.appendChild(s);
+      }
+    });
+    let actuel = 0;
+    const seg = $(".labo-seg", onglets);
+    function montrer(i, anime) {
+      panneaux.forEach((p, k) => p.classList.toggle("on", k === i));
+      const p = panneaux[i];
+      if (anime && i !== actuel && !mouvementReduit()) { p.classList.remove("in-d", "in-g"); void p.offsetWidth; p.classList.add(i > actuel ? "in-d" : "in-g"); }
+      const change = i !== actuel;
+      actuel = i;
+      $$(".seg.glisse", p).forEach(s => s._placer && s._placer());
+      remplirCurseurs(p);
+      if (change) rappelerAffichage(n);
+    }
+    segment(seg, noms.map((x, i) => [String(i), "<small>" + echapper(x.court) + "</small><span>" + echapper(x.nom) + "</span>"]), "0", v => montrer(+v, true));
+    zone.addEventListener("click", e => {
+      const b = e.target.closest("[data-labo-suivant]"); if (!b) return;
+      seg._choisir(b.dataset.laboSuivant);
+      const y = onglets.getBoundingClientRect().top + window.scrollY - $("#ctx").offsetHeight - 12;
+      window.scrollTo({ top: Math.max(0, y), behavior: mouvementReduit() ? "auto" : "smooth" });
+    });
+    montrer(0, false);
+  }
+
+  /* Un labo qui était masqué redevient visible (étape « Manipuler », onglet
+     d'un labo) : on rappelle les fonctions « surAffichage » du module, comme à
+     l'ouverture du module. Les labos y relancent leurs animations, qui
+     s'arrêtent d'elles-mêmes quand leur scène est cachée. */
+  function rappelerAffichage(n) {
+    if (ongletCourant !== "m" + n) return;
+    (auAffichage[n] || []).forEach(f => { try { f(); } catch (e) { console.error(e); } });
+  }
+
+  // Affiche une étape du module n (les autres sont masquées).
+  function montrerEtape(n, cle, anime, defiler) {
+    const sec = $("#tab-m" + n); if (!sec) return;
+    const etapes = $$(":scope > .etape", sec); if (!etapes.length) return;
+    const cible = etapes.find(e => e.dataset.etape === cle) || etapes[0];
+    const iA = etapes.findIndex(e => e.classList.contains("courante")), iB = etapes.indexOf(cible);
+    etapes.forEach(e => e.classList.toggle("courante", e === cible));
+    etapeDe[n] = cible.dataset.etape;
+    sec.classList.toggle("pas-fin", iB === etapes.length - 1);
+    if (anime && iA !== iB && iA >= 0 && !mouvementReduit()) { cible.classList.remove("pas-in-d", "pas-in-g"); void cible.offsetWidth; cible.classList.add(iB > iA ? "pas-in-d" : "pas-in-g"); }
+    const barre = $("#pas-" + n, sec);
+    if (barre) { $$("button", barre).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === etapeDe[n]))); if (barre._placer) barre._placer(); }
+    $$(".seg.glisse", cible).forEach(s => s._placer && s._placer());
+    remplirCurseurs(cible);
+    if (defiler) {
+      // La barre des étapes vient se placer en haut de l'écran : l'étape commence juste dessous.
+      const b = $(".pas-barre", sec), y = b.getBoundingClientRect().top + window.scrollY - $("#ctx").offsetHeight - 8;
+      if (Math.abs(window.scrollY - y) > 4) window.scrollTo({ top: Math.max(0, y), behavior: mouvementReduit() ? "auto" : "smooth" });
+    }
+    if (ongletCourant === "m" + n) { suivreDefilement(); apparitions(cible); if (iA !== iB) rappelerAffichage(n); }
+  }
+
+  /* ==========================================================================
      NAVIGATION
      ========================================================================== */
   function go(cible, sansDefilement) {
@@ -389,6 +761,7 @@ const Application = (function () {
       toast(PICTO.cadenas + " Le <b>module " + n + "</b> s’ouvrira quand vous aurez obtenu au moins <b>" + noteMin() + "/20</b> à l’évaluation du module " + (n - 1) + ".");
       return;
     }
+    if (fenetreCourante) fenetreCourante.fermer(true); // une fenêtre ouverte se referme
     const change = cible !== ongletCourant;
     $$(".tab").forEach(s => {
       const actif = s.id === "tab-" + cible;
@@ -462,10 +835,13 @@ const Application = (function () {
     const y = window.scrollY, ctx = $("#ctx");
     ctx.classList.toggle("scrolled", y > 6); ctx.classList.toggle("past", y > 150);
     const etapes = etapesCourantes(); if (!etapes.length) return;
-    const ligne = $("#ctx").offsetHeight + Math.min(220, window.innerHeight * 0.3);
     let cur = etapes[0][0];
-    etapes.forEach(e => { if (e[1].getBoundingClientRect().top <= ligne) cur = e[0]; });
-    if (y >= document.documentElement.scrollHeight - window.innerHeight - 2 && y > 60) cur = etapes[etapes.length - 1][0];
+    if (EPURE) cur = etapeDe[+ongletCourant.slice(1)] || cur; // une étape à la fois : c'est celle affichée
+    else {
+      const ligne = $("#ctx").offsetHeight + Math.min(220, window.innerHeight * 0.3);
+      etapes.forEach(e => { if (e[1].getBoundingClientRect().top <= ligne) cur = e[0]; });
+      if (y >= document.documentElement.scrollHeight - window.innerHeight - 2 && y > 60) cur = etapes[etapes.length - 1][0];
+    }
     if (cur !== etapeActive) { etapeActive = cur; $$("#ctxEtapes button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === cur))); const s = $("#ctxEtapes"); if (s._placer) s._placer(); }
   }
 
@@ -505,6 +881,7 @@ const Application = (function () {
     }
     const bq = $('#ctxEtapes [data-v="evaluer"]');
     if (bq) bq.classList.toggle("ok", n > 0 && valide(n));
+    $$('.tab[data-n] .pas [data-v="evaluer"]').forEach(b => b.classList.toggle("ok", valide(+b.closest(".tab").dataset.n)));
     suivreDefilement();
 
     // Accueil : bouton, progression, parcours
@@ -535,6 +912,7 @@ const Application = (function () {
   }
 
   function allerEtape(cle) {
+    if (EPURE && ongletCourant.startsWith("m")) { montrerEtape(+ongletCourant.slice(1), cle, true, true); return; }
     const e = etapesCourantes().find(x => x[0] === cle); if (!e) return;
     const y = cle === "comprendre" ? 0 : e[1].getBoundingClientRect().top + window.scrollY - $("#ctx").offsetHeight - 16;
     window.scrollTo({ top: Math.max(0, y), behavior: mouvementReduit() ? "auto" : "smooth" });
@@ -660,10 +1038,13 @@ const Application = (function () {
 
     if (s.phase === "intro") {
       el.innerHTML = '<div class="qz"><div class="qz-hd"><div><span class="eyebrow">Évaluation · Module ' + n + "</span><h2>Contrôle des connaissances</h2>" +
-        '<p class="lead3">10 questions, 2 points chacune : <span class="qcat qc-lire">Lire</span> <span class="qcat qc-comprendre">Comprendre</span> <span class="qcat qc-qcm">QCM</span> <span class="qcat qc-calculer">Calculer</span> <span class="qcat qc-exercice">Exercice</span>. Obtenez au moins <b>' + noteMin() + "/20</b> pour " + (dernier ? "valider le parcours" : "débloquer le <b>module " + (n + 1) + "</b>") + ". Les valeurs changent à chaque tentative ; la calculatrice est autorisée. À chaque question, un <b>indice</b> peut vous aider (il coûte " + nombreFr(COUT_INDICE) + " point).</p></div>" +
+        (EPURE
+          ? '<p class="lead3">10 questions · au moins <b>' + noteMin() + "/20</b> pour " + (dernier ? "valider le parcours" : "débloquer le <b>module " + (n + 1) + "</b>") + ".</p>" +
+            plus("Comment se passe l’évaluation ?", '<p>2 points par question, en cinq familles : <span class="qcat qc-lire">Lire</span> <span class="qcat qc-comprendre">Comprendre</span> <span class="qcat qc-qcm">QCM</span> <span class="qcat qc-calculer">Calculer</span> <span class="qcat qc-exercice">Exercice</span>.</p><p>Les valeurs changent à chaque tentative ; la calculatrice est autorisée. À chaque question, un <b>indice</b> peut vous aider (il coûte ' + nombreFr(COUT_INDICE) + " point).</p>", { cls: "plus-regles" })
+          : '<p class="lead3">10 questions, 2 points chacune : <span class="qcat qc-lire">Lire</span> <span class="qcat qc-comprendre">Comprendre</span> <span class="qcat qc-qcm">QCM</span> <span class="qcat qc-calculer">Calculer</span> <span class="qcat qc-exercice">Exercice</span>. Obtenez au moins <b>' + noteMin() + "/20</b> pour " + (dernier ? "valider le parcours" : "débloquer le <b>module " + (n + 1) + "</b>") + ". Les valeurs changent à chaque tentative ; la calculatrice est autorisée. À chaque question, un <b>indice</b> peut vous aider (il coûte " + nombreFr(COUT_INDICE) + " point).</p>") + "</div>" +
         '<div class="qz-best">' + anneau(best !== null ? best / 20 : 0, 108, 9, v) + "<div><b>" + (best !== null ? Applications.note(best) : "—") + "</b><span>meilleure note</span></div></div></div>" +
         '<div class="qz-meta"><span>' + (v ? PICTO.valide + " Module validé" : essais ? "Pas encore validé" : "Pas encore tenté") + "</span><span>Tentatives : " + essais + "</span>" + (f ? "<span>Dernière note : " + Applications.note((f.dernierScore / f.total) * 20) + "/20</span>" : "") + "</div>" +
-        '<div class="btnrow"><button class="btn primary big" data-q="start">' + (essais ? "Nouvelle tentative" : "Commencer l’évaluation") + '</button><button class="btn big" data-q="essentiel">Revoir l’essentiel ↑</button>' + (!dernier && ouvert(n + 1) ? '<button class="btn big" data-go="m' + (n + 1) + '">Module ' + (n + 1) + " →</button>" : "") + "</div></div>";
+        '<div class="btnrow"><button class="btn primary big" data-q="start">' + (essais ? "Nouvelle tentative" : "Commencer l’évaluation") + '</button><button class="btn big" data-q="essentiel">Revoir l’essentiel' + (EPURE ? "" : " ↑") + '</button>' + (!dernier && ouvert(n + 1) ? '<button class="btn big" data-go="m' + (n + 1) + '">Module ' + (n + 1) + " →</button>" : "") + "</div></div>";
     } else if (s.phase === "q") {
       const q = s.qs[s.i], total = s.qs.length;
       let rep;
@@ -683,12 +1064,15 @@ const Application = (function () {
       el.innerHTML = '<div class="qz"><div class="res-hd"><div class="res-ring">' + anneau(0, 168, 12, passe) + '<div class="res-n"><b data-compte="' + r.note + '">0</b><span>/ 20</span></div></div><div>' +
         '<span class="eyebrow">Module ' + n + " · tentative " + (f ? f.tentatives : 1) + "</span><h2>" + (passe ? (dernier ? "Parcours terminé, bravo !" : "Module validé !") : "Pas encore validé") + "</h2>" +
         '<p class="lead3">' + (passe ? (s.debloque && !dernier ? "Le <b>module " + (n + 1) + "</b> est maintenant débloqué." : "Votre note est enregistrée.") : "Il faut au moins <b>" + noteMin() + "/20</b>. Relisez la correction ci-dessous, revoyez le module puis retentez : les questions changent.") + "</p>" +
-        '<div class="btnrow">' + (passe && !dernier ? '<button class="btn primary big" data-go="m' + (n + 1) + '">Module ' + (n + 1) + " →</button>" : "") + '<button class="btn big' + (passe ? "" : " primary") + '" data-q="start">Nouvelle tentative</button><button class="btn big" data-q="essentiel">Revoir l’essentiel ↑</button></div>' +
+        '<div class="btnrow">' + (passe && !dernier ? '<button class="btn primary big" data-go="m' + (n + 1) + '">Module ' + (n + 1) + " →</button>" : "") + '<button class="btn big' + (passe ? "" : " primary") + '" data-q="start">Nouvelle tentative</button><button class="btn big" data-q="essentiel">Revoir l’essentiel' + (EPURE ? "" : " ↑") + '</button></div>' +
         '<p class="qz-save" aria-live="polite">' + (s.lieu || "Enregistrement…") + "</p></div></div>" +
-        '<h3 class="corr-t">Correction détaillée</h3><div class="corr">' + s.qs.map((q, k) => {
+        '<h3 class="corr-t">Correction détaillée</h3>' + (EPURE ? '<p class="qa-tip">Les erreurs sont ouvertes ; touchez une bonne réponse pour relire son explication.</p>' : "") + '<div class="corr">' + s.qs.map((q, k) => {
           const g = r.details[k], cls = g.pts >= g.max - 1e-9 ? "ok" : g.pts > 0 ? "part" : "ko";
-          return '<div class="corr-i ' + cls + '"><div class="corr-h"><span class="qcat qc-' + q.cat + '">' + CATEGORIES[q.cat] + '</span><span class="corr-q">' + (k + 1) + ". " + stripHtml(q.q) + "</span><em>" + nombreFr(g.pts) + " / " + g.max + (g.indice ? " (indice)" : "") + "</em></div>" +
-            '<div class="corr-a"><span>Votre réponse : <b>' + (g.given ? echapper(g.given) : "—") + "</b></span><span>Attendu : <b>" + g.expected + "</b></span></div>" + (q.expl ? '<div class="corr-x">' + q.expl + "</div>" : "") + "</div>";
+          const tete = '<span class="qcat qc-' + q.cat + '">' + CATEGORIES[q.cat] + '</span><span class="corr-q">' + (k + 1) + ". " + stripHtml(q.q) + "</span><em>" + nombreFr(g.pts) + " / " + g.max + (g.indice ? " (indice)" : "") + "</em>";
+          const detail = '<div class="corr-a"><span>Votre réponse : <b>' + (g.given ? echapper(g.given) : "—") + "</b></span><span>Attendu : <b>" + g.expected + "</b></span></div>" + (q.expl ? '<div class="corr-x">' + q.expl + "</div>" : "");
+          // Interface épurée : les bonnes réponses sont repliées, les erreurs restent ouvertes.
+          if (EPURE) return '<div class="corr-i plus ' + cls + (cls === "ok" ? "" : " ouvert") + '"><button type="button" class="plus-b corr-h" aria-expanded="' + (cls !== "ok") + '">' + tete + '<i class="plus-i" aria-hidden="true"></i></button><div class="plus-c"><div><div class="plus-in">' + detail + "</div></div></div></div>";
+          return '<div class="corr-i ' + cls + '"><div class="corr-h">' + tete + "</div>" + detail + "</div>";
         }).join("") + "</div>";
       // L'anneau se remplit et la note défile jusqu'à sa valeur.
       requestAnimationFrame(() => {
@@ -772,6 +1156,8 @@ const Application = (function () {
      ========================================================================== */
   function demarrer(config) {
     A = config;
+    EPURE = A.epure !== false && !/[?&]classique\b/.test(location.search);
+    if (EPURE) document.documentElement.classList.add("epure");
     const info = infosCatalogue();
     document.title = info.titre + " — Révision BTS Audiovisuel";
     construireCoquille(info);
@@ -784,6 +1170,12 @@ const Application = (function () {
     // Clics de navigation (menu, tuiles, bas de page, lexique)
     document.addEventListener("click", e => {
       const b = e.target.closest("[data-go]"); if (b) { e.preventDefault(); go(b.dataset.go); return; }
+      // Interface épurée : petits +, fiches, film, étapes
+      const pb = e.target.closest(".plus-b"); if (pb && pb.closest(".plus")) { basculerPlus(pb.closest(".plus")); return; }
+      const fi = e.target.closest("[data-fiche]"); if (fi) { const p = fi.dataset.fiche.split(":"); ouvrirFiche(+p[0], +p[1], fi); return; }
+      const fp = e.target.closest("[data-fiches-parcourir]"); if (fp) { ouvrirFiche(+fp.dataset.fichesParcourir, 0, fp); return; }
+      const fo = e.target.closest("[data-film-ouvrir]"); if (fo) { ouvrirFilm(+fo.dataset.filmOuvrir, fo); return; }
+      const pa = e.target.closest("[data-pas-aller]"); if (pa) { allerEtape(pa.dataset.pasAller); return; }
       const t = e.target.closest("[data-tout-ouvrir]");
       if (t) {
         const zone = t.closest(".etape"), lignes = $$("details.qa", zone), tous = lignes.every(d => d.open);
@@ -832,6 +1224,8 @@ const Application = (function () {
     segment: segment,
     toast: toast,
     question: question,
+    plus: plus,
+    fenetre: fenetre,
     nombre: nombreFr,
     // Outils pour les questions tirées au sort (contenu.js)
     hasard: hasardEntier,

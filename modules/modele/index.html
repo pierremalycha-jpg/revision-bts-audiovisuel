@@ -34,7 +34,20 @@
        Structure de référence : la scène à gauche (elle reste visible quand on
        fait défiler les réglages), les réglages à droite.
        Les identifiants commencent par le numéro du module (m1-…) pour ne
-       jamais entrer en collision avec ceux d'un autre labo. -->
+       jamais entrer en collision avec ceux d'un autre labo.
+
+       Interface épurée (par défaut) — le kit range le labo tout seul :
+       - PLUSIEURS LABOS dans un module : fais précéder chacun d'un titre
+           <div class="sous-labo"><span class="eyebrow">Labo 1 · Nom court</span>
+             <h3>La question du labo</h3><p class="muted">La consigne.</p></div>
+         Chaque labo devient un ONGLET (« Labo 1 / Nom court ») ; un seul est
+         affiché à la fois, avec « Labo suivant → » en bas.
+       - Une carte qui contient un .calc (« Calcul pas à pas ») est REPLIÉE
+         derrière un « + » : l'élève l'ouvre quand il en a besoin.
+       - « Ce qu'il faut observer » et les réglages restent toujours visibles.
+       - Une animation doit s'arrêter quand sa scène est cachée et repartir
+         dans Application.surAffichage(n, …) : le kit l'appelle quand le labo
+         redevient visible (étape « Manipuler », changement d'onglet). -->
   <template data-labo="1">
     <div class="lab">
       <div class="lab-stage">
