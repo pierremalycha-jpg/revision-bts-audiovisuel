@@ -153,6 +153,7 @@ Règles de code (dans `labos.js`) :
 | `css/application.css` | La mise en page de référence des applications. |
 | `css/style.css` | Couleurs, typographie, boutons, champs : partagés avec toute la plateforme. |
 | `js/theme.js` | Thème clair ou sombre, partagé avec la photométrie. |
+| `js/transition.js` | Animation d'ouverture d'une application (l'icône grandit jusqu'à remplir l'écran, puis le voile s'estompe sur l'application). À charger dans le `<head>` juste après `theme.js`, comme dans `modules/modele/index.html`. |
 | `js/applications.js` | Icônes d'application et lecture de la progression (accueil, tableau de bord). |
 | `modules/modele/` | Le modèle à dupliquer, entièrement commenté. |
 | `modules/tes-signal-video-numerique/` | Une application complète construite avec le kit : à lire comme exemple. |
