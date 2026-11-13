@@ -1,0 +1,260 @@
+/* ==========================================================================
+   simulateur.css — la mise en page du simulateur caméra
+   --------------------------------------------------------------------------
+   Les couleurs, boutons, curseurs et cartes viennent de css/style.css ; les
+   scènes (.stg, .cv, .readouts, .ctl) de css/application.css, comme dans les
+   labos des autres applications. Ce fichier n'ajoute que ce qui est propre
+   au simulateur :
+     1. la barre du haut et la grille de la page
+     2. le retour caméra et la maquette du plateau
+     3. l'exploration (matériel, objectif, capteur, signal)
+     4. la colonne des réglages
+     5. les expériences guidées
+     6. les schémas SVG (toujours dessinés sur fond sombre)
+     7. petits écrans et mouvement réduit
+   ========================================================================== */
+
+/* 1. BARRE ET GRILLE ---------------------------------------------------------- */
+body.sim-page { display: block; }
+
+.sim-barre {
+  position: sticky; top: 0; z-index: 40;
+  display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap;
+  padding: 8px 16px;
+  background: var(--glass);
+  -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--glassline);
+}
+.sim-retour { display: inline-flex; align-items: center; gap: 4px; padding: 6px 10px 6px 4px; border-radius: 980px; color: var(--muted); font-size: .86rem; font-weight: 500; text-decoration: none; }
+.sim-retour:hover { background: var(--hover); color: var(--text); text-decoration: none; }
+.sim-retour svg { width: 16px; height: 16px; }
+.sim-titre { display: flex; align-items: center; gap: 10px; }
+.sim-titre .app-ic { width: 30px; height: 30px; border-radius: 9px; font-size: 16px; box-shadow: none; }
+.sim-titre h1 { margin: 0; font-size: 1.05rem; font-weight: 650; letter-spacing: -.02em; white-space: nowrap; }
+.sim-config { margin: 0 auto; }
+.sim-config button { display: grid; text-align: left; padding: 5px 16px 6px; line-height: 1.25; }
+.sim-config button b { font-size: .9rem; font-weight: 600; }
+.sim-config button small { font-size: .72rem; color: var(--muted); font-weight: 500; }
+.sim-actions { display: flex; align-items: center; gap: 8px; }
+.sim-actions .btn svg { width: 15px; height: 15px; }
+.sim-barre .bouton-theme { margin: 0; }
+
+main.sim {
+  display: grid; grid-template-columns: minmax(0, 1fr) 372px; gap: 14px; align-items: start;
+  max-width: 1780px; padding: 14px 16px 40px;
+}
+.sim-scene { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.sim-haut { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); gap: 12px; }
+.sim .stg { display: flex; flex-direction: column; min-width: 0; }
+.sim .stg .vt { flex: none; }
+.sim .readouts b small { font-family: var(--font); font-size: .7rem; font-weight: 500; color: var(--muted); letter-spacing: 0; text-transform: none; display: block; margin-top: -2px; }
+.sim .readouts b { font-size: 1.16rem; }
+.sim .readouts > div { padding: 9px 14px; }
+#commentaire { font-size: .92rem; line-height: 1.45; min-height: 3.2em; }
+
+/* 2. RETOUR CAMÉRA ET PLATEAU ------------------------------------------------- */
+.moniteur {
+  position: relative; aspect-ratio: 16 / 9; width: 100%;
+  max-height: 56vh; margin: 0 auto;
+  background: #000; border-radius: 14px; overflow: hidden;
+  cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.moniteur.saisi { cursor: grabbing; }
+.moniteur:focus-visible, .plateau:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.moniteur canvas { display: block; width: 100%; height: 100%; }
+.mon-info, .mon-badges {
+  position: absolute; left: 10px; display: flex; flex-wrap: wrap; gap: 4px 10px; pointer-events: none;
+  font: 600 .74rem/1.2 var(--mono); color: #fff; text-shadow: 0 1px 2px #000, 0 0 6px rgba(0, 0, 0, .8);
+}
+.mon-info { top: 8px; }
+.mon-badges { bottom: 8px; }
+.mon-badges span { background: rgba(0, 0, 0, .55); border-radius: 6px; padding: 3px 7px; text-shadow: none; color: #ffd60a; }
+.mon-message { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: #fff; background: #111; font-size: .95rem; }
+.mon-message[hidden] { display: none; }
+.sous-moniteur { display: flex; justify-content: space-between; align-items: center; gap: 8px 12px; flex-wrap: wrap; margin: 8px 2px 0; font-size: .8rem; }
+.viser { display: flex; flex-wrap: wrap; gap: 6px; }
+.aides { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; text-transform: none; letter-spacing: 0; }
+.chip.mini { padding: 4px 11px; font-size: .78rem; }
+.seg.mini button { padding: 3px 9px; font-size: .76rem; }
+
+#bloc-plateau .plateau { flex: 1 1 auto; height: 0; min-height: 210px; cursor: grab; touch-action: none; }
+.legende { display: inline-flex; align-items: center; gap: 5px; text-transform: none; letter-spacing: 0; font-weight: 500; }
+.lg { width: 11px; height: 11px; border-radius: 3px; display: inline-block; margin-left: 6px; }
+.lg.champ { background: rgba(64, 156, 255, .75); }
+.lg.nette { background: rgba(48, 209, 88, .85); }
+.plateau-distance { margin: 8px 2px 0; }
+
+/* 3. EXPLORATION -------------------------------------------------------------- */
+.volet { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 14px; align-items: start; }
+.volet[hidden] { display: none; }
+.volet.deux { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.volet-dessin { position: relative; min-width: 0; overflow-x: auto; }
+.volet figure { margin: 0; min-width: 0; }
+.volet figcaption { font-size: .8rem; color: var(--muted); margin: 6px 2px 0; }
+#materiel { height: 300px; }
+#oscilloscope, #courbe { height: 250px; }
+.schema { min-width: 600px; }
+.sim-fiche { font-size: .88rem; line-height: 1.45; background: var(--panel2); border-radius: 14px; padding: 14px 16px; }
+.sim-fiche h4, .reg-fiche h4 { font-size: 1rem; margin: 0 0 .4em; }
+.sim-fiche p:last-child, .reg-fiche p:last-child { margin-bottom: 0; }
+.comparaison { background: var(--soft-orange); border-radius: 10px; padding: 7px 10px; }
+.propre { background: var(--soft-blue); border-radius: 10px; padding: 7px 10px; }
+
+/* Les repères numérotés posés sur le dessin du matériel */
+.repere {
+  position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%;
+  border: 2px solid #fff; background: var(--accent); color: #fff; font: 700 .78rem var(--font);
+  cursor: pointer; box-shadow: 0 2px 8px rgba(0, 0, 0, .45); transition: transform .2s var(--spring), background .2s;
+}
+.repere:hover, .repere:focus-visible { transform: scale(1.18); outline: none; }
+.repere.sel { background: #ffd60a; color: #1d1d1f; }
+
+/* La chaîne du signal : des maillons cliquables */
+.chaine { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 10px; }
+.chaine .fleche { color: var(--faint); font-weight: 700; }
+.maillon { display: grid; text-align: left; border: 1px solid var(--cardline); background: var(--panel2); border-radius: 10px; padding: 5px 10px; font: inherit; color: var(--text); cursor: pointer; transition: background .2s, transform .15s; }
+.maillon:hover { background: var(--panel3); }
+.maillon:active { transform: scale(.96); }
+.maillon small { font-size: .66rem; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
+.maillon b { font-size: .84rem; font-variant-numeric: tabular-nums; }
+
+/* 4. RÉGLAGES ----------------------------------------------------------------- */
+.sim-reglages {
+  position: sticky; top: 78px;
+  max-height: calc(100vh - 92px); overflow-y: auto; overscroll-behavior: contain;
+  background: var(--panel); border: 1px solid var(--cardline); border-radius: var(--radius); padding: 12px 16px 16px;
+}
+.seg.onglets { display: grid; grid-template-columns: repeat(4, 1fr); position: sticky; top: -12px; z-index: 2; margin: 0 -4px; }
+.seg.onglets button { padding: 7px 4px; font-size: .82rem; }
+.seg button[aria-selected="true"] { background: var(--segon); font-weight: 600; box-shadow: 0 1px 3px rgba(0, 0, 0, .12), 0 0 0 .5px rgba(0, 0, 0, .04); }
+.reg-titre h3 { font-size: 1rem; margin: 18px 0 2px; }
+.reg-titre:first-child h3 { margin-top: 14px; }
+.reg-titre p { font-size: .8rem; margin: 0 0 2px; }
+.reg { padding: 11px 0 12px; border-bottom: 1px solid var(--line); border-radius: 8px; }
+.reg:last-child { border-bottom: 0; }
+.reg-tete { display: flex; align-items: center; gap: 8px; min-height: 24px; }
+.reg-nom { flex: 1; font-size: .87rem; font-weight: 600; }
+.reg output { font-family: var(--mono); font-size: .84rem; font-variant-numeric: tabular-nums; color: var(--accent2); white-space: nowrap; }
+.reg output small { font-family: var(--font); color: var(--muted); font-size: .72rem; }
+.reg-aide { flex: none; width: 22px; height: 22px; border: 0; border-radius: 50%; background: var(--panel3); color: var(--muted); font: 700 .78rem var(--font); cursor: pointer; transition: background .2s, color .2s; }
+.reg-aide:hover, .reg-aide[aria-expanded="true"] { background: var(--accent); color: #fff; }
+.reg-corps { margin-top: 4px; }
+.reg-corps .seg { display: flex; }
+.reg-corps .seg button { flex: 1 1 auto; padding: 5px 8px; font-size: .8rem; }
+.reg-corps .btnrow { margin-top: 6px; }
+.reg-etat { font-size: .8rem; color: var(--warn); margin: 2px 0 0; }
+.reg-etat:empty { display: none; }
+.reg-fiche { background: var(--panel2); border-radius: 12px; padding: 10px 12px; margin-top: 10px; font-size: .85rem; line-height: 1.45; animation: entree .3s var(--ease) both; }
+.reg-fiche p { margin-bottom: .6em; }
+.case { display: flex; align-items: center; gap: 9px; font-size: .82rem; color: var(--muted); cursor: pointer; }
+.case input { width: 18px; height: 18px; accent-color: var(--accent); flex: none; }
+.reg.flash { animation: flash 1.1s var(--ease); }
+@keyframes flash { 0%, 40% { background: var(--soft-blue); box-shadow: 0 0 0 8px var(--soft-blue); } 100% { background: transparent; box-shadow: 0 0 0 8px transparent; } }
+
+/* 5. EXPÉRIENCES -------------------------------------------------------------- */
+.exp-carte { background: var(--soft-green); border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; }
+.exp-carte[hidden] { display: none; }
+.exp-carte-tete { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.exp-carte .eyebrow { font-size: .76rem; margin: 0; }
+.exp-carte h3 { font-size: 1rem; margin: 2px 0 6px; }
+.exp-etape { font-size: .88rem; line-height: 1.45; margin: 0 0 8px; }
+.exp-points { display: flex; gap: 5px; margin-bottom: 10px; }
+.exp-points i { width: 18px; height: 4px; border-radius: 2px; background: var(--line2); }
+.exp-points i.fait { background: var(--ok); opacity: .5; }
+.exp-points i.on { background: var(--ok); }
+.exp-fenetre { width: min(760px, calc(100vw - 32px)); max-height: calc(100vh - 48px); border: 0; border-radius: 22px; padding: 22px 24px 24px; background: var(--panel); color: var(--text); box-shadow: var(--sh2); }
+.exp-fenetre::backdrop { background: rgba(0, 0, 0, .45); }
+.exp-tete { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.exp-tete h2 { margin: 0 0 .3em; font-size: 1.5rem; }
+.exp-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 10px; margin-top: 14px; }
+.exp-choix { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; text-align: left; border: 1px solid var(--cardline); background: var(--panel2); border-radius: 14px; padding: 12px 14px; font: inherit; color: var(--text); cursor: pointer; transition: background .2s, transform .2s var(--ease); }
+.exp-choix:hover { background: var(--panel3); transform: translateY(-2px); }
+.exp-choix span { grid-row: span 2; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: .82rem; }
+.exp-choix b { font-size: .92rem; }
+.exp-choix small { color: var(--muted); font-size: .8rem; line-height: 1.35; }
+
+/* 6. SCHÉMAS SVG — couleurs fixes, sur fond sombre dans les deux thèmes --------- */
+.schema { font-family: var(--font); }
+.an-fut { fill: #2c313a; stroke: #4a515e; stroke-width: 1; }
+.an-tube { fill: #3a404b; }
+.an-boitier { fill: #15171c; stroke: #3a404b; stroke-width: 1.5; }
+.an-verre { fill: rgba(140, 200, 255, .26); stroke: #9fd0ff; stroke-width: 1.3; stroke-linejoin: round; }
+.an-lumiere { fill: rgba(255, 214, 10, .14); }
+.an-rayons { fill: none; stroke: #ffd60a; stroke-width: 1.3; opacity: .9; }
+.an-axe { stroke: rgba(255, 255, 255, .16); stroke-dasharray: 8 6; fill: none; }
+.an-iris { fill: #ff6b5e; }
+.an-zone { fill: transparent; stroke: transparent; }
+.piece { cursor: pointer; outline: none; }
+.piece:hover .an-zone, .piece:focus-visible .an-zone, .piece.sel .an-zone { fill: rgba(255, 255, 255, .07); stroke: rgba(255, 255, 255, .45); }
+.piece.sel .an-verre { fill: rgba(255, 214, 10, .34); stroke: #ffd60a; }
+.an-bague rect { fill: #616977; transition: fill .2s; }
+.an-bague:hover rect, .an-bague:focus-visible rect, .an-bague.sel rect { fill: #ffd60a; }
+.an-stries path { stroke: rgba(0, 0, 0, .42); stroke-width: 1.6; fill: none; }
+.an-etq text { fill: #c8d0dc; font-size: 16px; font-weight: 600; }
+.an-etq path { stroke: rgba(255, 255, 255, .3); fill: none; }
+.an-etq:hover text, .an-etq.sel text { fill: #ffd60a; }
+.an-foyer { fill: #ff453a; stroke: #fff; stroke-width: 1.6; }
+.an-foyer.net { fill: #30d158; }
+.an-note { font-size: 16.5px; font-weight: 600; }
+.an-note.ok { fill: #5ee07d; }
+.an-note.ko { fill: #ff8a80; }
+.an-prisme { fill: rgba(190, 225, 255, .18); stroke: #9fd0ff; stroke-width: 1.3; }
+.an-dichro { stroke: rgba(255, 255, 255, .5); stroke-dasharray: 4 3; fill: none; }
+.piece:hover .an-prisme, .piece.sel .an-prisme { fill: rgba(255, 214, 10, .3); stroke: #ffd60a; }
+.an-capteur, .an-puce { stroke: #fff; stroke-width: 1; }
+.piece:hover .an-capteur, .piece.sel .an-capteur, .piece:hover .an-puce, .piece.sel .an-puce { stroke: #ffd60a; stroke-width: 2.5; }
+.an-monture { fill: #8a93a3; }
+.piece:hover .an-monture, .piece.sel .an-monture { fill: #ffd60a; }
+.an-split { fill: none; stroke-width: 2; }
+.an-rvb { font-size: 15px; font-weight: 700; }
+.an-range { opacity: .45; }
+.an-titre { fill: #fff; font-size: 17px; font-weight: 700; }
+.an-cote { fill: #9aa3b2; font-size: 15px; font-weight: 600; }
+.an-cote.actif { fill: #ffd60a; }
+.an-legende { fill: #c8d0dc; font-size: 15px; font-weight: 500; }
+.an-cadre-photo { fill: none; stroke: rgba(255, 255, 255, .25); stroke-dasharray: 5 4; }
+.an-format { fill: rgba(255, 255, 255, .05); stroke: rgba(255, 255, 255, .5); stroke-width: 1.5; }
+.an-format.actif { fill: rgba(255, 214, 10, .2); stroke: #ffd60a; stroke-width: 2; }
+.an-blanc { stroke: #fff; stroke-width: 5; fill: none; }
+.an-fleche { fill: none; stroke: #fff; stroke-width: 3; }
+
+/* 7. PETITS ÉCRANS ------------------------------------------------------------ */
+@media (max-height: 820px) and (min-width: 1081px) {
+  .moniteur { max-height: 46vh; }
+  #materiel { height: 250px; }
+}
+@media (max-width: 1280px) {
+  main.sim { grid-template-columns: minmax(0, 1fr) 336px; }
+  .volet { grid-template-columns: minmax(0, 1fr) 250px; }
+}
+/* Une seule colonne : l'image reste collée en haut pendant qu'on règle. */
+@media (max-width: 1080px) {
+  main.sim { grid-template-columns: minmax(0, 1fr); padding: 10px 10px 32px; }
+  .sim-scene, .sim-haut { display: contents; }
+  #bloc-moniteur { order: 1; position: sticky; top: 0; z-index: 30; box-shadow: var(--sh2); }
+  #mesures { order: 2; }
+  #commentaire { order: 3; }
+  .sim-reglages { order: 4; position: static; max-height: none; }
+  #bloc-plateau { order: 5; }
+  #bloc-explorer { order: 6; }
+  .sim-barre { position: static; }
+  .sim-config { order: 5; width: 100%; margin: 0; display: grid; grid-template-columns: 1fr 1fr; }
+  .sim-retour span { display: none; }
+  .moniteur { max-height: 38vh; width: auto; }
+  .sous-moniteur > .muted { display: none; }
+  #bloc-plateau .plateau { height: 260px; flex: none; }
+  .volet, .volet.deux { grid-template-columns: minmax(0, 1fr); }
+  .seg.onglets { position: static; }
+}
+@media (max-width: 560px) {
+  .sim-titre h1 { font-size: .95rem; }
+  .sim-actions .btn { padding: 5px 9px; }
+  .sim-config button small { display: none; }
+  .sim .readouts { grid-template-columns: repeat(3, 1fr); }
+  .sim .readouts b { font-size: 1rem; }
+  .aides .chip.mini, .seg.mini button { padding: 3px 7px; font-size: .72rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reg-fiche, .reg.flash { animation: none; }
+  .repere, .exp-choix, .maillon { transition: none; }
+}

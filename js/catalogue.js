@@ -22,10 +22,12 @@
      description une phrase de présentation (tableau de bord, infobulle)
      icone       le pictogramme : une clé de ICONES ci-dessous
      teinte      les couleurs du dégradé de l'icône, de haut en bas
-     modules     le nombre de modules (chacun se termine par une évaluation /20)
+     modules     le nombre de modules (chacun se termine par une évaluation /20) ;
+                 0 pour un outil ou un simulateur sans évaluation
      suivi       où lire la progression :
                    "kit"         application construite avec le kit (cas normal) ;
-                   "photometrie" application de photométrie (sa propre sauvegarde).
+                   "photometrie" application de photométrie (sa propre sauvegarde) ;
+                   "aucun"       pas de note : outil ou simulateur en accès libre.
      page        l'adresse de l'application, depuis la racine du site.
                  On écrit « index.html » en toutes lettres pour que le lien
                  fonctionne aussi quand on ouvre le site par double-clic.
@@ -131,6 +133,20 @@ const CATALOGUE = [
     suivi: "kit",
     page: "modules/tes-microphones/index.html",
     disponible: true
+  },
+  {
+    id: "tmo-simulateur-camera",
+    categorie: "pratique",
+    epreuve: "TMO",
+    titre: "Simulateur caméra",
+    accroche: "Deux caméras, deux objectifs.",
+    description: "Une caméra de plateau 2/3″ avec son zoom parfocal et sa CCU, un boîtier plein format avec son zoom photo varifocal : exposition, profondeur de champ, défauts optiques, knee et black gamma, sur l’image que voit la caméra.",
+    icone: "camera",
+    teinte: ["#30d158", "#00c7be", "#0a84ff"],
+    modules: 0,
+    suivi: "aucun",
+    page: "modules/tmo-simulateur-camera/index.html",
+    disponible: true
   }
 
   // Pour ajouter une application, copie le bloc ci-dessous APRÈS une virgule,
@@ -216,7 +232,6 @@ const CATEGORIES = [
     teinte: ["#30d158", "#00c7be", "#0a84ff"],
     aVenir: [
       { titre: "Régie", accroche: "Mélangeur, sources et grille.", icone: "regie" },
-      { titre: "Caméra", accroche: "Régler exposition, balance et mise au point.", icone: "camera" },
       { titre: "Car régie", accroche: "Une captation en extérieur.", icone: "car" }
     ]
   }

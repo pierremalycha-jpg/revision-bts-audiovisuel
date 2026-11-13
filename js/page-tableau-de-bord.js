@@ -42,7 +42,8 @@ async function afficherTableauDeBord(utilisateur) {
   let notes = 0;
   let tentatives = 0;
 
-  CATALOGUE.filter(function (app) { return app.disponible; }).forEach(function (app) {
+  // Les simulateurs et outils (suivi « aucun ») n'ont pas de note : ils ne figurent pas ici.
+  CATALOGUE.filter(function (app) { return app.disponible && app.suivi !== "aucun"; }).forEach(function (app) {
     const p = Applications.progression(app, progressionSuivi);
     valides += p.valides;
     modulesTotal += p.total;

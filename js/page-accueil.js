@@ -50,6 +50,8 @@ function creerIconeApplication(app, progression, rang) {
     etat.append(barre, document.createTextNode(progression.valides + " / " + progression.total));
   } else if (app.modules) {
     etat.textContent = app.modules + " module" + (app.modules > 1 ? "s" : "");
+  } else if (app.suivi === "aucun") {
+    etat.textContent = "Accès libre"; // outil ou simulateur : pas de module ni de note
   }
   lien.append(etat);
 

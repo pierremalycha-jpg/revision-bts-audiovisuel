@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simulateur caméra — Révision BTS Audiovisuel</title>
+  <meta name="description" content="Simulateur de caméra et d'objectif : une caméra de plateau 2/3 de pouce et son zoom parfocal, un boîtier plein format et son zoom photo varifocal. Exposition, profondeur de champ, défauts optiques, knee, black gamma.">
+  <!-- « ../../ » remonte de deux dossiers : modules/tmo-simulateur-camera/ → racine -->
+  <script src="../../js/theme.js"></script>
+  <script src="../../js/transition.js"></script>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/application.css">
+  <link rel="stylesheet" href="simulateur.css">
+</head>
+
+<!-- ======================================================================
+     SIMULATEUR CAMÉRA — une application pratique (pas de modules ni de note)
+     ----------------------------------------------------------------------
+     Cette page ne contient que la charpente. Les fichiers, dans l'ordre :
+       optique.js     les deux configurations et les lois physiques
+       decor.js       le plateau TV, dessiné calque par calque (2,5D)
+       rendu.js       l'image de la caméra (WebGL)
+       plateau.js     le matériel et la maquette du plateau
+       anatomie.js    la coupe des objectifs et le schéma des capteurs
+       signal.js      l'oscilloscope et la courbe de transfert
+       textes.js      les explications et les expériences guidées
+       simulateur.js  l'état, les réglages et le lien entre tout le reste
+     ====================================================================== -->
+<body data-racine="../../" class="sim-page">
+
+  <header class="sim-barre">
+    <a class="sim-retour" href="../../index.html#pratique" title="Retour à toutes les applications">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Les applications</span>
+    </a>
+    <div class="sim-titre">
+      <span class="app-ic" id="sim-icone" aria-hidden="true"></span>
+      <h1>Simulateur caméra</h1>
+    </div>
+    <div class="seg sim-config" id="choix-config" role="group" aria-label="Configuration de prise de vue"></div>
+    <div class="sim-actions">
+      <button class="btn small" id="btn-experiences" type="button">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 2h4M6.5 2v4L3 12.2A1.2 1.2 0 0 0 4 14h8a1.2 1.2 0 0 0 1-1.8L9.5 6V2M4.6 10h6.8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Expériences guidées
+      </button>
+      <button class="bouton-theme" id="bouton-theme" type="button"></button>
+    </div>
+  </header>
+
+  <main class="sim" id="sim">
+
+    <!-- ============ COLONNE DE GAUCHE : ce qu'on regarde ============ -->
+    <section class="sim-scene" aria-label="Image et plateau">
+
+      <div class="sim-haut">
+        <!-- Le retour caméra : l'image calculée par rendu.js -->
+        <div class="stg" id="bloc-moniteur">
+          <div class="vt">
+            <span>Retour caméra · <b id="nom-config"></b></span>
+            <div class="aides" role="group" aria-label="Aides de visée">
+              <div class="seg mini" id="aide-zebra" role="group" aria-label="Zébra"></div>
+              <button class="chip mini" id="aide-peaking" type="button" aria-pressed="false">Peaking</button>
+              <button class="chip mini" id="aide-loupe" type="button" aria-pressed="false">Loupe ×1</button>
+              <button class="chip mini" id="aide-roue" type="button" aria-pressed="false">Roue</button>
+            </div>
+          </div>
+          <div class="moniteur" id="moniteur" tabindex="0" aria-label="Image de la caméra. Glisser pour cadrer : panoramique et inclinaison.">
+            <canvas id="image" width="960" height="540"></canvas>
+            <div class="mon-info" id="mon-info" aria-hidden="true"></div>
+            <div class="mon-badges" id="mon-badges" aria-hidden="true"></div>
+            <div class="mon-message" id="mon-message" hidden></div>
+          </div>
+          <div class="sous-moniteur">
+            <span class="muted">Glissez dans l’image pour cadrer</span>
+            <div class="viser" id="viser" role="group" aria-label="Viser"></div>
+          </div>
+        </div>
+
+        <!-- La maquette du plateau, vue de trois quarts -->
+        <div class="stg" id="bloc-plateau">
+          <div class="vt">
+            <span>Le plateau</span>
+            <span class="legende"><i class="lg champ"></i>champ <i class="lg nette"></i>zone nette</span>
+          </div>
+          <canvas id="plateau" class="cv plateau" tabindex="0" aria-label="Maquette du plateau vue de trois quarts : la caméra, son angle de champ, le plan net et la zone nette. Glisser pour la faire pivoter."></canvas>
+          <label class="ctl plateau-distance"><span>Distance caméra–sujet</span><input type="range" id="distance" min="1.5" max="5.5" step="0.05" value="3.5"><output id="distance-o"></output></label>
+        </div>
+      </div>
+
+      <!-- Les valeurs calculées -->
+      <div class="readouts" id="mesures">
+        <div><small>Focale</small><b id="m-focale">—</b></div>
+        <div><small>Angle de champ</small><b id="m-champ">—</b></div>
+        <div><small>Ouverture réelle</small><b id="m-ouverture">—</b></div>
+        <div><small>Plan net</small><b class="acc" id="m-net">—</b></div>
+        <div><small>Zone nette</small><b id="m-pdc">—</b></div>
+        <div><small>Exposition</small><b id="m-expo">—</b></div>
+      </div>
+
+      <!-- Le commentaire : ce que le dernier réglage vient de changer -->
+      <div class="note info" id="commentaire" aria-live="polite"></div>
+
+      <!-- L'exploration : matériel, objectif, capteur, signal -->
+      <div class="stg" id="bloc-explorer">
+        <div class="vt">
+          <div class="seg" id="onglets-explorer" role="tablist" aria-label="Explorer"></div>
+          <span id="explorer-legende"></span>
+        </div>
+
+        <div class="volet" id="volet-materiel" role="tabpanel">
+          <div class="volet-dessin">
+            <canvas id="materiel" class="cv" aria-hidden="true"></canvas>
+            <div id="reperes"></div>
+          </div>
+          <div class="sim-fiche" id="fiche-materiel" aria-live="polite"></div>
+        </div>
+
+        <div class="volet" id="volet-anatomie" role="tabpanel" hidden>
+          <div class="volet-dessin"><svg id="anatomie" class="cv schema" role="img" aria-label="Coupe de l’objectif : groupes de lentilles, diaphragme, bagues, et trajet de la lumière jusqu’au capteur"></svg></div>
+          <div class="sim-fiche" id="fiche-anatomie" aria-live="polite"></div>
+        </div>
+
+        <div class="volet" id="volet-capteur" role="tabpanel" hidden>
+          <div class="volet-dessin">
+            <svg id="capteur" class="cv schema" role="img" aria-label="Comparaison des deux capteurs à la même échelle, et mesure de la couleur"></svg>
+            <div class="chaine" id="chaine" aria-label="Chaîne de traitement du signal"></div>
+          </div>
+          <div class="sim-fiche" id="fiche-capteur" aria-live="polite"></div>
+        </div>
+
+        <div class="volet deux" id="volet-signal" role="tabpanel" hidden>
+          <figure><canvas id="oscilloscope" class="cv" role="img" aria-label="Oscilloscope : niveaux vidéo de l’image, de 0 à 109 %"></canvas><figcaption><b>Oscilloscope.</b> Les niveaux de l’image, colonne par colonne : 0 % = noir, 100 % = blanc.</figcaption></figure>
+          <figure><canvas id="courbe" class="cv" role="img" aria-label="Courbe de transfert de la caméra"></canvas><figcaption><b>Courbe de la caméra.</b> En jaune, la courbe réglée ; en pointillé, la courbe sans retouche ; en bleu, les tons du décor.</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ COLONNE DE DROITE : ce qu'on règle ============ -->
+    <aside class="sim-reglages" aria-label="Réglages">
+      <div class="exp-carte" id="exp-carte" hidden></div>
+      <div class="seg onglets" id="onglets-reglages" role="tablist" aria-label="Familles de réglages"></div>
+      <div class="panneau" id="panneau"></div>
+    </aside>
+  </main>
+
+  <!-- La liste des expériences guidées -->
+  <dialog class="exp-fenetre" id="exp-fenetre" aria-labelledby="exp-titre">
+    <div class="exp-tete">
+      <div><span class="eyebrow">Pour découvrir pas à pas</span><h2 id="exp-titre">Expériences guidées</h2></div>
+      <button class="btn small" id="exp-fermer" type="button">Fermer</button>
+    </div>
+    <p class="muted">Chaque expérience prépare les réglages, puis vous guide en quelques étapes. Vous restez libre de tout manipuler.</p>
+    <div class="exp-liste" id="exp-liste"></div>
+  </dialog>
+
+  <!-- catalogue.js : pour l'icône et les couleurs de l'application -->
+  <script src="../../js/catalogue.js"></script>
+  <script src="optique.js"></script>
+  <script src="decor.js"></script>
+  <script src="rendu.js"></script>
+  <script src="plateau.js"></script>
+  <script src="anatomie.js"></script>
+  <script src="signal.js"></script>
+  <script src="textes.js"></script>
+  <script src="simulateur.js"></script>
+</body>
+</html>
