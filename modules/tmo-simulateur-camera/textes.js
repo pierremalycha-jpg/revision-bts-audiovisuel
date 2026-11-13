@@ -36,7 +36,7 @@ const AIDES = {
     titre: "Bague de mise au point",
     quoi: "Elle déplace un groupe de lentilles pour choisir la <b>distance du plan net</b>. Tout ce qui est à cette distance est net ; plus on s’en éloigne, plus c’est flou.",
     image: "Un projecteur de diapositives : on tourne la bague jusqu’à ce que l’image soit nette sur l’écran. Ici, l’écran est le capteur.",
-    observer: "Dans la vue du plateau, le <b>cadre vert</b> est le plan net. Sur le sol, les repères de distance montrent où commence et où finit la zone nette.",
+    observer: "Dans la scène, le <b>cadre vert</b> est le plan net et la bande verte au sol, la zone nette. Dans l’image de la caméra, les repères de distance peints au sol montrent où elle commence et où elle finit.",
     plateau: "Méthode de plateau : <b>zoomer à fond</b> sur le sujet, faire le point, puis recadrer. Le point tient, car l’objectif est parfocal.",
     boitier: "Zoom varifocal : le point <b>glisse quand on zoome</b>. Il faut le refaire après chaque changement de focale (ou laisser travailler l’autofocus)."
   },
@@ -88,7 +88,7 @@ const AIDES = {
     titre: "Obturation",
     quoi: "La durée pendant laquelle le capteur reçoit la lumière pour chaque image. Durée courte = moins de lumière, mais mouvements <b>figés</b> ; durée longue = mouvements <b>filés</b>.",
     image: "Cligner des yeux très vite devant un ventilateur : on voit les pales arrêtées.",
-    observer: "Lancez la <b>roue</b> du décor : au 1/50 elle file, au 1/1000 on lit les chiffres. Chaque division par deux de la durée coûte un diaphragme.",
+    observer: "Faites tourner la <b>roue</b> du décor (bouton sous le curseur) : au 1/50 elle file, au 1/1000 on lit les chiffres. Chaque division par deux de la durée coûte un diaphragme.",
     plateau: "En 50i, l’obturateur « OFF » correspond au 1/50 s. On ne le change que pour le sport ou pour filmer un écran.",
     boitier: "Règle des 180° : une durée égale à la moitié de la durée d’une image (1/50 s à 25 images par seconde) donne un filé naturel."
   },
@@ -112,7 +112,7 @@ const AIDES = {
   gamma: {
     titre: "Courbe de gamma",
     quoi: "Le capteur répond en ligne droite ; l’œil, non. La courbe de gamma <b>étire les basses lumières</b> et tasse les hautes pour ranger l’image dans le signal vidéo. ITU-709 est la courbe standard de la télévision.",
-    observer: "Dans l’onglet « Le signal », la courbe montre où tombe chaque ton. Le « master gamma » creuse ou éclaircit les tons moyens sans bouger le noir ni le blanc.",
+    observer: "Dans la fenêtre « Oscilloscope et courbe » (menu Afficher), la courbe montre où tombe chaque ton. Le « master gamma » creuse ou éclaircit les tons moyens sans bouger le noir ni le blanc.",
     boitier: "<b>S-Cinetone</b> adoucit le contraste et les hautes lumières. <b>S-Log3</b> est une courbe logarithmique : image grise et plate, mais toute la dynamique est conservée pour l’étalonnage."
   },
   masterGamma: {
@@ -320,7 +320,9 @@ const PIECES = {
      S.point(id, distance)     fait le point à cette distance (mètres)
      S.exposer(id)             règle le diaphragme pour une exposition correcte
      S.aides({ zebra, peaking, loupe, loupeX, loupeY, roue })
-     S.onglets(reglages, explorer)      ouvre les onglets utiles
+     S.ouvrir(reglages, fenetre)   ouvre une famille de réglages ("objectif", "exposition", "image",
+                               "defauts") et, au besoin, une fenêtre ("profondeur", "anatomie",
+                               "capteur", "signal")
    ========================================================================== */
 const EXPERIENCES = [
   {
@@ -330,12 +332,12 @@ const EXPERIENCES = [
     preparer(S) {
       S.config("plateau"); S.cadre({ distance: 3.5, pan: 0, tilt: -3 });
       S.regler("plateau", { focale: 10.8, ouverture: 1.8, nd: 0, sensibilite: 0, obturation: 50, knee: true });
-      S.point("plateau", 3.5); S.aides({ zebra: 2, loupe: 1 }); S.onglets("exposition", "signal");
+      S.point("plateau", 3.5); S.aides({ zebra: 2, loupe: 1 }); S.ouvrir("exposition", "signal");
     },
     etapes: [
       "L’image est <b>brûlée</b> : le diaphragme est grand ouvert sous 1 000 lux. Les hachures du zébra 100 % montrent tout ce qui est écrêté ; sur l’oscilloscope, la trace est collée en haut.",
-      "Onglet <b>Objectif</b> : fermez le diaphragme jusqu’à ce que le voyant d’exposition passe au vert (vers f/9). L’image est bien exposée… mais tout est net, du premier plan au fond.",
-      "Autre solution : rouvrez à <b>f/2,3</b> et mettez le filtre <b>ND 1/16</b> (onglet Exposition). Même exposition, mais la plante du premier plan est devenue floue : le filtre ND permet de <b>choisir son diaphragme</b>.",
+      "Dans <b>Objectif</b>, fermez le diaphragme jusqu’à ce que l’indication « Expo », en bas de l’image, passe au vert (vers f/9). L’image est bien exposée… mais tout est net, du premier plan au fond.",
+      "Autre solution : rouvrez à <b>f/2,3</b> et mettez le filtre <b>ND 1/16</b> (réglages Exposition). Même exposition, mais la plante du premier plan est devenue floue : le filtre ND permet de <b>choisir son diaphragme</b>.",
       "Passez le zébra sur <b>70 %</b> : les hachures doivent se poser sur les zones claires du visage."
     ]
   },
@@ -347,11 +349,11 @@ const EXPERIENCES = [
       S.cadre({ distance: 3.5, pan: 0, tilt: -3 }); S.commun({ lux: 1000 });
       S.regler("plateau", { focale: 13.5, ouverture: 2.8, nd: 2, sensibilite: 3, obturation: 50 });
       S.regler("boitier", { focale: 50, ouverture: 2.8, nd: 2, sensibilite: 1600, obturation: 50 });
-      S.point("plateau", 3.5); S.point("boitier", 3.5); S.config("plateau"); S.aides({ zebra: 0, loupe: 1 }); S.onglets("objectif", "materiel");
+      S.point("plateau", 3.5); S.point("boitier", 3.5); S.config("plateau"); S.aides({ zebra: 0, loupe: 1 }); S.ouvrir("objectif", "profondeur");
     },
     etapes: [
-      "Caméra de plateau, 13,5 mm à f/2,8, point sur la présentatrice. Regardez la plante au premier plan et le mur du fond : presque nets. Dans la vue du plateau, la <b>zone verte</b> (zone nette) est longue.",
-      "Passez sur le <b>boîtier</b> (en haut) : même cadre, mais il faut 50 mm pour l’obtenir, car le capteur est 3,7 fois plus large. Toujours f/2,8 : la plante et le fond sont <b>très flous</b>, la zone verte est courte.",
+      "Caméra de plateau, 13,5 mm à f/2,8, point sur la présentatrice. Regardez la plante au premier plan et le mur du fond : presque nets. Dans la scène, la <b>bande verte</b> au sol (zone nette) est longue.",
+      "Passez sur le <b>boîtier</b> (en haut) : même cadre, mais il faut 50 mm pour l’obtenir, car le capteur est 3,7 fois plus large. Toujours f/2,8 : la plante et le fond sont <b>très flous</b>, la bande verte est courte.",
       "Sur le boîtier, fermez le diaphragme jusqu’à retrouver la zone nette de la caméra de plateau : il faut aller vers <b>f/11</b> (retirez le filtre ND pour garder l’exposition). Règle pratique : à cadre égal, le 2/3″ à f/2,8 donne la profondeur de champ d’un plein format à f/11.",
       "Conclusion : pour isoler un sujet par le flou, le grand capteur est avantagé. Pour tout garder net en direct (sport, plateau), le petit capteur est plus sûr."
     ]
@@ -364,12 +366,12 @@ const EXPERIENCES = [
       S.cadre({ distance: 3.5 }); S.viser("visage"); S.commun({ lux: 1000 });
       S.regler("plateau", { focale: 170, doubleur: false, ouverture: 2.8, nd: 2, sensibilite: 3, obturation: 50, tirage: 0 });
       S.regler("boitier", { focale: 70, ouverture: 2.8, nd: 2, sensibilite: 1600, obturation: 50 });
-      S.point("plateau", 3.5); S.point("boitier", 3.5); S.config("plateau"); S.aides({ zebra: 0, peaking: true, loupe: 1 }); S.onglets("objectif", "anatomie");
+      S.point("plateau", 3.5); S.point("boitier", 3.5); S.config("plateau"); S.aides({ zebra: 0, peaking: true, loupe: 1 }); S.ouvrir("objectif", "anatomie");
     },
     etapes: [
       "Caméra de plateau, zoomée à fond sur le visage. Le point est fait (le peaking rouge souligne les contours nets). <b>Dézoomez</b> lentement jusqu’au grand-angle : le visage reste net tout du long.",
-      "Regardez la vue <b>L’objectif</b> pendant le zoom : le variateur et le compensateur se déplacent ensemble, et le foyer reste <b>posé sur le capteur</b>. C’est un zoom <b>parfocal</b>.",
-      "Passez sur le <b>boîtier</b> : 70 mm, point fait sur le visage. Dézoomez vers 24 mm : le visage devient un peu mou, et dans la vue du plateau le cadre vert (le plan net) s’est rapproché de la caméra. Revenez à 70 mm : il est de nouveau net.",
+      "Regardez la <b>coupe de l’objectif</b> pendant le zoom : le variateur et le compensateur se déplacent ensemble, et le foyer reste <b>posé sur le capteur</b>. C’est un zoom <b>parfocal</b>.",
+      "Passez sur le <b>boîtier</b> : 70 mm, point fait sur le visage. Dézoomez vers 24 mm : le visage devient un peu mou, et dans la scène le cadre vert (le plan net) s’est rapproché de la caméra. Revenez à 70 mm : il est de nouveau net.",
       "Maintenant l’inverse, bien plus sévère : à <b>24 mm</b>, cliquez sur <b>AF</b> pour faire le point, puis zoomez à 70 mm. Le visage est <b>complètement flou</b> : le plan net a glissé loin derrière. C’est un zoom <b>varifocal</b> ; en longue focale, la profondeur de champ ne pardonne plus rien.",
       "À retenir : avec un parfocal, on fait le point une fois, en longue focale. Avec un varifocal, on refait le point après chaque coup de zoom."
     ]
@@ -381,12 +383,12 @@ const EXPERIENCES = [
     preparer(S) {
       S.config("plateau"); S.cadre({ distance: 3.5 }); S.viser("etoile"); S.commun({ lux: 1000 });
       S.regler("plateau", { focale: 170, doubleur: false, ouverture: 1.8, nd: 2, sensibilite: 0, obturation: 50, tirage: 0.09 });
-      S.point("plateau", 3.5); S.aides({ zebra: 0, peaking: false, loupe: 1 }); S.onglets("objectif", "anatomie");
+      S.point("plateau", 3.5); S.aides({ zebra: 0, peaking: false, loupe: 1 }); S.ouvrir("objectif", "anatomie");
     },
     etapes: [
       "La caméra vise la mire, zoomée à fond, diaphragme grand ouvert (avec du ND) : c’est là que la profondeur de champ est la plus courte, donc le réglage le plus précis. Le point est fait.",
       "<b>Dézoomez à fond</b> (8,5 mm). L’image est <b>molle</b> alors qu’on n’a pas touché au point : le tirage optique est faux.",
-      "Sans toucher à la bague de mise au point, ouvrez <b>Tirage optique</b> et ramenez la netteté en grand-angle avec ce curseur (il doit revenir vers 0).",
+      "Sans toucher à la bague de mise au point, ramenez la netteté en grand-angle avec le curseur <b>Tirage optique</b> (il doit revenir vers 0).",
       "Rezoomez à fond, refaites le point à la bague de mise au point, dézoomez, vérifiez. Quand le point tient sur toute la course, le tirage est réglé."
     ]
   },
@@ -397,13 +399,13 @@ const EXPERIENCES = [
     preparer(S) {
       S.config("boitier"); S.cadre({ distance: 3.5, pan: 0, tilt: -3 }); S.commun({ lux: 1000, niveau: 3, acLat: true, acLon: true, vignettage: false, diffraction: true, distorsion: true, pique: true });
       S.regler("boitier", { focale: 24, ouverture: 2.8, nd: 2, sensibilite: 1600, obturation: 50 });
-      S.point("boitier", 3.5); S.aides({ zebra: 0, peaking: false, loupe: 4, loupeX: 0.88, loupeY: 0.74 }); S.onglets("defauts", "anatomie");
+      S.point("boitier", 3.5); S.aides({ zebra: 0, peaking: false, loupe: 4, loupeX: 0.88, loupeY: 0.74 }); S.ouvrir("defauts");
     },
     etapes: [
       "Boîtier à 24 mm. La loupe ×4 regarde une <b>barre LED</b> dans le coin en haut à droite : elle est bordée de rouge d’un côté, de bleu de l’autre. C’est l’aberration chromatique <b>latérale</b>.",
       "Glissez dans l’image pour amener la loupe <b>au centre</b> : plus de liseré. L’aberration latérale grandit avec la distance au centre.",
       "Revenez sur le bord et <b>fermez le diaphragme</b> : le liseré ne change pas. Zoomez vers 50 mm : il disparaît, puis s’<b>inverse</b> à 70 mm.",
-      "Dans l’onglet Défauts, décochez l’aberration latérale pour voir l’image corrigée, comme le fait le boîtier. Puis testez la caméra de plateau au grand-angle : même phénomène."
+      "Dans les réglages <b>Défauts</b>, décochez l’aberration latérale pour voir l’image corrigée, comme le fait le boîtier. Puis testez la caméra de plateau au grand-angle : même phénomène."
     ]
   },
   {
@@ -413,13 +415,13 @@ const EXPERIENCES = [
     preparer(S) {
       S.config("boitier"); S.cadre({ distance: 3.5, pan: 0, tilt: -3 }); S.commun({ lux: 1000, niveau: 1, vignettage: true });
       S.regler("boitier", { focale: 24, ouverture: 2.8, nd: 1, sensibilite: 400, obturation: 50 });
-      S.point("boitier", 3.5); S.aides({ zebra: 0, peaking: false, loupe: 1 }); S.onglets("objectif", "signal");
+      S.point("boitier", 3.5); S.aides({ zebra: 0, peaking: false, loupe: 1 }); S.ouvrir("objectif");
     },
     etapes: [
       "Boîtier à 24 mm, f/2,8 : les coins sont nettement plus sombres que le centre (plus de deux diaphragmes).",
       "Fermez à <b>f/5,6</b> et retirez le filtre ND pour garder la même exposition : les coins s’éclaircissent. La part due à la monture des lentilles a disparu ; il reste la chute naturelle du grand-angle.",
       "Revenez à f/2,8 et zoomez à <b>50 mm</b> : le vignettage diminue, l’angle de champ est plus étroit.",
-      "Passez sur la caméra de plateau au grand-angle, grande ouverte : le vignettage est bien plus discret. Dans l’onglet Défauts, décochez « Vignettage » pour simuler la correction faite par la caméra."
+      "Passez sur la caméra de plateau au grand-angle, grande ouverte : le vignettage est bien plus discret. Dans les réglages <b>Défauts</b>, décochez « Vignettage » pour simuler la correction faite par la caméra."
     ]
   },
   {
@@ -430,7 +432,7 @@ const EXPERIENCES = [
       S.config("plateau"); S.cadre({ distance: 3.5 }); S.viser("etoile"); S.commun({ lux: 2000, niveau: 3, diffraction: true });
       S.regler("plateau", { focale: 40, doubleur: false, ouverture: 4, nd: 2, sensibilite: 3, obturation: 50, tirage: 0 });
       S.regler("boitier", { focale: 70, ouverture: 4, nd: 2, sensibilite: 1600, obturation: 50 });
-      S.point("plateau", 3.5); S.point("boitier", 3.5); S.aides({ zebra: 0, peaking: false, loupe: 2 }); S.onglets("objectif", "anatomie");
+      S.point("plateau", 3.5); S.point("boitier", 3.5); S.aides({ zebra: 0, peaking: false, loupe: 2 }); S.ouvrir("objectif");
     },
     etapes: [
       "La caméra de plateau vise la mire à f/4, avec le filtre ND 1/16 : l’étoile de Siemens est fine jusqu’au centre.",
@@ -447,7 +449,7 @@ const EXPERIENCES = [
     preparer(S) {
       S.config("plateau"); S.cadre({ distance: 3.5, pan: -9, tilt: 3 }); S.commun({ lux: 1000 });
       S.regler("plateau", { focale: 17, doubleur: false, ouverture: 4.5, nd: 1, sensibilite: 0, obturation: 50, knee: false, kneePoint: 90, kneePente: 0, tirage: 0 });
-      S.point("plateau", 3.5); S.aides({ zebra: 2, peaking: false, loupe: 1 }); S.onglets("image", "signal");
+      S.point("plateau", 3.5); S.aides({ zebra: 2, peaking: false, loupe: 1 }); S.ouvrir("image", "signal");
     },
     etapes: [
       "Le visage est bien exposé, mais l’<b>écran LED</b> est trois fois plus lumineux qu’un blanc : knee coupé, le ciel est un aplat blanc hachuré par le zébra, et la trace de l’oscilloscope s’écrase sur la ligne 109 %.",
@@ -463,7 +465,7 @@ const EXPERIENCES = [
     preparer(S) {
       S.config("plateau"); S.cadre({ distance: 3.5 }); S.viser("buste"); S.commun({ lux: 1000 });
       S.regler("plateau", { focale: 34, doubleur: false, ouverture: 4.5, nd: 1, sensibilite: 0, obturation: 50, knee: true, masterBlack: 0, bgNiveau: 0, bgPlage: 1, tirage: 0 });
-      S.point("plateau", 3.5); S.aides({ zebra: 0, peaking: false, loupe: 1 }); S.onglets("image", "signal");
+      S.point("plateau", 3.5); S.aides({ zebra: 0, peaking: false, loupe: 1 }); S.ouvrir("image", "signal");
     },
     etapes: [
       "Plan serré sur la présentatrice. Sa veste bleu nuit et ses cheveux sont de grandes zones sombres : on y devine à peine les rayures et les mèches.",
@@ -479,7 +481,7 @@ const EXPERIENCES = [
     preparer(S) {
       S.config("boitier"); S.cadre({ distance: 3.5 }); S.viser("roue"); S.commun({ lux: 1000 });
       S.regler("boitier", { focale: 50, ouverture: 4, nd: 1, sensibilite: 800, obturation: 50 });
-      S.point("boitier", 5.3); S.aides({ zebra: 0, peaking: false, loupe: 1, roue: true }); S.onglets("exposition", "signal");
+      S.point("boitier", 5.3); S.aides({ zebra: 0, peaking: false, loupe: 1, roue: true }); S.ouvrir("exposition");
     },
     etapes: [
       "La roue tourne. Au <b>1/50 s</b>, chaque image dure assez longtemps pour que les chiffres filent : c’est le flou de bougé.",
@@ -496,7 +498,7 @@ const EXPERIENCES = [
       S.config("plateau"); S.cadre({ distance: 3.5 }); S.viser("buste"); S.commun({ lux: 30 });
       S.regler("plateau", { focale: 20, doubleur: false, ouverture: 4, nd: 0, sensibilite: 0, obturation: 50, tirage: 0, detail: 0 });
       S.regler("boitier", { focale: 70, ouverture: 4, nd: 0, sensibilite: 800, obturation: 50 });
-      S.point("plateau", 3.5); S.point("boitier", 3.5); S.aides({ zebra: 0, peaking: false, loupe: 1 }); S.onglets("exposition", "signal");
+      S.point("plateau", 3.5); S.point("boitier", 3.5); S.aides({ zebra: 0, peaking: false, loupe: 1 }); S.ouvrir("exposition", "signal");
     },
     etapes: [
       "Les projecteurs sont éteints : il ne reste que <b>30 lux</b>, l’éclairage d’une pièce le soir. À f/4 et 0 dB, l’image est très sombre.",
@@ -512,7 +514,7 @@ const EXPERIENCES = [
     preparer(S) {
       S.config("plateau"); S.cadre({ distance: 3.5, pan: 0, tilt: -3 }); S.commun({ lux: 1000, kelvin: 3200 });
       S.regler("plateau", { focale: 10.8, doubleur: false, ouverture: 4.5, nd: 1, sensibilite: 0, obturation: 50, blanc: 5600, tirage: 0 });
-      S.point("plateau", 3.5); S.aides({ zebra: 0, peaking: false, loupe: 1 }); S.onglets("exposition", "signal");
+      S.point("plateau", 3.5); S.aides({ zebra: 0, peaking: false, loupe: 1 }); S.ouvrir("exposition");
     },
     etapes: [
       "Le plateau est passé en lumière <b>tungstène (3 200 K)</b>, mais la caméra est restée réglée sur 5 600 K : toute l’image est <b>orangée</b>.",

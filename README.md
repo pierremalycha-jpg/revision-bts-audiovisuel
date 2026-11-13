@@ -94,13 +94,14 @@ revision-bts-audiovisuel/
     ├── tes-microphones/              Sous-catégorie « Son » : neuf modules sur les microphones
     │   └── index.html, contenu.js, labos.js
     └── tmo-simulateur-camera/        Application pratique : le simulateur caméra (voir plus bas)
-        ├── index.html, simulateur.css  La page et sa mise en page
+        ├── index.html, simulateur.css  La page et son interface épurée (scène, dock, fenêtres)
         ├── optique.js                Les deux configurations et les lois physiques
-        ├── decor.js                  Le plateau TV, dessiné calque par calque (2,5D)
+        ├── decor.js, materiel.js     Le plateau TV et le matériel, dessinés à plat (2,5D)
+        ├── scene.js                  La grande scène en perspective, caméra au centre (WebGL)
         ├── rendu.js                  L'image de la caméra (WebGL)
-        ├── plateau.js, anatomie.js, signal.js   Maquette du plateau, coupe des objectifs, oscilloscope
+        ├── profondeur.js, anatomie.js, signal.js   Les schémas facultatifs : profondeur de champ, objectifs, signal
         ├── textes.js                 Les explications et les expériences guidées
-        └── simulateur.js             L'état, les réglages, le lien entre tout le reste
+        └── simulateur.js             L'état, les réglages, les fenêtres, le lien entre tout le reste
 ```
 
 ## Le simulateur caméra
@@ -113,12 +114,20 @@ Première **application pratique** : on y manipule deux configurations de prise 
 | Capteur | trois CMOS 2/3″ derrière un prisme | un CMOS plein format à matrice de Bayer |
 | Objectif | zoom broadcast 8,5–170 mm f/1,8, **parfocal**, doubleur ×2, tirage optique | zoom photo 24–70 mm f/2,8, **varifocal**, autofocus |
 
-Ce que l'on règle : les bagues (zoom, mise au point, diaphragme), la lumière du plateau, le filtre ND, l'obturation, le gain ou les ISO, la balance des blancs, puis la courbe de la caméra (gamma, master black, **black gamma** — black stretch et black press —, **knee**, saturation, détail). Ce que l'on voit : l'image de la caméra, avec l'exposition, la **profondeur de champ** et les **défauts optiques** (aberrations chromatiques latérale et longitudinale, vignettage, diffraction, distorsion, mollesse à pleine ouverture) qui varient avec l'objectif, la focale et l'ouverture ; la maquette du plateau (angle de champ, plan net, zone nette) ; la coupe de l'objectif, dont les lentilles bougent avec les bagues ; l'oscilloscope et la courbe de transfert. Douze **expériences guidées** proposent un parcours (bouton en haut à droite).
+Ce que l'on règle : les bagues (zoom, mise au point, diaphragme), la lumière du plateau, le filtre ND, l'obturation, le gain ou les ISO, la balance des blancs, puis la courbe de la caméra (gamma, master black, **black gamma** — black stretch et black press —, **knee**, saturation, détail). Ce que l'on voit : l'image de la caméra, avec l'exposition, la **profondeur de champ** et les **défauts optiques** (aberrations chromatiques latérale et longitudinale, vignettage, diffraction, distorsion, mollesse à pleine ouverture) qui varient avec l'objectif, la focale et l'ouverture.
+
+**Une interface épurée.** La page est une seule grande scène : le plateau en perspective, la caméra au centre ; on tourne autour en glissant, on s'approche avec la molette. Tout le reste flotte par-dessus, en semi-transparence, et ne s'affiche que si on le demande :
+
+- en bas, le **dock** : quatre familles de réglages (Objectif, Exposition, Image, Défauts) qui s'ouvrent et se referment d'un clic, et le menu **Afficher** ;
+- le **retour caméra** est une fenêtre : on la déplace par son titre, on la redimensionne par son coin, on l'agrandit d'un double-clic sur le titre ;
+- le menu **Afficher** propose, au choix : le champ et la zone nette dans la scène, la **vue de côté / de dessus** (schéma de profondeur de champ), la coupe de l'objectif (ses lentilles bougent avec les bagues), le capteur et la chaîne du signal, l'oscilloscope et la courbe de transfert, et les **explications** (une fiche qui suit le réglage que l'on touche, plus des repères cliquables sur le matériel) ;
+- en haut à droite, douze **expériences guidées**.
 
 À savoir pour le faire évoluer :
 
 - **Aucune note, aucun module** : dans le catalogue, l'application a `modules: 0` et `suivi: "aucun"`. Elle n'apparaît donc pas dans « Ma progression ».
-- **Le décor est en 2,5D** : des dessins plats (les « calques » de `decor.js`), posés à leur vraie distance. Pour ajouter un élément, écris sa fonction de dessin (en mètres) et ajoute une ligne à la liste `calques`.
+- **Le décor est en 2,5D** : des dessins plats (les « calques » de `decor.js`), posés à leur vraie distance. Pour ajouter un élément, écris sa fonction de dessin (en mètres) et ajoute une ligne à la liste `calques` : il apparaît dans la scène et dans l'image de la caméra.
+- **Ce qui est affiché au départ** se règle dans `simulateur.js` (`etat.affiche`) ; la taille et la place des fenêtres, dans `FENETRES`.
 - **Les valeurs physiques** (sensibilité, bruit, force des défauts de chaque objectif) sont regroupées en tête de `optique.js`, dans `CONFIGS`. Ce sont des ordres de grandeur réalistes, pas des mesures d'un modèle précis.
 - **Les textes** (une fiche par réglage, les expériences) sont tous dans `textes.js`.
 - **Les défauts sont accentués ×3 par défaut**, pour être visibles sur un vidéoprojecteur ; l'onglet « Défauts » permet de revenir à leur force réelle ou de les corriger.

@@ -11,7 +11,7 @@
    deux fois :
      - rendu.js le « photographie » à la bonne résolution pour l'image de la
        caméra (même au téléobjectif, les détails restent fins) ;
-     - plateau.js le pose dans la vue d'ensemble du plateau.
+     - scene.js le pose debout dans la grande scène en perspective.
 
    Repère du plateau : X vers la droite de la caméra, Y vers le haut,
    Z = profondeur (on s'éloigne de la caméra). Le sol est à Y = 0.
