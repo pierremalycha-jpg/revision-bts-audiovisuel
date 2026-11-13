@@ -174,5 +174,6 @@ Règles de code (dans `labos.js`) :
 | `modules/tes-capteurs/` | Six labos animés (canvas, boucles d'animation avec pause, mouvement réduit). |
 | `modules/tes-eclairage/` | Plusieurs labos par module (titres `.sous-labo`), couleurs calculées à partir de spectres (moteur CIE), schémas SVG dans les notions et les questions (`.qa-fig`), image calculée rayon par rayon. |
 | `modules/tes-compression-video/` | Plusieurs labos par module avec un seul `Application.labo` (fonction `labo(n, f)` en tête de `labos.js`), calculs réels sur une image dessinée (codeur JPEG, estimation de mouvement, codeur arithmétique), fiches MediaInfo en SVG pour les questions « Lire ». |
+| `modules/tes-microphones/` | Physique partagée entre le cours et les labos (objet `MICRO` et tableau `DIRECTIVITES` en tête de `contenu.js`, réutilisés par `labos.js`), diagrammes polaires en SVG (`figPolaire`) et sur canvas (`O.polaireGrille`, `O.polaireCourbe`), fiches techniques en SVG (`figFiche`) pour les questions « Lire ». |
 
 La photométrie, elle, reste un **fichier unique** autonome (elle fonctionne aussi hors ligne, avec son propre enregistrement, son relevé PDF et son tableau de bord enseignant). Le kit en reprend la forme ; il ne la remplace pas.

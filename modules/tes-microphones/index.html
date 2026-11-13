@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Microphones — Révision BTS Audiovisuel</title>
+  <meta name="description" content="Application de révision : pression acoustique et dB SPL, technologies de micro (dynamique, ruban, électrostatique, électret), capsules et effet de proximité, directivité, sensibilité et fiche technique, types de micros, liaisons symétriques et alimentation fantôme, couples stéréophoniques.">
+  <!-- « ../../ » remonte de deux dossiers : modules/tes-microphones/ → racine -->
+  <script src="../../js/theme.js"></script>
+  <script src="../../js/transition.js"></script>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/application.css">
+</head>
+
+<!-- Toute la page (menu, accueil, notions, essentiel, évaluation) est construite
+     par js/application.js à partir de contenu.js. Cette page ne contient que
+     les LABOS : un <template> par module, avec un ou plusieurs labos chacun.
+     Identifiants : m + numéro du module + lettre du labo (m1a-…, m2b-…). -->
+<body data-racine="../../">
+
+
+
+  <!-- Scripts communs : ne pas modifier, ne pas changer l'ordre -->
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+  <script src="../../js/firebase-config.js"></script>
+  <script src="../../js/suivi.js"></script>
+  <script src="../../js/commun.js"></script>
+  <script src="../../js/catalogue.js"></script>
+  <script src="../../js/applications.js"></script>
+  <script src="../../js/application.js"></script>
+  <!-- Scripts propres à CETTE application -->
+  <script src="contenu.js"></script>
+  <script src="labos.js"></script>
+  <script>
+    Application.demarrer(APPLICATION);
+  </script>
+</body>
+</html>

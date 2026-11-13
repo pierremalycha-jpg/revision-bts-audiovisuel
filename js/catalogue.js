@@ -15,7 +15,7 @@
                    "outils"        outil pour préparer un projet (plan de feu…) ;
                    "pratique"      application pratique, simulateur (régie…).
      sousCategorie  (catégorie « connaissances » seulement) le rayon où ranger
-                 l'application : "camera-eclairage" ou "numerique".
+                 l'application : "camera-eclairage", "numerique" ou "son".
      epreuve     "TES" ou "TMO"
      titre       le nom affiché sous l'icône (court : un ou deux mots)
      accroche    une ligne sous le nom
@@ -116,6 +116,21 @@ const CATALOGUE = [
     suivi: "kit",
     page: "modules/tes-compression-video/index.html",
     disponible: true
+  },
+  {
+    id: "tes-microphones",
+    categorie: "connaissances",
+    sousCategorie: "son",
+    epreuve: "TES",
+    titre: "Microphones",
+    accroche: "De la vibration à la tension.",
+    description: "Pression acoustique et dB SPL, technologies de micro (dynamique, ruban, électrostatique, électret), capsules et effet de proximité, directivité, sensibilité et fiche technique, types de micros, liaisons symétriques et alimentation fantôme, couples stéréophoniques.",
+    icone: "micro",
+    teinte: ["#ff375f", "#bf5af2", "#5e5ce6"],
+    modules: 8,
+    suivi: "kit",
+    page: "modules/tes-microphones/index.html",
+    disponible: true
   }
 
   // Pour ajouter une application, copie le bloc ci-dessous APRÈS une virgule,
@@ -168,6 +183,11 @@ const CATEGORIES = [
         id: "numerique",
         nom: "Le numérique",
         description: "Le signal vidéo numérique, son débit et sa compression."
+      },
+      {
+        id: "son",
+        nom: "Son",
+        description: "Le son, les microphones, leurs liaisons et la prise de son stéréophonique."
       }
     ]
   },
@@ -245,6 +265,8 @@ const ICONES = {
   projecteur: '<path d="M3.5 8.2l9-3.4v12.4l-9-3.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12.5 7.2l8 -2.6M12.5 12h8.5M12.5 16.8l8 2.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" opacity=".75"/><path d="M8 15.6v4.2M5 19.8h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
   // Une image découpée en blocs, serrée entre deux flèches (compression)
   compression: '<rect x="7" y="5.5" width="10" height="13" rx="2.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 5.8v12.4M7.3 12h9.4" stroke="currentColor" stroke-width="1.3" opacity=".7"/><rect x="8.6" y="7.2" width="2.6" height="3.4" rx=".6" fill="currentColor"/><path d="M1.8 12h3.4M3.6 9.9 5.6 12l-2 2.1M22.2 12h-3.4M20.4 9.9 18.4 12l2 2.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+  // Un microphone sur son étrier (son, microphones)
+  micro: '<rect x="8.7" y="2.6" width="6.6" height="11.2" rx="3.3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.9 6.4h2.6M8.9 9.4h2.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity=".75"/><path d="M5.6 10.8a6.4 6.4 0 0 0 12.8 0M12 17.3v3.6M8.8 20.9h6.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
   // Le signe « plus » (emplacement de la prochaine application)
   // Un livre ouvert (catégorie « Apport de connaissances »)
   livre: '<path d="M12 6.2C10 4.8 7.3 4.3 3.8 4.6v13.2c3.5-.3 6.2.2 8.2 1.6 2-1.4 4.7-1.9 8.2-1.6V4.6c-3.5-.3-6.2.2-8.2 1.6zM12 6.2v13.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
