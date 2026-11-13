@@ -980,6 +980,7 @@ const MODULE_6 = {
    ========================================================================== */
 const APPLICATION = {
   id: "tes-compression-video",   // IDENTIQUE à l'id de js/catalogue.js — ne plus le changer
+  epure: true,                   // interface épurée (une étape à la fois, fiches, petits +) ; « ?classique » rend l'ancienne
   titre: "Compression vidéo",
   accroche: "Moins de bits, même image.",
   epreuve: "TES",

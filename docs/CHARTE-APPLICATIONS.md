@@ -41,6 +41,22 @@ La barre du haut les affiche et suit le défilement. L'élève sait toujours où
 | **Retenir** | L'essentiel avant l'évaluation. | Quatre questions : définitions, formules, repères, **pièges**. Court : ce qui tombe à l'évaluation, rien de plus. |
 | **S'évaluer** | 10 questions, 2 points chacune, note sur 20. | Les valeurs changent à chaque tentative. Correction détaillée. **12/20** ouvre le module suivant. |
 
+### L'interface épurée (option `epure: true` dans `contenu.js`)
+
+Le même contenu, présenté pour que l'élève ne se noie pas en arrivant sur un module. Rien n'est supprimé : tout reste à un clic. Ajouter `?classique` à l'adresse rend l'ancienne présentation (une seule longue page), pour comparer.
+
+| Élément | Présentation épurée |
+|---|---|
+| **Étapes** | Une seule à la fois. Une barre numérotée (1 Comprendre · 2 Manipuler · 3 Retenir · 4 S'évaluer) sous le titre ; « Étape suivante » en bas. L'étape entre en glissant dans le sens du parcours. |
+| **Film** | Une carte compacte (vignette, durée, « Regarder »). Il s'ouvre dans une fenêtre qui grandit depuis la vignette, avec ses chapitres, et démarre à l'ouverture. |
+| **Comprendre** | Les mots et les formules en **tuiles** (icône + mot, ou la formule). Une tuile ouvre sa **fiche** dans une fenêtre ; on les feuillette avec ← →, les points du bas ou en glissant le doigt. Une coche verte marque les fiches déjà lues. |
+| **Dans une fiche** | La définition (ou la formule et sa lecture à voix haute) reste visible ; la comparaison, les repères, le tableau des symboles et l'exemple chiffré sont derrière des **petits +**. |
+| **Manipuler** | Plusieurs labos : des **onglets**, un labo à la fois, et « Labo suivant » en bas. Une carte qui contient un `.calc` (« Calcul pas à pas ») est repliée derrière un +. « Ce qu'il faut observer » reste toujours visible. |
+| **S'évaluer** | Les règles détaillées derrière un +. Dans la correction, les erreurs sont ouvertes, les bonnes réponses repliées. |
+| **Téléphone** | Les fenêtres montent du bas de l'écran. |
+
+Le kit fournit aussi aux labos `Application.plus(titre, html, { ouvert })` (un détail replié) et `Application.fenetre({ origine, contenu })` (une fenêtre qui s'ouvre depuis un élément).
+
 ### Le film du module (avant les quatre étapes)
 
 Sous le titre du module, une **vidéo courte** (deux à trois minutes) résume l'essentiel : en musique, **sans voix**, avec des animations qui expliquent les notions pas à pas. L'élève la regarde en arrivant, puis y revient pour réviser.
