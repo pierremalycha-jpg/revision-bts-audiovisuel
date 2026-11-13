@@ -262,6 +262,19 @@
     fin: T(B.fin + 1, 3.5),
   };
 
-  const SCORE = { FPS, FORMAT, W, H, SAFE, DURATION, STYLE: 'flat', clock, T, BEAT, B, S, CHAPITRES, m, chords, chordAt, HOOK, boite, theme, ev, hits, markers };
+  // ---------- l'arrangement (lu par films/_commun/musique.js) : la batterie entre avec la formule du débit ----------
+  const arrangement = [
+    { from: B.titre, to: B.probleme, drums: false, bassline: false, gain: 1.4 }, // titre : le piano seul
+    { from: B.probleme, to: B.debit, drums: false, gain: 0.9 }, // le problème : basse + piano
+    { from: B.debit, to: B.inter, fill: [B.inter - 1] },
+    { from: B.inter, to: B.spatiale, drums: false }, // respiration avant les redondances
+    { from: B.spatiale, to: B.retenir, fill: [B.place - 1] },
+    { from: B.retenir, to: B.fin, drums: false, gain: 0.9 }, // à retenir : on se calme
+    { from: B.fin, to: B.fin + 1, drums: false }, // la cadence finale
+  ];
+  const calme = (mesure) => mesure < B.debit || mesure === B.inter || mesure >= B.retenir;
+  const META = { app: 'Compression vidéo', module: 1 };
+
+  const SCORE = { FPS, FORMAT, W, H, SAFE, DURATION, STYLE: 'flat', clock, T, BEAT, B, S, CHAPITRES, META, m, chords, chordAt, HOOK, boite, theme, arrangement, calme, ev, hits, markers };
   if (node) module.exports = SCORE; else globalThis.SCORE = SCORE;
 })();

@@ -260,7 +260,8 @@
   // Nom de l'application en haut à droite + barre de progression par chapitre en bas
   K.habillage = (ctx, t, S) => {
     K.icone(ctx, W - K.MX - 22, 148, 44);
-    K.t(ctx, 'Compression vidéo · Module 1', W - K.MX - 58, 159, { s: 28, w: 700, c: C.mut, a: 'right' });
+    const M = S.META || { app: 'Compression vidéo', module: 1 };
+    K.t(ctx, M.app + ' · Module ' + M.module, W - K.MX - 58, 159, { s: 28, w: 700, c: C.mut, a: 'right' });
     const x0 = K.MX, x1 = W - K.MX, y = 1026, total = S.CHAPITRES[S.CHAPITRES.length - 1].t1 - S.CHAPITRES[0].t0, vide = 10;
     const dispo = x1 - x0 - vide * (S.CHAPITRES.length - 1);
     let x = x0;
@@ -270,6 +271,96 @@
       if (p > 0) { K.rr(ctx, x, y, Math.max(6, l * p), 6, 3); ctx.fillStyle = p >= 1 ? 'rgba(255,255,255,.5)' : K.lin(ctx, x0, 0, x1, 0, SPECTRE); ctx.fill(); }
       x += l + vide;
     }
+  };
+
+  /* ==========================================================================
+     LES SCÈNES COMMUNES À TOUS LES FILMS : titre, « À retenir », fin, montage
+     (elles lisent SCORE.META et SCORE.ev, fabriqués par partition.js)
+     ========================================================================== */
+  const dernierTemps = (S, t) => S.clock.OFFSET + Math.floor((t - S.clock.OFFSET) / S.BEAT) * S.BEAT;
+
+  // décor : des bits qui montent lentement (titre et fin)
+  K.pluieDeBits = (ctx, t, force = 1) => {
+    G.decor(() => {
+      for (let i = 0; i < 70; i++) {
+        const v = 14 + K.alea(i + 50) * 30, s = 22 + K.alea(i + 70) * 26;
+        const x = K.alea(i) * W, y = (((K.alea(i + 100) * (H + 80) - t * v) % (H + 80)) + (H + 80)) % (H + 80) - 40;
+        const bit = K.alea(i + 200 + Math.floor(t * 0.5 + K.alea(i + 9) * 3)) > 0.5 ? '1' : '0';
+        K.t(ctx, bit, x, y, { s, w: 700, c: SPECTRE[i % 4], a: 'center', al: (0.05 + K.alea(i + 300) * 0.09) * force });
+      }
+    });
+  };
+  // un texte centré, réduit s'il dépasse la largeur disponible
+  const ajuste = (ctx, str, s, w, max = W - 2 * K.MX) => Math.min(s, Math.floor((s * max) / K.larg(ctx, str, s, w)));
+
+  // LE TITRE : icône de l'application, sur-titre, titre, sous-titre en dégradé, pastille du module
+  K.scTitre = (ctx, t) => {
+    const S = globalThis.SCORE, e = S.ev.titre, M = S.META;
+    K.fond(ctx, t, C.vio);
+    K.pluieDeBits(ctx, t);
+    const presse = t >= e.icone ? U.pulse(t, dernierTemps(S, t), 5) : 0; // l'icône « serre » l'image sur chaque temps
+    K.entre(ctx, t, e.icone, () => K.icone(ctx, 960, 300, 210, { presse }), { zoom: 0.5, cx: 960, cy: 300 });
+    K.entre(ctx, t, e.sur, () => K.t(ctx, 'BTS AUDIOVISUEL  ·  TES  ·  ' + M.app.toUpperCase(), 960, 505, { s: 30, w: 700, c: C.mut, a: 'center', ls: 5 }));
+    K.entre(ctx, t, e.titre, () => K.t(ctx, M.titre, 960, 655, { s: ajuste(ctx, M.titre, 128, 800), w: 800, a: 'center' }), { dy: 40, d: 0.6 });
+    K.entre(ctx, t, e.sous, () => K.degrade(ctx, M.sousTitre, 960, 775, { s: ajuste(ctx, M.sousTitre, 84, 800), a: 'center' }), { dy: 40, d: 0.6 });
+    K.entre(ctx, t, e.pastille, () => K.puce(ctx, M.pastille, 960, 885, { s: 34, c: C.bleu, a: 'center' }), { dy: 20 });
+  };
+
+  // À RETENIR : lignes = [['la formule ou le mot', 'le complément', couleur], …] (6 au plus), une ligne par note
+  K.scRetenir = (lignes) => (ctx, t) => {
+    const S = globalThis.SCORE, e = S.ev.retenir;
+    K.fond(ctx, t, C.vio); K.habillage(ctx, t, S);
+    K.entre(ctx, t, e.debut, () => K.degrade(ctx, 'À retenir', K.MX, 172, { s: 64 }), { dx: -30, dy: 0 });
+    const pas = lignes.length > 5 ? 116 : 132, h = pas - 16;
+    lignes.forEach((r, i) => {
+      const y = 232 + i * pas, c = r[2] || [C.bleu, C.vio, C.ora, C.rose][i % 4];
+      K.entre(ctx, t, e.lignes[i], () => {
+        K.carte(ctx, K.MX, y, W - 2 * K.MX, h, { r: 26, s: K.rgba(c, 0.35) });
+        ctx.fillStyle = c; ctx.beginPath(); ctx.arc(K.MX + 56, y + h / 2, 26, 0, 7); ctx.fill();
+        K.t(ctx, String(i + 1), K.MX + 56, y + h / 2 + 2, { s: 30, w: 800, c: '#0b0c0e', a: 'center', b: 'middle' });
+        K.t(ctx, r[0], K.MX + 112, y + h / 2 + 16, { s: 46, w: 800 });
+        K.t(ctx, r[1], W - K.MX - 40, y + h / 2 + 13, { s: 34, c: C.txt2, a: 'right' });
+      }, { dx: -50, dy: 0, d: 0.45 });
+      K.onde(ctx, K.MX + 56, y + h / 2, t, e.lignes[i], { c, r: 90, lw: 4 });
+    });
+  };
+
+  // LA FIN : « À vous de jouer » et les quatre étapes du module
+  const ETAPES = [['Comprendre', ['#5ac8fa', '#007aff']], ['Manipuler', ['#ffb340', '#ff6a3d']], ['Retenir', ['#ff5e8a', '#af52de']], ['S’évaluer', ['#34c759', '#00a37a']]];
+  K.scFin = (ctx, t) => {
+    const S = globalThis.SCORE, e = S.ev.fin;
+    K.fond(ctx, t, C.vio);
+    K.pluieDeBits(ctx, t);
+    K.entre(ctx, t, e.titre, () => K.degrade(ctx, 'À vous de jouer.', 960, 370, { s: 128, a: 'center' }), { dy: 40, d: 0.6 });
+    const xs = [420, 780, 1140, 1500], y = 580;
+    ctx.save(); ctx.globalAlpha *= K.app(t, e.etapes[0], 0.6); ctx.strokeStyle = C.ligne; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(xs[0], y); ctx.lineTo(lerp(xs[0], xs[3], K.va(t, e.etapes[0], e.etapes[3], 0, 1, ease.linear)), y); ctx.stroke(); ctx.restore();
+    ETAPES.forEach((s, i) => {
+      K.entre(ctx, t, e.etapes[i], () => {
+        ctx.fillStyle = K.lin(ctx, xs[i] - 40, y - 56, xs[i] + 40, y + 56, s[1]); ctx.beginPath(); ctx.arc(xs[i], y, 56, 0, 7); ctx.fill();
+        K.t(ctx, String(i + 1), xs[i], y + 3, { s: 54, w: 800, c: '#ffffff', a: 'center', b: 'middle' });
+        K.t(ctx, s[0], xs[i], y + 118, { s: 40, w: 700, a: 'center' });
+      }, { zoom: 0.5, cx: xs[i], cy: y, d: 0.4 });
+      K.onde(ctx, xs[i], y, t, e.etapes[i], { c: s[1][0], r: 150 });
+    });
+    K.entre(ctx, t, e.note, () => K.riche(ctx, ['Au moins ', ['12/20', { c: C.txt, w: 800 }], S.META.dernier ? ' à l’évaluation pour valider le parcours.' : ' à l’évaluation pour ouvrir le module suivant.'], 960, 810, { s: 38, c: C.txt2, a: 'center' }), { dy: 20 });
+    K.entre(ctx, t, e.credit, () => K.t(ctx, 'D’après les cours de Pierre MALYCHA · BTS Audiovisuel · Lycée Henri Martin, Saint-Quentin', 960, 970, { s: 26, c: C.mut, a: 'center' }), { dy: 0 });
+  };
+
+  // LE MONTAGE : scenes = { idDeSection: dessin(ctx, t) } ; « titre » et « fin » sont fournis d'office.
+  // Une scène par section du plan, fondu enchaîné sur la barre de mesure.
+  K.monter = (scenes) => {
+    const S = globalThis.SCORE, Shots = globalThis.Shots, Studio = globalThis.Studio;
+    const ordre = Object.keys(S.B).filter((id) => id !== 'END').sort((a, b) => S.B[a] - S.B[b]);
+    const liste = ordre.map((id) => {
+      const draw = scenes[id] || (id === 'titre' ? K.scTitre : id === 'fin' ? K.scFin : null);
+      if (!draw) throw new Error('monter : aucune scène pour la section « ' + id + ' »');
+      return { at: id === 'titre' ? 0 : S.T(S.B[id]), draw, in: id === 'titre' ? 'cut' : { type: 'fade', dur: id === 'fin' || S.B[id] === S.B[ordre[1]] ? 0.6 : 0.4 } };
+    });
+    const film = Shots.film(liste);
+    Studio.film({
+      draw(ctx, t) { if (t < 0.2) return; film(ctx, t); }, // un instant de noir avant le titre
+      post: { paper: 0, grain: 0, vignette: 0.12 },
+    });
   };
 
   globalThis.K = K;
