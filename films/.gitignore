@@ -1,0 +1,7 @@
+# Le moteur de rendu, les fichiers calculés et les copies du kit commun ne sont pas enregistrés dans le dépôt
+*/engine/
+*/out/
+*/kit.js
+*/partition.js
+!_commun/kit.js
+!_commun/partition.js

@@ -46,6 +46,15 @@ const APPLICATION = {
       resume: "Trois mots-clés, séparés",     // sous le libellé, et sur la tuile du parcours
       intro: "Un paragraphe qui dit <b>ce que l’on va comprendre</b> et pourquoi c’est utile sur un plateau ou en régie.",
 
+      /* ---- LE FILM DU MODULE (facultatif) ----------------------------------
+         Une vidéo courte, en musique et sans voix, qui résume l'essentiel du
+         module. Elle s'affiche sous le titre, avant « Comprendre ». Retire les
+         « // » quand le fichier vidéo existe (voir films/README.md) :
+           src       le fichier vidéo (.mp4), rangé dans le dossier de l'application
+           affiche   l'image montrée avant la lecture
+           duree     la durée affichée ; chapitres : [seconde, titre] */
+      // film: { src: "films/module-1.mp4", affiche: "films/module-1.jpg", duree: "2 min", chapitres: [[0, "Première notion"], [40, "Deuxième notion"]] },
+
       /* ---- 1. COMPRENDRE : les mots et les formules ------------------------
          Chaque mot devient une question dépliable. Champs d'un mot :
            t   le mot (obligatoire)          d   la définition (obligatoire)

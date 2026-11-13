@@ -5,6 +5,8 @@
    l'application de photométrie, qui sert de RÉFÉRENCE :
 
      Accueil de l'application  héros, progression, parcours des modules
+     En haut de chaque module  le film du module (facultatif) : une vidéo courte,
+                               en musique et sans voix, qui résume l'essentiel
      Pour chaque module, quatre étapes, dans cet ordre :
        1. Comprendre   les mots et les formules, en questions dépliables
        2. Manipuler    animations et simulations (le « labo » du module)
@@ -182,7 +184,7 @@ const Application = (function () {
   /* Apparition douce des blocs au défilement */
   let observateur = null;
   function apparitions(racine) {
-    const blocs = $$(".pagehead, .etape-hd, .lesson-cols > div, .manip > *, .lab, .etape-retenir > .qa-list, .quizbox, .path > .tile, .home-grid > .card", racine);
+    const blocs = $$(".pagehead, .film-stg, .etape-hd, .lesson-cols > div, .manip > *, .lab, .etape-retenir > .qa-list, .quizbox, .path > .tile, .home-grid > .card", racine);
     if (mouvementReduit() || !("IntersectionObserver" in window)) return;
     if (!observateur) observateur = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("rv-in"); observateur.unobserve(e.target); } }), { rootMargin: "0px 0px -6% 0px", threshold: 0.04 });
     blocs.forEach(el => {
@@ -276,6 +278,9 @@ const Application = (function () {
     const sec = document.createElement("section"); sec.className = "tab"; sec.id = "tab-m" + n; sec.dataset.n = n;
     let html = '<div class="pagehead"><span class="kicker">Module ' + n + "</span><h2>" + m.titre + "</h2>" + (m.intro ? "<p>" + m.intro + "</p>" : "") + "</div>";
 
+    // Le film du module : la vidéo qui résume l'essentiel (facultative)
+    if (m.film && m.film.src) html += blocFilm(m.film, n);
+
     // 1. Comprendre
     const N = m.notions;
     if (N) {
@@ -318,6 +323,42 @@ const Application = (function () {
     $("#appMain").appendChild(sec);
 
     if (modele) $("#labo-" + n).appendChild(modele.content.cloneNode(true));
+    brancherFilm(sec);
+  }
+
+  /* --- Le film du module ---------------------------------------------------
+     Une vidéo courte (2 à 3 minutes), en musique et sans voix, qui reprend pas
+     à pas les notions essentielles du module. Elle se déclare dans contenu.js :
+       film: { src: "films/module-1.mp4", affiche: "films/module-1.jpg", duree: "2 min 23",
+               chapitres: [[6, "Le problème"], [18, "Le débit"], …] }   (temps en secondes)
+     Elle ne démarre jamais seule (elle a du son) : l'élève appuie sur lecture.
+     Les chapitres, à côté de la vidéo (dessous sur petit écran), permettent
+     d'aller droit à une notion. */
+  function minutes(s) { return Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0"); }
+  function blocFilm(f, n) {
+    const chapitres = (f.chapitres || []).map(c => '<button type="button" class="chip" data-film-t="' + c[0] + '"><small>' + minutes(c[0]) + "</small>" + echapper(c[1]) + "</button>").join("");
+    return '<div class="film' + (chapitres ? "" : " sans-chapitres") + '" id="film-' + n + '">' +
+      '<div class="film-hd"><span class="eyebrow">Le film du module' + (f.duree ? " · " + echapper(f.duree) : "") + '</span><span class="film-note">' + (f.intro || "L’essentiel du module, pas à pas, en images et en musique (sans voix).") + "</span></div>" +
+      '<div class="film-corps"><div class="stg film-stg"><video class="film-v" controls playsinline preload="none"' + (f.affiche ? ' poster="' + echapper(f.affiche) + '"' : "") +
+      ' aria-label="Film du module ' + n + ' : animation musicale sans voix, tout le texte est affiché à l’écran"><source src="' + echapper(f.src) + '" type="video/mp4">' +
+      "Votre navigateur ne peut pas lire cette vidéo.</video></div>" +
+      (chapitres ? '<div class="film-chap" role="group" aria-label="Chapitres du film"><b class="film-chap-t">Chapitres</b>' + chapitres + "</div>" : "") +
+      "</div></div>";
+  }
+  function brancherFilm(sec) {
+    const video = $(".film-v", sec); if (!video) return;
+    const puces = $$("[data-film-t]", sec);
+    // Un clic sur un chapitre : la vidéo saute à ce moment et joue.
+    puces.forEach(b => b.addEventListener("click", () => {
+      video.currentTime = +b.dataset.filmT;
+      const lecture = video.play(); if (lecture && lecture.catch) lecture.catch(() => { /* lecture refusée : l'élève appuiera sur lecture */ });
+    }));
+    // Pendant la lecture, le chapitre en cours est mis en évidence.
+    video.addEventListener("timeupdate", () => {
+      let courant = -1;
+      puces.forEach((b, i) => { if (video.currentTime >= +b.dataset.filmT - 0.05) courant = i; });
+      puces.forEach((b, i) => b.classList.toggle("on", i === courant && (video.currentTime > 0 || !video.paused)));
+    });
   }
 
   function carteMot(d) {
@@ -355,6 +396,7 @@ const Application = (function () {
       if (actif && change && !mouvementReduit()) { s.classList.remove("enter"); void s.offsetWidth; s.classList.add("enter"); }
     });
     ongletCourant = cible;
+    $$("video.film-v").forEach(v => { if (!v.closest(".tab.active") && !v.paused) v.pause(); }); // le film d'un module quitté se met en pause
     tiroir(false);
     if (!sansDefilement) window.scrollTo(0, 0);
     try { history.replaceState(null, "", "#" + cible); } catch (e) { /* page ouverte en local : sans importance */ }

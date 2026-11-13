@@ -69,7 +69,7 @@ const O = {
   boucle(canvas, image) {
     let actif = !O.reduit(), dernier = performance.now();
     function pas(t) {
-      const dt = Math.min(0.05, (t - dernier) / 1000); dernier = t;
+      const dt = Math.max(0, Math.min(0.05, (t - dernier) / 1000)); dernier = t; // jamais négatif (la première image peut porter une heure antérieure)
       if (actif && O.visible(canvas)) image(dt);
       requestAnimationFrame(pas);
     }
