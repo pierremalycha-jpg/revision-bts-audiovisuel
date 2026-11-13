@@ -207,3 +207,5 @@ Règles de code (dans `labos.js`) :
 | `modules/tes-microphones/` | Physique partagée entre le cours et les labos (objet `MICRO` et tableau `DIRECTIVITES` en tête de `contenu.js`, réutilisés par `labos.js`), diagrammes polaires en SVG (`figPolaire`) et sur canvas (`O.polaireGrille`, `O.polaireCourbe`), fiches techniques en SVG (`figFiche`) pour les questions « Lire ». |
 
 La photométrie, elle, reste un **fichier unique** autonome (elle fonctionne aussi hors ligne, avec son propre enregistrement, son relevé PDF et son tableau de bord enseignant). Le kit en reprend la forme ; il ne la remplace pas.
+
+Elle a reçu la même **interface épurée** que les applications du kit (une étape à la fois, notions en tuiles et fiches, petits +, fenêtres qui grandissent depuis le bouton cliqué). Ce code est écrit dans son propre fichier (objet `Epure`, juste avant `Lessons`, et styles « INTERFACE ÉPURÉE » à la fin de sa feuille de style) pour qu'elle continue de fonctionner hors connexion. Toute évolution de l'interface épurée du kit (`js/application.js`, `css/application.css`) est à reporter aussi à cet endroit. `?classique` y rend également l'ancienne présentation.

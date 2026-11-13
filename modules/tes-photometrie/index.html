@@ -1438,6 +1438,160 @@ svg.scene .pill.cool text{fill:#64b5ff}
 table.dash td .pill{white-space:nowrap}
 table.dash td.acts{white-space:nowrap}
 
+
+/* =====================================================================
+   INTERFACE ÉPURÉE — la même que les autres applications de la plateforme
+   (css/application.css, section 9). Une étape à la fois, les notions en
+   tuiles qui ouvrent leur fiche dans une fenêtre, les détails derrière des
+   « petits + ». « ?classique » dans l'adresse rend l'ancienne présentation.
+   ===================================================================== */
+:root{--ease-out:cubic-bezier(.16,1,.3,1);--ease-in-out:cubic-bezier(.65,0,.35,1)}
+html.fen-ouverte{overflow:hidden}
+
+/* --- La fenêtre dynamique : elle grandit depuis l'élément cliqué --- */
+.fen-ov{position:fixed;inset:0;z-index:150;display:grid;place-items:center;padding:24px;background:rgba(0,0,0,0);transition:background .35s var(--ease),backdrop-filter .35s var(--ease)}
+.fen-ov.in{background:rgba(0,0,0,.36);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.fen{position:relative;display:flex;flex-direction:column;width:min(720px,100%);max-height:min(88vh,940px);background:var(--panel);color:var(--text);border-radius:26px;box-shadow:var(--sh2);overflow:hidden;outline:none;opacity:0;transform:translate(var(--fx,0px),var(--fy,24px)) scale(var(--fs,.94));transition:transform .52s var(--ease-out),opacity .26s var(--ease)}
+.fen-ov.in .fen{opacity:1;transform:none}
+.fen-ov.out .fen{transition:transform .36s var(--ease-in-out),opacity .24s var(--ease) .1s}
+.fen-c{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:28px 30px 26px}
+.fen-x{position:absolute;top:14px;right:14px;z-index:3;width:32px;height:32px;border:0;border-radius:50%;background:var(--panel3);color:var(--muted);display:grid;place-items:center;cursor:pointer;transition:background .2s,color .2s,transform .3s var(--spring)}
+.fen-x:hover{background:var(--line2);color:var(--text);transform:rotate(90deg)}
+.fen-x svg{width:15px;height:15px}
+/* Les feuilles existantes (lexique, identité…) grandissent elles aussi depuis le bouton cliqué */
+html.epure .sheet{opacity:0;transform:translate(var(--fx,0px),var(--fy,16px)) scale(var(--fs,.96));transition:transform .5s var(--ease-out),opacity .26s var(--ease)}
+html.epure .sheet-ov.in .sheet{opacity:1;transform:none}
+html.epure .sheet-ov.out .sheet{transition:transform .34s var(--ease-in-out),opacity .22s var(--ease) .1s}
+
+/* --- Le « petit + » : un détail qui se déplie en douceur --- */
+.plus{border-radius:14px;background:var(--panel2)}
+.plus-b{display:flex;align-items:center;gap:11px;width:100%;border:0;border-radius:14px;background:none;color:var(--text);font:inherit;font-size:.93rem;font-weight:600;letter-spacing:-.01em;text-align:left;padding:11px 14px;cursor:pointer;transition:background .15s}
+.plus-b:hover{background:var(--hover)}
+.plus-b:focus-visible{box-shadow:inset 0 0 0 3px rgba(0,113,227,.4);outline:none}
+.plus-i{flex:none;position:relative;width:22px;height:22px;border-radius:50%;background:var(--accent);transition:transform .4s var(--spring),background .25s}
+.plus-i::before,.plus-i::after{content:"";position:absolute;left:50%;top:50%;width:10px;height:2px;margin:-1px 0 0 -5px;border-radius:1px;background:#fff;transition:transform .4s var(--spring)}
+.plus-i::after{transform:rotate(90deg)}
+.plus.ouvert>.plus-b .plus-i{transform:rotate(180deg);background:var(--faint)}
+.plus.ouvert>.plus-b .plus-i::after{transform:rotate(0deg)}
+.plus-cmp>.plus-b .plus-i{background:#ff9500}
+.plus-c{display:grid;grid-template-rows:0fr;visibility:hidden;transition:grid-template-rows .42s var(--ease-out),visibility 0s .42s}
+.plus.ouvert>.plus-c{grid-template-rows:1fr;visibility:visible;transition:grid-template-rows .42s var(--ease-out),visibility 0s}
+.plus-c>div{min-height:0;overflow:hidden}
+.plus-in{padding:0 16px 14px 47px;font-size:.92rem;line-height:1.5;opacity:0;transform:translateY(-6px);transition:opacity .2s var(--ease),transform .3s var(--ease)}
+.plus.ouvert>.plus-c>div>.plus-in{opacity:1;transform:none;transition:opacity .3s var(--ease) .1s,transform .4s var(--ease-out) .06s}
+.plus-in>:first-child{margin-top:0}
+.plus-in>:last-child{margin-bottom:0}
+
+/* --- La barre des étapes, sous le titre du module --- */
+html.epure .tab>.pagehead{margin-bottom:22px}
+.pas-barre{margin:0 0 32px}
+.seg.pas{display:flex;flex-wrap:nowrap;width:100%;max-width:780px;gap:4px;padding:4px;border-radius:16px}
+.seg.pas button{flex:1;display:flex;align-items:center;justify-content:center;gap:9px;padding:10px 12px;border-radius:12px;font-size:.95rem;white-space:nowrap}
+.seg.pas .seg-th{border-radius:12px}
+.pas-n{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:.78rem;font-weight:700;background:var(--panel3);color:var(--muted);transition:background .3s,color .3s}
+.seg.pas button.on .pas-n{background:var(--accent);color:#fff}
+.seg.pas button.ok .pas-n{background:var(--ok);color:#fff}
+/* la barre du haut ne montre les étapes qu'une fois la barre du module dépassée */
+html.epure .ctx-tabs{opacity:0;transform:translateY(-4px);pointer-events:none;transition:opacity .25s var(--ease),transform .25s var(--ease)}
+html.epure .ctx.past .ctx-tabs{opacity:1;transform:none;pointer-events:auto}
+
+/* Une étape à la fois ; elle entre en glissant dans le sens du parcours */
+html.epure .tab>[data-pas]:not(.pas-on){display:none!important}
+html.epure .tab:not(.pas-fin)>.pager{display:none}
+html.epure .tab>.lesson{margin-bottom:8px}
+.pas-in-d{animation:glisseD .46s var(--ease-out) both}
+.pas-in-g{animation:glisseG .46s var(--ease-out) both}
+@keyframes glisseD{from{opacity:0;transform:translateX(34px)}to{opacity:1;transform:none}}
+@keyframes glisseG{from{opacity:0;transform:translateX(-34px)}to{opacity:1;transform:none}}
+.pas-suite{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:36px 0 30px;padding-top:22px;border-top:1px solid var(--line)}
+.pas-suite .btn{display:inline-flex;align-items:center;gap:8px}
+.pas-suite .btn svg{width:13px;height:13px}
+.pas-suite .btn small{font-size:.74rem;font-weight:600;opacity:.72;color:inherit}
+
+/* --- Comprendre : les notions en tuiles --- */
+.fiches-bloc+.fiches-bloc{margin-top:28px}
+.fiches{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.fiches-fx{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.fiche{position:relative;display:flex;align-items:center;gap:12px;min-height:66px;padding:12px 14px;border:1px solid var(--cardline);border-radius:18px;background:var(--panel);color:var(--text);font:inherit;text-align:left;cursor:pointer;transition:border-color .2s,transform .3s var(--ease),box-shadow .3s}
+.fiche:hover{border-color:var(--line2);transform:translateY(-2px);box-shadow:var(--sh1)}
+.fiche:active{transform:scale(.97)}
+.fiche-ic{flex:none;width:40px;height:40px;border-radius:12px;background:var(--panel2);display:grid;place-items:center;font-size:1.2rem;line-height:1;transition:transform .4s var(--spring)}
+.fiche:hover .fiche-ic{transform:scale(1.08) rotate(-4deg)}
+.fiche-ic i,.fc-ic i{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:700;color:var(--accent);font-size:1.25rem}
+.fiche-t{display:flex;flex-direction:column;gap:2px;min-width:0;padding-right:10px}
+.fiche-t b{font-size:.95rem;font-weight:600;letter-spacing:-.012em;line-height:1.25}
+.fiche-t small{font-size:.76rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fiche-fx .fiche-f{font-family:var(--mono);font-size:.9rem;line-height:1.35}
+.fiche-fx .fiche-t small{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.fiche-vu{position:absolute;top:8px;right:8px;width:16px;height:16px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;opacity:0;transform:scale(.4);transition:opacity .25s,transform .4s var(--spring)}
+.fiche-vu svg{width:10px;height:10px}
+.fiche.vue .fiche-vu{opacity:1;transform:none}
+.qa-h small.ok{color:var(--ok)}
+.qa-tip svg{width:14px;height:14px;vertical-align:-2px;margin-right:3px}
+
+/* La fiche, dans sa fenêtre : on la feuillette avec ← → */
+.fen-fiche{width:min(680px,100%)}
+.fen-fiche .fen-c{display:flex;flex-direction:column;overflow:hidden;padding:0}
+.fc-zone{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:28px 30px 22px}
+.fc-zone.in-d{animation:glisseD .4s var(--ease-out) both}
+.fc-zone.in-g{animation:glisseG .4s var(--ease-out) both}
+.fc-hd{display:flex;align-items:center;gap:16px;margin:0 40px 14px 0}
+.fc-ic{flex:none;width:56px;height:56px;border-radius:17px;background:var(--panel2);display:grid;place-items:center;font-size:1.7rem;line-height:1}
+.fc-ic i{font-size:1.8rem}
+.fc-hd h3{font-size:1.42rem;margin:.1em 0 0;letter-spacing:-.022em;line-height:1.2}
+.fc-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.fc-tags .pill{background:var(--soft-blue);color:var(--accent2)}
+.fc-tags .pill.neutre{background:var(--panel3);color:var(--muted)}
+.fc-q{margin:0 0 8px;color:var(--muted);font-size:.95rem;font-weight:500}
+.fc-d p{margin:0;font-size:1.02rem;line-height:1.55}
+.fc .fx-f{font-size:1.45rem;background:var(--panel2);border-left:0;border-radius:14px;padding:14px 18px;margin:2px 0 8px}
+.fc .fx-say{margin:0 0 4px}
+.fc .fx-ex{margin:0;background:none;padding:0;font-size:inherit}
+.fc-plus{display:flex;flex-direction:column;gap:8px;margin-top:18px}
+.fc-plus:empty{display:none}
+.fc-nav{flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-top:1px solid var(--line);background:var(--panel)}
+.fc-fl{flex:none;width:40px;height:40px;border:0;border-radius:50%;background:var(--panel3);color:var(--text);display:grid;place-items:center;cursor:pointer;transition:background .2s,transform .15s var(--ease),opacity .2s}
+.fc-fl:hover{background:var(--line2)}
+.fc-fl:active{transform:scale(.9)}
+.fc-fl:disabled{opacity:.3;cursor:default;transform:none}
+.fc-fl svg{width:16px;height:16px}
+.fc-pos{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:0;font-size:.8rem;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.fc-pts{display:flex;flex-wrap:wrap;justify-content:center;gap:5px}
+.fc-pts i{width:7px;height:7px;border-radius:4px;background:var(--panel3);cursor:pointer;transition:width .35s var(--ease),background .3s}
+.fc-pts i.pf{background:rgba(0,113,227,.25)}
+.fc-pts i.on{width:22px;background:var(--accent)}
+
+/* --- S'évaluer : règles et correction repliées --- */
+.qz .plus-regles{margin:14px 0 0;max-width:52em}
+.qz .plus-regles .plus-in p{margin:0 0 6px}
+.corr-i.plus{padding:0}
+.corr-i .corr-h.plus-b{align-items:center;padding:13px 16px 13px 18px;font-weight:400;font-size:inherit;border-radius:16px}
+.corr-i .corr-h .corr-q{font-weight:500}
+.corr-i .plus-in{padding:0 18px 14px}
+.corr-i .plus-in .corr-a{margin-top:0}
+
+/* --- Petits écrans : la fenêtre monte du bas de l'écran --- */
+@media (max-width:700px){
+  html.epure .ctx-tabs{display:none}
+  .fen-ov{place-items:end stretch;padding:0}
+  .fen{width:100%;max-height:92vh;border-radius:24px 24px 0 0;opacity:1;transform:translateY(105%)}
+  .fen-ov.out .fen{transition:transform .34s var(--ease-in-out)}
+  .fen::before{content:"";position:absolute;top:7px;left:50%;z-index:3;width:38px;height:5px;margin-left:-19px;border-radius:3px;background:var(--line2)}
+  .fen-c,.fc-zone{padding:28px 18px 18px}
+  .fen-fiche .fen-c{padding:0}
+  .fc-hd{gap:12px}
+  .fc-ic{width:46px;height:46px;font-size:1.4rem}
+  .fc-hd h3{font-size:1.2rem}
+  .fc .fx-f{font-size:1.15rem}
+  .seg.pas button{flex-direction:column;gap:3px;padding:7px 2px;font-size:.74rem}
+  .pas-n{width:22px;height:22px}
+  .pas-suite .btn small{display:none}
+  .fiches,.fiches-fx{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){
+  .fen,.fen-ov,.plus-c,.plus-in,.plus-i,.plus-i::before,.plus-i::after,html.epure .sheet{transition:none!important}
+  .fc-zone,.pas-in-d,.pas-in-g{animation:none!important}
+}
 </style>
 </head>
 <body>
@@ -6378,8 +6532,9 @@ function toast(html, kind) {
 }
 function sheet(html, onMount) {
   const ov = document.createElement('div'); ov.className = 'sheet-ov'; ov.innerHTML = '<div class="sheet" role="dialog" aria-modal="true"><button class="sheet-x" aria-label="Fermer">×</button>' + html + '</div>';
-  document.body.appendChild(ov); requestAnimationFrame(() => ov.classList.add('in'));
-  const close = () => { ov.classList.remove('in'); setTimeout(() => ov.remove(), 300); };
+  const origine = document.activeElement;
+  document.body.appendChild(ov); if (EPURE) { Epure.depuis(ov.querySelector('.sheet'), origine); void ov.offsetWidth; } requestAnimationFrame(() => ov.classList.add('in'));
+  const close = () => { if (EPURE) { Epure.depuis(ov.querySelector('.sheet'), origine); ov.classList.add('out'); } ov.classList.remove('in'); setTimeout(() => ov.remove(), EPURE ? 380 : 300); };
   ov.addEventListener('click', e => { if (e.target === ov || e.target.closest('.sheet-x') || e.target.closest('[data-close]')) close(); });
   const inp = ov.querySelector('input'); if (inp) setTimeout(() => inp.focus(), 120);
   if (onMount) onMount(ov.querySelector('.sheet'), close);
@@ -6978,10 +7133,10 @@ const Quiz = {
   render(id) {
     const s = this.st[id], el = s.el; if (!el) return; const p = Prog.m(id), ps = Prog.passed(id), last = id === MODS.length;
     if (s.phase === 'intro') {
-      el.innerHTML = '<div class="qz qz-intro"><div class="qz-hd"><div><div class="eyebrow">Évaluation · Module ' + id + '</div><h2>Contrôle des connaissances</h2><p class="lead3">10 questions, 2 points chacune : <span class="qcat qc-lire">Lire</span> <span class="qcat qc-comp">Comprendre</span> <span class="qcat qc-qcm">QCM</span> <span class="qcat qc-calc">Calculer</span> <span class="qcat qc-ex">Exercice</span>. Obtenez au moins <b>' + PASS_MARK + '/20</b> pour ' + (last ? 'valider le parcours' : 'débloquer le <b>module ' + (id + 1) + '</b>') + '. Les valeurs changent à chaque tentative ; la calculatrice est autorisée. À chaque question, un <b>indice</b> peut vous montrer où trouver la réponse dans le module : il coûte <b>' + nf(HINT_COST, 1) + ' point</b>.</p></div>' +
+      el.innerHTML = '<div class="qz qz-intro"><div class="qz-hd"><div><div class="eyebrow">Évaluation · Module ' + id + '</div><h2>Contrôle des connaissances</h2>' + (EPURE ? Epure.introQuiz(id, last) : '<p class="lead3">10 questions, 2 points chacune : <span class="qcat qc-lire">Lire</span> <span class="qcat qc-comp">Comprendre</span> <span class="qcat qc-qcm">QCM</span> <span class="qcat qc-calc">Calculer</span> <span class="qcat qc-ex">Exercice</span>. Obtenez au moins <b>' + PASS_MARK + '/20</b> pour ' + (last ? 'valider le parcours' : 'débloquer le <b>module ' + (id + 1) + '</b>') + '. Les valeurs changent à chaque tentative ; la calculatrice est autorisée. À chaque question, un <b>indice</b> peut vous montrer où trouver la réponse dans le module : il coûte <b>' + nf(HINT_COST, 1) + ' point</b>.</p>') + '</div>' +
         '<div class="qz-best">' + Prog.ring(p.best !== null ? p.best / 20 : 0, 108, 9) + '<div><b>' + (p.best !== null ? nf(p.best, p.best % 1 ? 1 : 0) : '—') + '</b><span>meilleure note</span></div></div></div>' +
         '<div class="qz-meta"><span>' + (ps ? ICON.check + ' Module validé' : p.attempts ? 'Pas encore validé' : 'Pas encore tenté') + '</span><span>Tentatives : ' + p.attempts + '</span>' + (p.last !== null ? '<span>Dernière note : ' + nf(p.last, p.last % 1 ? 1 : 0) + '/20</span>' : '') + '</div>' +
-        '<div class="btnrow"><button class="btn primary big" data-q="start">' + (p.attempts ? 'Nouvelle tentative' : 'Commencer l’évaluation') + '</button><button class="btn big" data-q="recap">Revoir l’essentiel ↑</button>' + (!last && (ps || Prog.byGrant(id + 1)) ? '<button class="btn big" data-q="next">Module ' + (id + 1) + ' →</button>' : '') + '</div></div>';
+        '<div class="btnrow"><button class="btn primary big" data-q="start">' + (p.attempts ? 'Nouvelle tentative' : 'Commencer l’évaluation') + '</button><button class="btn big" data-q="recap">Revoir l’essentiel' + (EPURE ? '' : ' ↑') + '</button>' + (!last && (ps || Prog.byGrant(id + 1)) ? '<button class="btn big" data-q="next">Module ' + (id + 1) + ' →</button>' : '') + '</div></div>';
     } else if (s.phase === 'q') {
       const q = s.qs[s.i], n = s.qs.length;
       let ans = '';
@@ -6998,7 +7153,7 @@ const Quiz = {
       const r = s.res, pass = r.score >= PASS_MARK;
       el.innerHTML = '<div class="qz qz-res"><div class="res-hd"><div class="res-ring">' + Prog.ring(0, 168, 12) + '<div class="res-n"><b data-count="' + r.score + '">0</b><span>/ 20</span></div></div><div><div class="eyebrow">Module ' + id + ' · tentative ' + p.attempts + '</div><h2>' + (pass ? (last ? 'Parcours terminé, bravo !' : 'Module validé !') : 'Pas encore validé') + '</h2><p class="lead3">' + (pass ? (s.unlockedNow && !last ? 'Le <b>module ' + (id + 1) + '</b> est maintenant débloqué.' : last && Prog.bonus() ? 'Les ' + MODS.length + ' modules sont validés : le <b>bonus « Bac à sable »</b> est ouvert. À vous de créer votre plan de feu.' : 'Votre note est enregistrée dans votre relevé.') : 'Il faut au moins <b>' + PASS_MARK + '/20</b>. Relisez la correction ci-dessous, revoyez le module puis retentez : les questions changent.') + '</p>' +
         '<div class="btnrow">' + (pass && !last ? '<button class="btn primary big" data-q="next">Ouvrir le module ' + (id + 1) + ' →</button>' : pass && last && Prog.bonus() ? '<button class="btn primary big" data-go="bac">Ouvrir le bac à sable ★</button>' : '') + '<button class="btn big' + (pass ? '' : ' primary') + '" data-q="start">Nouvelle tentative</button>' + (!pass && !last && Prog.byGrant(id + 1) ? '<button class="btn big" data-q="next">Module ' + (id + 1) + ' (ouvert par l’enseignant) →</button>' : '') + '<button class="btn big" data-q="pdf">' + ICON.doc + ' Relevé PDF</button></div></div></div>' +
-        '<h3 class="corr-t">Correction détaillée</h3><div class="corr">' + s.qs.map((q, k) => { const g = r.detail[k], ok = g.pts >= g.max, part = g.pts > 0 && !ok; return '<div class="corr-i ' + (ok ? 'ok' : part ? 'part' : 'ko') + '"><div class="corr-h"><span class="qcat qc-' + q.cat + '">' + CATS[q.cat] + '</span><b>' + (k + 1) + '.</b> <span class="corr-q">' + q.q + '</span><em>' + nf(g.pts, g.pts % 1 ? 1 : 0) + ' / ' + g.max + (g.hint ? ' <small class="hint-tag">indice −' + nf(HINT_COST, 1) + '</small>' : '') + '</em></div><div class="corr-a"><span>Votre réponse : <b>' + (g.given ? escH(g.given) : '(sans réponse)') + '</b></span><span>Attendu : <b>' + escH(g.expected) + '</b></span></div><div class="corr-x">' + (q.sol || q.expl || '') + '</div></div>'; }).join('') + '</div></div>';
+        '<h3 class="corr-t">Correction détaillée</h3>' + (EPURE ? '<p class="qa-tip">Les erreurs sont ouvertes ; touchez une bonne réponse pour relire son explication.</p>' : '') + '<div class="corr">' + s.qs.map((q, k) => { const g = r.detail[k], ok = g.pts >= g.max, part = g.pts > 0 && !ok; const cls = ok ? 'ok' : part ? 'part' : 'ko', tete = '<span class="qcat qc-' + q.cat + '">' + CATS[q.cat] + '</span><b>' + (k + 1) + '.</b> <span class="corr-q">' + q.q + '</span><em>' + nf(g.pts, g.pts % 1 ? 1 : 0) + ' / ' + g.max + (g.hint ? ' <small class="hint-tag">indice −' + nf(HINT_COST, 1) + '</small>' : '') + '</em>', detail = '<div class="corr-a"><span>Votre réponse : <b>' + (g.given ? escH(g.given) : '(sans réponse)') + '</b></span><span>Attendu : <b>' + escH(g.expected) + '</b></span></div><div class="corr-x">' + (q.sol || q.expl || '') + '</div>'; if (EPURE) return Epure.correction(cls, tete, detail); return '<div class="corr-i ' + cls + '"><div class="corr-h">' + tete + '</div>' + detail + '</div>'; }).join('') + '</div></div>';
       requestAnimationFrame(() => { const c = el.querySelector('.res-ring .pr-fg'); if (c) { const L = +c.getAttribute('stroke-dasharray'); c.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(.2,.8,.2,1)'; c.style.stroke = pass ? 'var(--ok)' : 'var(--warn)'; requestAnimationFrame(() => { c.setAttribute('stroke-dashoffset', (L * (1 - r.score / 20)).toFixed(1)); }); }
         const b = el.querySelector('[data-count]'), t0 = performance.now(); const tick = t => { const k = Math.min(1, (t - t0) / 1100), e = 1 - Math.pow(1 - k, 3); b.textContent = k < 1 ? nf(Math.round(r.score * e)) : nf(r.score, r.score % 1 ? 1 : 0); if (k < 1) requestAnimationFrame(tick); }; requestAnimationFrame(tick); });
     }
@@ -7014,6 +7169,7 @@ const Quiz = {
       if (b.dataset.q === 'pdf') return Prog.reportSheet();
       if (b.dataset.q === 'hint') { const q = s.qs && s.qs[s.i]; if (q && !q.hint) { q.hint = true; this.persist(id); this.render(id); const hb = el.querySelector('.qz-hint'); if (hb) hb.scrollIntoView({ behavior: ANIM.reduce ? 'auto' : 'smooth', block: 'nearest' }); } return; }
       if (b.dataset.q === 'where') { const q = s.qs && s.qs[s.i]; if (q) this.showWhere(q, el); return; }
+      if (b.dataset.q === 'recap' && EPURE && $('.tab.active[data-epure]')) { Epure.montrer('recap', true, true); const r = $('.tab.active > .recap'); if (r) { Fold.all(r, true); Fold.labels(); } return; }
       if (b.dataset.q === 'recap') { const r = el.previousElementSibling; if (r && r.classList.contains('recap')) { Fold.all(r, true); Fold.labels(); } if (r && r.classList.contains('recap')) r.scrollIntoView({ behavior: ANIM.reduce ? 'auto' : 'smooth', block: 'start' }); return; }
       const q = s.qs && s.qs[s.i];
       if (b.dataset.ch !== undefined) { q.val = +b.dataset.ch; $$('[data-ch]', el).forEach(x => x.classList.toggle('on', x === b)); this.dots(id); this.persist(id); return; }
@@ -7034,7 +7190,8 @@ const Quiz = {
   },
   // met en évidence l'endroit du module où se trouve la réponse
   showWhere(q, box) {
-    const t = this.resolveWhere(q.w, box); if (!t) { toast('Relisez la partie « Les notions à connaître » de ce module.', 'warn'); return; }
+    if (EPURE) { const f = Epure.ficheDe(q.w); if (f) { Epure.ouvrirFiche(f[0], f[1], box.querySelector('[data-q="where"]')); return; } }
+    const t = this.resolveWhere(q.w, box); if (EPURE && t) Epure.montrerPour(t); if (!t) { toast('Relisez la partie « Les notions à connaître » de ce module.', 'warn'); return; }
     const sp = t.closest('.subpane'); if (sp && !sp.classList.contains('on')) { const tab = sp.closest('.tab'); if (tab && tab.id === 'tab-spectre' && typeof Qual !== 'undefined') Qual.sub(sp.dataset.sp); else if (tab && tab.id === 'tab-projecteurs') Pr.sub(sp.dataset.sp); }
     Fold.reveal(t);
     $$('.hl-target').forEach(x => x.classList.remove('hl-target'));
@@ -7042,7 +7199,7 @@ const Quiz = {
     clearTimeout(this._hlT); this._hlT = setTimeout(() => t.classList.remove('hl-target'), 6000);
     let back = $('#backToQ'); if (!back) { back = document.createElement('button'); back.id = 'backToQ'; back.className = 'btn primary'; document.body.appendChild(back); }
     back.innerHTML = '↩ Revenir à la question'; back.hidden = false; requestAnimationFrame(() => back.classList.add('in'));
-    back.onclick = () => { back.classList.remove('in'); setTimeout(() => { back.hidden = true; }, 300); const r = box.getBoundingClientRect(); window.scrollTo({ top: window.scrollY + r.top - 70, behavior: ANIM.reduce ? 'auto' : 'smooth' }); };
+    back.onclick = () => { if (EPURE) Epure.montrer('quiz', false, false); back.classList.remove('in'); setTimeout(() => { back.hidden = true; }, 300); const r = box.getBoundingClientRect(); window.scrollTo({ top: window.scrollY + r.top - 70, behavior: ANIM.reduce ? 'auto' : 'smooth' }); };
     clearTimeout(this._backT); this._backT = setTimeout(() => { back.classList.remove('in'); setTimeout(() => { back.hidden = true; }, 300); }, 45000);
   },
   resolveWhere(w, box) {
@@ -7873,6 +8030,296 @@ const LESSON_Q = {
 };
 Object.keys(LESSON_Q).forEach(k => { const L = LESSONS[k], Q = LESSON_Q[k]; L.defs.forEach((d, i) => { d.q = Q.d[i]; }); L.fx.forEach((f, i) => { f.q = Q.f[i]; }); });
 
+/* =====================================================================
+   INTERFACE ÉPURÉE — la même que les autres applications de la plateforme
+   (js/application.js, section « INTERFACE ÉPURÉE »), adaptée à ce fichier
+   unique pour qu'il continue de fonctionner hors connexion.
+     - une ÉTAPE à la fois (Comprendre, Manipuler, Retenir, S'évaluer), avec
+       une barre numérotée sous le titre et « Étape suivante » en bas ;
+     - les NOTIONS en tuiles : chaque tuile ouvre sa fiche dans une fenêtre,
+       qu'on feuillette avec ← → ; la comparaison, les repères, les symboles
+       et l'exemple sont derrière des « petits + » ;
+     - les fenêtres GRANDISSENT depuis le bouton cliqué et s'y referment ;
+     - l'ÉVALUATION : règles et bonnes réponses de la correction repliées ;
+       l'indice « Voir dans le module » ouvre la fiche ou l'étape concernée.
+   Rien n'est supprimé. « ?classique » dans l'adresse rend l'ancienne
+   présentation (une seule longue page).
+   ===================================================================== */
+const EPURE = !/[?&]classique\b/.test(location.search);
+if (EPURE) document.documentElement.classList.add('epure');
+const Epure = {
+  P: {
+    croix: '<svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    lecture: '<svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.2 3.4v9.2a.6.6 0 0 0 .9.5l7.2-4.6a.6.6 0 0 0 0-1L6.1 2.9a.6.6 0 0 0-.9.5z" fill="currentColor"/></svg>',
+    gauche: '<svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    droite: '<svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    info: '<svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7.2v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="4.9" r=".95" fill="currentColor"/></svg>',
+    coche: '<svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.6 8.4l2.9 2.9 5.9-6.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  },
+  ORDRE: ['learn', 'lab', 'recap', 'quiz'],
+  NOMS: { learn: 'Comprendre', lab: 'Manipuler', recap: 'Retenir', quiz: 'S’évaluer' },
+  etape: {},      // étape affichée, par page (« grandeurs », « plateau:trois »…)
+  fiches: {},     // les fiches de chaque leçon (clé de LESSONS)
+  vues: null,     // fiches déjà lues (sur cet appareil)
+  ouverte: null,  // la fenêtre ouverte
+  nb(s) { return String(s).replace(/ ([?!;:%»])/g, ' $1').replace(/« /g, '« '); },
+  sansBalise(s) { return String(s).replace(/<[^>]+>/g, ''); },
+
+  /* ---------- la fenêtre dynamique ---------- */
+  // Départ (et retour) : le centre de l'élément cliqué, à sa taille.
+  depuis(fen, origine) {
+    const vis = origine && origine.isConnected && origine.offsetParent !== null && origine.getBoundingClientRect;
+    const r = vis ? origine.getBoundingClientRect() : null, enVue = r && r.width > 0 && r.bottom > 0 && r.top < window.innerHeight;
+    const cx = fen.offsetLeft + fen.offsetWidth / 2, cy = fen.offsetTop + fen.offsetHeight / 2;
+    const dx = enVue ? r.left + r.width / 2 - cx : 0, dy = enVue ? r.top + r.height / 2 - cy : 24;
+    const s = enVue ? clamp(r.width / fen.offsetWidth, 0.18, 0.9) : 0.94;
+    fen.style.setProperty('--fx', dx.toFixed(1) + 'px'); fen.style.setProperty('--fy', dy.toFixed(1) + 'px'); fen.style.setProperty('--fs', s.toFixed(3));
+  },
+  fenetre(o) {
+    if (this.ouverte) this.ouverte.fermer(true);
+    let origine = o.origine && o.origine.getBoundingClientRect ? o.origine : null;
+    const ov = document.createElement('div'); ov.className = 'fen-ov';
+    ov.innerHTML = '<div class="fen ' + (o.classe || '') + '" role="dialog" aria-modal="true"' + (o.titre ? ' aria-label="' + escH(o.titre) + '"' : '') + ' tabindex="-1"><button class="fen-x" type="button" aria-label="Fermer">' + this.P.croix + '</button><div class="fen-c"></div></div>';
+    const fen = ov.querySelector('.fen'), corps = ov.querySelector('.fen-c');
+    corps.innerHTML = o.contenu || '';
+    document.body.appendChild(ov); document.documentElement.classList.add('fen-ouverte');
+    this.depuis(fen, origine); void fen.offsetWidth;
+    requestAnimationFrame(() => ov.classList.add('in'));
+    const avant = document.activeElement;
+    setTimeout(() => { if (ov.isConnected) ov.querySelector('.fen-x').focus({ preventScroll: true }); }, 60);
+    let fermee = false;
+    const clavier = e => {
+      if (e.key === 'Escape') { e.stopPropagation(); fermer(); return; }
+      if (e.key === 'Tab') {
+        const f = $$('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])', fen).filter(x => !x.disabled && x.offsetParent !== null); if (!f.length) return;
+        if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+        else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+        return;
+      }
+      if (o.clavier) o.clavier(e);
+    };
+    const fermer = immediat => {
+      if (fermee) return; fermee = true;
+      document.removeEventListener('keydown', clavier, true);
+      if (this.ouverte === api) this.ouverte = null;
+      document.documentElement.classList.remove('fen-ouverte');
+      if (immediat === true || ANIM.reduce) { ov.remove(); return; }
+      this.depuis(fen, origine); ov.classList.remove('in'); ov.classList.add('out');
+      setTimeout(() => ov.remove(), 380);
+      const retour = origine && origine.isConnected ? origine : avant; if (retour && retour.focus) retour.focus({ preventScroll: true });
+    };
+    document.addEventListener('keydown', clavier, true);
+    ov.addEventListener('click', e => { if (e.target === ov || e.target.closest('.fen-x, [data-fermer]')) fermer(); });
+    const api = { corps, fen, fermer, origine: el => { origine = el; } };
+    this.ouverte = api;
+    return api;
+  },
+
+  /* ---------- le « petit + » ---------- */
+  plus(titre, corps, o) {
+    o = o || {};
+    return '<div class="plus' + (o.ouvert ? ' ouvert' : '') + (o.cls ? ' ' + o.cls : '') + '"><button type="button" class="plus-b" aria-expanded="' + !!o.ouvert + '"><i class="plus-i" aria-hidden="true"></i><span>' + titre + '</span></button><div class="plus-c"><div><div class="plus-in">' + corps + '</div></div></div></div>';
+  },
+  basculer(bloc) {
+    const ouvrir = !bloc.classList.contains('ouvert');
+    bloc.classList.toggle('ouvert', ouvrir);
+    const b = bloc.querySelector('.plus-b'); if (b) b.setAttribute('aria-expanded', String(ouvrir));
+  },
+
+  /* ---------- les notions en tuiles ---------- */
+  lecon(key, modNo) {
+    const L = LESSONS[key]; if (!L) return '';
+    this.fiches[key] = L.defs.map(d => ({ type: 'mot', d })).concat(L.fx.map(f => ({ type: 'fx', f })));
+    let k = 0;
+    const tm = L.defs.map(d => this.tuileMot(d, key, k++)).join(''), tf = L.fx.map(f => this.tuileFx(f, key, k++)).join('');
+    return '<div class="lesson-hd"><div><div class="eyebrow">Les notions à connaître' + (modNo ? ' · module ' + modNo : '') + '</div><h3>' + L.title + '</h3><p class="lead3">' + L.intro + '</p></div>' +
+      '<div class="lesson-nav"><button class="btn small" data-fiches-parcourir="' + key + '">' + this.P.lecture + ' Parcourir les fiches</button></div></div>' +
+      '<div class="fiches-bloc"><h4 class="qa-h">Les mots à connaître<small data-fiches-compte="' + key + ':mot"></small></h4><div class="fiches">' + tm + '</div></div>' +
+      (L.fx.length ? '<div class="fiches-bloc"><h4 class="qa-h">Les formules<small data-fiches-compte="' + key + ':fx"></small></h4><div class="fiches fiches-fx">' + tf + '</div></div>' : '') +
+      '<p class="qa-tip">' + this.P.info + ' Touchez une tuile pour ouvrir sa fiche. Dans la fiche, les flèches ← → passent à la suivante. Une formule se lit comme une phrase : à voix haute, de gauche à droite.</p>';
+  },
+  tuileMot(d, key, k) {
+    const sous = [d.s ? 'symbole ' + d.s : '', d.u || ''].filter(Boolean).join(' · ');
+    return '<button type="button" class="fiche" data-fiche="' + key + ':' + k + '"><span class="fiche-ic" aria-hidden="true">' + (d.ic || '•') + '</span><span class="fiche-t"><b>' + d.t + '</b>' + (sous ? '<small>' + sous + '</small>' : '') + '</span><i class="fiche-vu" title="Fiche déjà lue">' + this.P.coche + '</i></button>';
+  },
+  tuileFx(f, key, k) {
+    return '<button type="button" class="fiche fiche-fx" data-fiche="' + key + ':' + k + '"><span class="fiche-ic" aria-hidden="true"><i>ƒ</i></span><span class="fiche-t"><b class="fiche-f">' + f.f + '</b>' + (f.q ? '<small>' + this.nb(this.sansBalise(f.q)) + '</small>' : '') + '</span><i class="fiche-vu" title="Fiche déjà lue">' + this.P.coche + '</i></button>';
+  },
+  contenuFiche(key, k) {
+    const x = this.fiches[key][k];
+    if (x.type === 'mot') {
+      const d = x.d, tags = (d.s ? '<span class="pill">symbole ' + d.s + '</span>' : '') + (d.u ? '<span class="pill neutre">unité : ' + d.u + '</span>' : '');
+      return '<div class="fc"><div class="fc-hd"><span class="fc-ic" aria-hidden="true">' + (d.ic || '•') + '</span><div><div class="eyebrow">Les mots à connaître</div><h3>' + d.t + '</h3>' + (tags ? '<div class="fc-tags">' + tags + '</div>' : '') + '</div></div>' +
+        (d.q ? '<p class="fc-q">' + this.nb(d.q) + '</p>' : '') + '<div class="fc-d"><p>' + d.d + '</p></div>' +
+        '<div class="fc-plus">' + (d.c ? this.plus('Une comparaison pour comprendre', d.c, { cls: 'plus-cmp' }) : '') + (d.r ? this.plus('Des repères chiffrés', d.r, { cls: 'plus-rep' }) : '') + '</div></div>';
+    }
+    const f = x.f;
+    const table = f.rows ? '<table class="fx-t">' + f.rows.map(r => '<tr><td class="sym">' + r[0] + '</td><td class="nm">' + r[1] + '</td><td class="u">' + (r[2] || '—') + '</td><td class="role">' + (r[3] || '') + '</td></tr>').join('') + '</table>' : '';
+    return '<div class="fc"><div class="fc-hd"><span class="fc-ic" aria-hidden="true"><i>ƒ</i></span><div><div class="eyebrow">Les formules</div><h3>' + this.nb(f.q || 'La formule') + '</h3></div></div>' +
+      '<div class="fx-f"><span class="eq">' + f.f + '</span></div>' + (f.say ? '<div class="fx-say">Se lit : « ' + f.say + ' »</div>' : '') +
+      '<div class="fc-plus">' + (table ? this.plus('Que veut dire chaque lettre ?', table, { cls: 'plus-sym' }) : '') + (f.ex ? this.plus('Un exemple chiffré', '<div class="fx-ex">' + f.ex + '</div>', { cls: 'plus-ex' }) : '') + '</div></div>';
+  },
+  ouvrirFiche(key, k, origine) {
+    const liste = this.fiches[key] || [], total = liste.length; if (!total) return;
+    let i = k;
+    const f = this.fenetre({
+      origine, classe: 'fen-fiche', titre: 'Fiche',
+      contenu: '<div class="fc-zone"></div><div class="fc-nav"><button type="button" class="fc-fl" data-fc="-1" aria-label="Fiche précédente">' + this.P.gauche + '</button><div class="fc-pos" aria-live="polite"><span></span><div class="fc-pts">' + liste.map((x, j) => '<i data-fc-i="' + j + '"' + (x.type === 'fx' ? ' class="pf"' : '') + '></i>').join('') + '</div></div><button type="button" class="fc-fl" data-fc="1" aria-label="Fiche suivante">' + this.P.droite + '</button></div>',
+      clavier: e => {
+        if (e.target.closest && e.target.closest('input, select, textarea')) return;
+        if (e.key === 'ArrowRight') { e.preventDefault(); aller(1); } else if (e.key === 'ArrowLeft') { e.preventDefault(); aller(-1); }
+      }
+    });
+    const zone = f.corps.querySelector('.fc-zone');
+    const montrer = dir => {
+      zone.innerHTML = this.contenuFiche(key, i);
+      zone.classList.remove('in-d', 'in-g');
+      if (dir && !ANIM.reduce) { void zone.offsetWidth; zone.classList.add(dir > 0 ? 'in-d' : 'in-g'); }
+      zone.scrollTop = 0;
+      f.corps.querySelector('.fc-pos span').textContent = (i + 1) + ' / ' + total;
+      $$('.fc-pts i', f.corps).forEach((p, j) => p.classList.toggle('on', j === i));
+      f.corps.querySelector('[data-fc="-1"]').disabled = i === 0;
+      f.corps.querySelector('[data-fc="1"]').disabled = i === total - 1;
+      f.origine($('[data-fiche="' + key + ':' + i + '"]') || origine);
+      this.marquerVue(key, i);
+    };
+    const aller = d => { const j = i + d; if (j < 0 || j >= total) return; i = j; montrer(d); };
+    f.corps.addEventListener('click', e => {
+      const b = e.target.closest('[data-fc]'); if (b) { aller(+b.dataset.fc); return; }
+      const p = e.target.closest('[data-fc-i]'); if (p) { const j = +p.dataset.fcI; if (j !== i) { const d = j > i ? 1 : -1; i = j; montrer(d); } }
+    });
+    let x0 = null, y0 = null; // sur téléphone : glisser le doigt
+    zone.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+    zone.addEventListener('touchend', e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null; if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) aller(dx < 0 ? 1 : -1); }, { passive: true });
+    montrer(0);
+  },
+  lireVues() {
+    if (this.vues) return this.vues;
+    try { this.vues = new Set(JSON.parse(localStorage.getItem('photometrie-fiches') || '[]')); } catch (e) { this.vues = new Set(); }
+    return this.vues;
+  },
+  marquerVue(key, k) {
+    const v = this.lireVues(), c = key + ':' + k;
+    if (!v.has(c)) { v.add(c); try { localStorage.setItem('photometrie-fiches', JSON.stringify(Array.from(v))); } catch (e) { } }
+    this.compter(key);
+  },
+  compter(key) {
+    const liste = this.fiches[key]; if (!liste) return; const v = this.lireVues();
+    $$('[data-fiche^="' + key + ':"]').forEach(t => t.classList.toggle('vue', v.has(t.dataset.fiche)));
+    ['mot', 'fx'].forEach(type => {
+      const el = $('[data-fiches-compte="' + key + ':' + type + '"]'); if (!el) return;
+      const ks = liste.map((x, k) => x.type === type ? k : -1).filter(k => k >= 0), lues = ks.filter(k => v.has(key + ':' + k)).length;
+      el.textContent = ks.length + ' fiche' + (ks.length > 1 ? 's' : '') + (lues ? ' · ' + lues + ' lue' + (lues > 1 ? 's' : '') : '');
+      el.classList.toggle('ok', lues === ks.length);
+    });
+  },
+  // Indice de l'évaluation « def:… » ou « fx:… » : ouvre la fiche correspondante.
+  ficheDe(w) {
+    if (!w || !(w.startsWith('def:') || w.startsWith('fx:'))) return null;
+    const lec = $('.tab.active > .lesson'), key = lec && lec.dataset.key, liste = key && this.fiches[key]; if (!liste) return null;
+    const norm = s => this.sansBalise(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+    const def = w.startsWith('def:'), m = norm(w.slice(def ? 4 : 3));
+    let k = liste.findIndex(x => def ? x.type === 'mot' && norm(x.d.t).includes(m) : x.type === 'fx' && norm(x.f.f).includes(m));
+    if (k < 0) k = liste.findIndex(x => def ? x.type === 'mot' && norm(x.d.t + ' ' + x.d.d).includes(m) : x.type === 'fx' && norm(x.f.f + ' ' + (x.f.q || '')).includes(m));
+    return k < 0 ? null : [key, k];
+  },
+
+  /* ---------- les étapes : une à la fois ---------- */
+  cle() { return currentTab === 'plateau' ? 'plateau:' + (Plateau.group || 'pos') : currentTab; },
+  presentes(sec) { return this.ORDRE.filter(s => sec.querySelector(':scope > [data-pas="' + s + '"]')); },
+  preparer(sec) {
+    if (sec.dataset.epure) return true;
+    const learn = sec.querySelector(':scope > .lesson'); if (!learn) return false;
+    const recap = sec.querySelector(':scope > .recap'), quiz = sec.querySelector(':scope > .quizbox');
+    let zone = null;
+    Array.from(sec.children).forEach(el => {
+      if (el === learn) zone = 'learn'; else if (el === recap) zone = 'recap'; else if (el === quiz) zone = 'quiz'; else if (zone === 'learn') zone = 'lab';
+      if (zone && !el.classList.contains('pager')) el.dataset.pas = zone;
+    });
+    const etapes = this.presentes(sec);
+    // la barre des étapes, sous le titre
+    const barre = document.createElement('nav'); barre.className = 'pas-barre'; barre.setAttribute('aria-label', 'Étapes du module');
+    barre.innerHTML = '<div class="seg pas">' + etapes.map((s, i) => '<button type="button" data-pas-v="' + s + '"><i class="pas-n">' + (i + 1) + '</i><span>' + this.NOMS[s] + '</span></button>').join('') + '</div>';
+    const tete = sec.querySelector(':scope > .pagehead'); if (tete) tete.after(barre); else sec.prepend(barre);
+    // en bas de chaque étape : revenir, ou passer à la suivante
+    etapes.forEach((s, i) => {
+      if (s === 'quiz') return;
+      const els = $$(':scope > [data-pas="' + s + '"]', sec), der = els[els.length - 1], prec = etapes[i - 1], suiv = etapes[i + 1];
+      const nav = document.createElement('div'); nav.className = 'pas-suite'; nav.dataset.pas = s;
+      nav.innerHTML = (prec ? '<button type="button" class="btn" data-pas-aller="' + prec + '">' + this.P.gauche + ' ' + this.NOMS[prec] + '</button>' : '<span></span>') +
+        (suiv ? '<button type="button" class="btn primary" data-pas-aller="' + suiv + '"><small>Étape ' + (i + 2) + '</small> ' + this.NOMS[suiv] + ' ' + this.P.droite + '</button>' : '');
+      der.after(nav);
+    });
+    sec.dataset.epure = '1';
+    return true;
+  },
+  // appelé à chaque changement de page (Shell.sync) : prépare la page et rétablit son étape
+  appliquer() {
+    const sec = $('.tab.active'); if (!sec || !this.preparer(sec)) return;
+    const k = this.cle();
+    if (sec.dataset.pasCle === k && sec.dataset.pasCur) { this.marquer(sec); return; }
+    sec.dataset.pasCle = k;
+    this.montrer(this.etape[k] || 'learn', false, false);
+  },
+  marquer(sec) {
+    const cur = sec.dataset.pasCur;
+    $$('.pas-barre button', sec).forEach(b => { b.classList.toggle('on', b.dataset.pasV === cur); b.setAttribute('aria-pressed', String(b.dataset.pasV === cur)); });
+    const id = currentTab === 'accueil' ? null : Prog.modOf(currentTab === 'plateau' ? 'plateau:' + (Plateau.group || 'pos') : currentTab);
+    const q = sec.querySelector('.pas-barre [data-pas-v="quiz"]'); if (q) q.classList.toggle('ok', !!id && Prog.passed(id));
+  },
+  montrer(etape, anime, defiler) {
+    const sec = $('.tab.active'); if (!sec || !sec.dataset.epure) return;
+    const etapes = this.presentes(sec); if (!etapes.includes(etape)) etape = etapes[0];
+    const avant = sec.dataset.pasCur;
+    $$(':scope > [data-pas]', sec).forEach(el => el.classList.toggle('pas-on', el.dataset.pas === etape));
+    sec.dataset.pasCur = etape; this.etape[this.cle()] = etape;
+    sec.classList.toggle('pas-fin', etape === etapes[etapes.length - 1]);
+    if (anime && avant && avant !== etape && !ANIM.reduce) {
+      const cls = etapes.indexOf(etape) > etapes.indexOf(avant) ? 'pas-in-d' : 'pas-in-g';
+      $$(':scope > [data-pas].pas-on', sec).forEach(el => {
+        el.classList.remove('pas-in-d', 'pas-in-g'); void el.offsetWidth; el.classList.add(cls);
+        el.addEventListener('animationend', function fin(e) { if (e.target !== el) return; el.classList.remove(cls); el.removeEventListener('animationend', fin); });
+      });
+    }
+    this.marquer(sec);
+    if (defiler) {
+      // la barre des étapes vient en haut de l'écran : l'étape commence juste dessous
+      const b = sec.querySelector('.pas-barre'), y = b.getBoundingClientRect().top + window.scrollY - $('#ctx').offsetHeight - 8;
+      if (Math.abs(window.scrollY - y) > 4) window.scrollTo({ top: Math.max(0, y), behavior: ANIM.reduce ? 'auto' : 'smooth' });
+    }
+    requestAnimationFrame(() => {
+      if (typeof StageFit !== 'undefined') StageFit.all();
+      if (typeof SegThumb !== 'undefined') SegThumb.all(true);
+      if (typeof Reveal !== 'undefined') Reveal.scan();
+      if (typeof Shell !== 'undefined') Shell.spy();
+    });
+  },
+  // l'élément t est dans une étape cachée : on l'affiche d'abord
+  montrerPour(t) { const e = t && t.closest('.tab > [data-pas]'); if (e && !e.classList.contains('pas-on')) this.montrer(e.dataset.pas, false, false); },
+  sections(sec) { return this.presentes(sec).map(s => [s, sec.querySelector(':scope > [data-pas="' + s + '"]')]); },
+
+  /* ---------- l'évaluation ---------- */
+  introQuiz(id, last) {
+    return '<p class="lead3">10 questions · au moins <b>' + PASS_MARK + '/20</b> pour ' + (last ? 'valider le parcours' : 'débloquer le <b>module ' + (id + 1) + '</b>') + '.</p>' +
+      this.plus('Comment se passe l’évaluation ?', '<p>2 points par question, en cinq familles : <span class="qcat qc-lire">Lire</span> <span class="qcat qc-comp">Comprendre</span> <span class="qcat qc-qcm">QCM</span> <span class="qcat qc-calc">Calculer</span> <span class="qcat qc-ex">Exercice</span>.</p><p>Les valeurs changent à chaque tentative ; la calculatrice est autorisée. À chaque question, un <b>indice</b> peut vous montrer où trouver la réponse dans le module : il coûte <b>' + nf(HINT_COST, 1) + ' point</b>.</p>', { cls: 'plus-regles' });
+  },
+  correction(cls, tete, detail) {
+    return '<div class="corr-i plus ' + cls + (cls === 'ok' ? '' : ' ouvert') + '"><button type="button" class="plus-b corr-h" aria-expanded="' + (cls !== 'ok') + '">' + tete + '<i class="plus-i" aria-hidden="true"></i></button><div class="plus-c"><div><div class="plus-in">' + detail + '</div></div></div></div>';
+  },
+
+  init() {
+    if (!EPURE) return;
+    document.addEventListener('click', e => {
+      const pb = e.target.closest('.plus-b'); if (pb && pb.closest('.plus')) { this.basculer(pb.closest('.plus')); return; }
+      const fi = e.target.closest('[data-fiche]'); if (fi) { const p = fi.dataset.fiche.split(':'); this.ouvrirFiche(p[0], +p[1], fi); return; }
+      const fp = e.target.closest('[data-fiches-parcourir]'); if (fp) { this.ouvrirFiche(fp.dataset.fichesParcourir, 0, fp); return; }
+      const pv = e.target.closest('[data-pas-v], [data-pas-aller]'); if (pv) this.montrer(pv.dataset.pasV || pv.dataset.pasAller, true, true);
+    });
+    // les feuilles existantes (lexique, identité, sauvegarde…) se ferment vers leur bouton
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !this.ouverte) { const x = $('.sheet-ov.in .sheet-x'); if (x) x.click(); } });
+  }
+};
+
 const Lessons = {
   defCard(d) {
     return Fold.html(d.q || d.t, '<div class="def-tt"><b>' + d.t + '</b>' + (d.s || d.u ? '<small>' + (d.s ? 'symbole ' + d.s : '') + (d.s && d.u ? ' · ' : '') + (d.u ? 'unité : ' + d.u : '') + '</small>' : '') + '</div><p>' + d.d + '</p>' + (d.c ? '<p class="cmp"><span>Comparaison</span>' + d.c + '</p>' : '') + (d.r ? '<p class="rep"><span>Repères</span>' + d.r + '</p>' : ''), { cls: 'def', ic: d.ic || '•' });
@@ -7883,6 +8330,7 @@ const Lessons = {
       (f.ex ? '<div class="fx-ex"><span>Exemple</span>' + f.ex + '</div>' : ''), { cls: 'fx', ic: '<i>ƒ</i>' });
   },
   lesson(key, modNo) {
+    if (EPURE) return Epure.lecon(key, modNo); // interface épurée : les notions en tuiles
     const L = LESSONS[key]; if (!L) return '';
     return '<div class="lesson-hd"><div><div class="eyebrow">Les notions à connaître' + (modNo ? ' · module ' + modNo : '') + '</div><h3>' + L.title + '</h3><p class="lead3">' + L.intro + '</p><p class="qa-tip">Cliquez sur une question pour afficher sa réponse.</p></div><div class="lesson-nav"><button class="btn small" data-fold-all=".lesson">Tout ouvrir</button></div></div>' +
       '<div class="lesson-cols"><div data-part="defs"><h4 class="qa-h">Les mots à connaître<small>' + L.defs.length + ' questions</small></h4><div class="qa-list">' + L.defs.map(d => this.defCard(d)).join('') + '</div></div>' +
@@ -7898,7 +8346,7 @@ const Lessons = {
       Fold.html('Quels pièges faut-il éviter ?', '<ul class="traps">' + R.traps.map(x => '<li>' + x + '</li>').join('') + '</ul>', { cls: 'rcq', ic: '⚠️' }) +
       '</div>';
   },
-  mount(el, key, modNo, kind) { if (!el) return; el.innerHTML = kind === 'recap' ? this.recap(key, modNo) : this.lesson(key, modNo); el.dataset.key = key; },
+  mount(el, key, modNo, kind) { if (!el) return; el.innerHTML = kind === 'recap' ? this.recap(key, modNo) : this.lesson(key, modNo); el.dataset.key = key; if (EPURE && kind !== 'recap') Epure.compter(key); },
   init() {
     $$('.lesson[data-mod]').forEach(el => this.mount(el, el.dataset.mod, el.dataset.no, 'lesson'));
     $$('.recap[data-mod]').forEach(el => this.mount(el, el.dataset.mod, el.dataset.no, 'recap'));
@@ -8298,6 +8746,7 @@ const Shell = {
   /* étapes de la page en cours : cours, simulations, essentiel, évaluation */
   sections() {
     const sec = $('.tab.active'); if (!sec || sec.id === 'tab-accueil' || sec.id === 'tab-dash') return [];
+    if (EPURE && sec.dataset.epure) return Epure.sections(sec);
     const learn = sec.querySelector(':scope > .lesson, :scope > details.lesson-fold'), recap = sec.querySelector(':scope > .recap'), quiz = sec.querySelector(':scope > .quizbox');
     const lab = learn ? learn.nextElementSibling : null;
     return [['learn', learn], ['lab', lab && lab !== recap && lab !== quiz ? lab : null], ['recap', recap], ['quiz', quiz]].filter(x => x[1]);
@@ -8310,6 +8759,7 @@ const Shell = {
       t.dataset.k = key;
       t.innerHTML = tab === 'accueil' ? '<b>Accueil</b>' : tab === 'bac' ? '<span>Bonus</span><b>Bac à sable : votre plan de feu</b>' : tab === 'dash' ? '<span>Enseignant</span><b>Tableau de bord</b>' : id ? '<span>Module ' + id + '</span><b>' + MODS[id - 1].t + '</b>' : '';
     }
+    if (EPURE) Epure.appliquer(); // interface épurée : prépare la page, rétablit son étape
     this.secs = this.sections();
     const tabs = $('#ctxTabs'), k2 = key + '|' + this.secs.map(s => s[0]).join(',');
     tabs.hidden = !this.secs.length;
@@ -8332,6 +8782,7 @@ const Shell = {
   },
   off() { return $('#ctx').offsetHeight + 16; },
   jump(k) {
+    if (EPURE && $('.tab.active[data-epure]')) { Epure.montrer(k, true, true); return; }
     const s = this.secs.find(x => x[0] === k); if (!s) return; const el = s[1];
     if (el.tagName === 'DETAILS' && !el.open) el.open = true;
     const y = k === 'learn' ? 0 : el.getBoundingClientRect().top + window.scrollY - this.off();
@@ -8341,6 +8792,7 @@ const Shell = {
     const y = window.scrollY, max = document.documentElement.scrollHeight - window.innerHeight;
     const cx = $('#ctx'); cx.classList.toggle('scrolled', y > 6); cx.classList.toggle('past', y > 150);
     if (!this.secs.length) return;
+    if (EPURE && $('.tab.active[data-epure]')) { const c = $('.tab.active').dataset.pasCur; if (c !== this.cur) { this.cur = c; $$('#ctxTabs button').forEach(b => b.classList.toggle('on', b.dataset.sec === c)); } return; }
     const line = this.off() + Math.min(220, window.innerHeight * 0.3); let cur = this.secs[0][0];
     for (const s of this.secs) if (s[1].getBoundingClientRect().top <= line) cur = s[0];
     if (max > 60 && y >= max - 2) cur = this.secs[this.secs.length - 1][0];
@@ -9411,6 +9863,7 @@ const Plateau = (() => {
   try { Tween.init(); } catch (e) { console.error(e); }
   try { Prog.init(); } catch (e) { console.error(e); }
   try { Fold.init(); } catch (e) { console.error(e); }
+  try { Epure.init(); } catch (e) { console.error(e); }
   try { HiDPI.init(); } catch (e) { console.error(e); }
   Backup.init().catch(e => console.error(e));
   [Gr, Me, Di, Ca, Sp, Pr, GS, FB, AnatAll, Illus, Minis, Qual, Tc, Bac].forEach(m => { try { m.init(); } catch (e) { console.error(e); } });
