@@ -436,6 +436,13 @@ const MODULE_2 = {
   nav: "JPEG",
   resume: "Blocs 8 × 8, DCT, quantification",
   intro: "Le JPEG est la base de presque tous les codecs vidéo : <b>découper</b> l’image en blocs, la <b>transformer</b> en fréquences (DCT), <b>arrondir</b> grossièrement ce que l’œil voit mal (quantification), puis <b>ranger</b> et <b>coder</b> les nombres obtenus. Comprendre le JPEG, c’est comprendre la compression <b>intra-image</b> de ProRes, DNxHR, et des images I de H.264 ou de HEVC.",
+  // Le film du module (source : films/compression-video-module-2/). Chapitres : [seconde, titre].
+  film: {
+    src: "films/module-2.mp4",
+    affiche: "films/module-2.jpg",
+    duree: "2 min 32",
+    chapitres: [[6.4, "La chaîne JPEG"], [21.4, "Y′CbCr, 4:2:0 et blocs 8 × 8"], [39.4, "La DCT"], [57.4, "La quantification"], [75.4, "Erreur et facteur de qualité"], [90.4, "Zigzag, RLE et Huffman"], [105.4, "Les artefacts"], [117.4, "La compression intra-image"], [132.4, "À retenir"]]
+  },
   notions: {
     titre: "La chaîne du JPEG, étape par étape",
     intro: "Chaque étape a un rôle précis. Une seule, la <b>quantification</b>, décide de la qualité (avec le sous-échantillonnage de la couleur).",
@@ -540,6 +547,13 @@ const MODULE_3 = {
   nav: "MPEG et GOP",
   resume: "Images I, P, B, GOP, mouvement",
   intro: "À 25 images par seconde, deux images successives se ressemblent énormément. Les codecs MPEG (MPEG-2, H.264, HEVC…) ne transmettent pas chaque image entière : ils <b>prédisent</b> l’image à partir des précédentes (et des suivantes !), puis n’envoient que des <b>vecteurs de mouvement</b> et la <b>différence</b> restante. C’est la compression <b>inter-image</b>, organisée en <b>GOP</b>.",
+  // Le film du module (source : films/compression-video-module-3/). Chapitres : [seconde, titre].
+  film: {
+    src: "films/module-3.mp4",
+    affiche: "films/module-3.jpg",
+    duree: "2 min 23",
+    chapitres: [[6.4, "L’idée : prédire"], [18.4, "Images I, P, B"], [33.4, "Le GOP : N et M"], [48.4, "L’estimation de mouvement"], [63.4, "Compensation et résidu"], [72.4, "L’ordre de transmission"], [84.4, "Le débit moyen d’un GOP"], [96.4, "GOP long ou tout-intra"], [111.4, "Les générations de codecs"], [123.4, "À retenir"]]
+  },
   notions: {
     titre: "Prédire une image à partir des autres",
     intro: "Trois types d’images, une organisation (le GOP), et un outil central : l’<b>estimation de mouvement</b>.",
@@ -643,6 +657,13 @@ const MODULE_4 = {
   nav: "Codage et CABAC",
   resume: "Entropie, Huffman, CABAC",
   intro: "Après la DCT, la quantification et la prédiction, il reste une longue suite de nombres (beaucoup de 0, quelques 1, de rares grandes valeurs). Le <b>codage entropique</b> les écrit avec le moins de bits possible, <b>sans rien perdre</b>. H.264 propose deux méthodes : le <b>CAVLC</b>, simple, et le <b>CABAC</b>, environ 10 à 15 % plus efficace. HEVC n’utilise plus que le CABAC.",
+  // Le film du module (source : films/compression-video-module-4/). Chapitres : [seconde, titre].
+  film: {
+    src: "films/module-4.mp4",
+    affiche: "films/module-4.jpg",
+    duree: "2 min 17",
+    chapitres: [[6.4, "La dernière étape"], [18.4, "Le coût d’un symbole"], [30.4, "L’entropie"], [42.4, "Le code de Huffman"], [60.4, "Coder ABRACADABRA"], [72.4, "Le codage arithmétique"], [84.4, "Le CABAC"], [102.4, "CAVLC ou CABAC ?"], [117.4, "À retenir"]]
+  },
   notions: {
     titre: "Écrire les nombres avec le moins de bits possible",
     intro: "Un symbole fréquent doit coûter peu, un symbole rare peut coûter cher. L’<b>entropie</b> donne la limite qu’aucun codage ne peut battre.",
@@ -749,6 +770,13 @@ const MODULE_5 = {
   nav: "CBR, VBR, profils",
   resume: "Débit constant ou variable, Main, High, niveaux",
   intro: "Un même codec peut être réglé de mille façons. Deux questions reviennent toujours : faut-il un débit <b>constant</b> (CBR) ou <b>variable</b> (VBR) ? Et le fichier sera-t-il <b>lisible</b> par le décodeur visé ? C’est le rôle du <b>profil</b> (quels outils) et du <b>niveau</b> (quelle charge), qu’on lit sous la forme « <b>High@L4.1</b> » ou « <b>Main 10@L5.1</b> ».",
+  // Le film du module (source : films/compression-video-module-5/). Chapitres : [seconde, titre].
+  film: {
+    src: "films/module-5.mp4",
+    affiche: "films/module-5.jpg",
+    duree: "2 min 26",
+    chapitres: [[6.4, "Deux questions"], [15.4, "CBR : débit constant"], [30.4, "VBR : débit variable"], [48.4, "Une ou deux passes"], [60.4, "Le QP"], [72.4, "Le tampon"], [84.4, "Le profil"], [96.4, "Le niveau"], [114.4, "Lire « High@L4.1 »"], [126.4, "À retenir"]]
+  },
   notions: {
     titre: "Répartir les bits et garantir la lecture",
     intro: "Le <b>contrôle de débit</b> ajuste la quantification image par image. Le <b>profil</b> et le <b>niveau</b> sont un contrat entre le codeur et le décodeur.",
@@ -848,6 +876,13 @@ const MODULE_6 = {
   nav: "Codecs et conteneurs",
   resume: "MOV, MP4, MXF, ProRes, H.264",
   intro: "Un fichier vidéo est une <b>enveloppe</b> (le conteneur : .mov, .mp4, .mxf…) qui range des <b>pistes</b> compressées chacune par un <b>codec</b> (ProRes, H.264, AAC…). Choisir le bon couple codec + conteneur à chaque étape (tournage, montage, diffusion) évite les fichiers illisibles, les disques pleins et les pertes de qualité.",
+  // Le film du module (source : films/compression-video-module-6/). Chapitres : [seconde, titre].
+  film: {
+    src: "films/module-6.mp4",
+    affiche: "films/module-6.jpg",
+    duree: "2 min 20",
+    chapitres: [[6.4, "Codec et conteneur"], [18.4, "Pistes et multiplexage"], [30.4, "L’extension et le rewrap"], [42.4, "Lire une fiche MediaInfo"], [51.4, "Cinq conteneurs"], [63.4, "Trois familles de codecs"], [78.4, "Les débits à connaître"], [90.4, "Proxy et générations"], [105.4, "Le débit du fichier"], [120.4, "À retenir"]]
+  },
   notions: {
     titre: "L’enveloppe et la langue",
     intro: "L’<b>extension</b> du fichier désigne le conteneur, presque jamais le codec. Pour savoir ce qu’il y a dedans, on ouvre le fichier dans <b>MediaInfo</b>.",

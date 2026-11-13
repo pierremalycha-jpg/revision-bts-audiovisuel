@@ -9,7 +9,7 @@
 set -euo pipefail
 ici="$(cd "$(dirname "$0")" && pwd)"
 film="${1:?Usage : ./publier.sh <dossier-du-film> <application> <numero-du-module>}"
-application="${2:?Il manque le dossier de l'application (ex. tes-compression-video)}"
+application="${2:?Il manque le dossier de l’application (ex. tes-compression-video)}"
 numero="${3:?Il manque le numéro du module}"
 dossier="$ici/$film"
 sortie="$ici/../modules/$application/films"
