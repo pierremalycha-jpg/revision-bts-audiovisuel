@@ -54,10 +54,14 @@ async function afficherTableauDeBord(utilisateur) {
     const ligne = creerElement("a", "suivi-app rv");
     ligne.href = app.page;
 
+    // Où l'application est rangée sur l'accueil : sous-catégorie, sinon catégorie.
+    const rubrique = Applications.rubrique(app);
+    const rayon = rubrique.sousCategorie ? rubrique.sousCategorie.nom : rubrique.categorie.nom;
+
     const texte = creerElement("div");
     texte.append(
       creerElement("h3", "", app.titre),
-      creerElement("p", "", app.epreuve +
+      creerElement("p", "", app.epreuve + " · " + rayon +
         (p.date ? " · dernière évaluation le " + new Date(p.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long" }) : ""))
     );
     // Une barre par module : verte = validé, orange = tenté, grise = pas encore.

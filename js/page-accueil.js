@@ -1,11 +1,14 @@
 /* ==========================================================================
-   page-accueil.js — la grille de toutes les applications (page d'accueil)
+   page-accueil.js — les applications de l'accueil, rangées par catégorie
    --------------------------------------------------------------------------
-   Les notions concernent tous les étudiants : il n'y a plus de pages par
-   option. L'accueil lit le catalogue (js/catalogue.js) et affiche TOUTES les
-   applications dans une seule grille d'icônes, avec la progression de
-   l'élève sous chacune. Publier une application dans le catalogue suffit à
-   la faire apparaître ici.
+   L'accueil lit le catalogue (js/catalogue.js) et range les applications
+   dans les trois catégories de CATEGORIES :
+     1. Apport de connaissances, découpée en sous-catégories (rayons) ;
+     2. Outils ;
+     3. Applications pratiques.
+   Sous chaque icône : la progression de l'élève. Les applications prévues
+   (liste « aVenir » d'une catégorie) sont montrées grisées.
+   Publier une application dans le catalogue suffit à la faire apparaître ici.
    ========================================================================== */
 
 // Fabrique l'icône cliquable d'une application.
@@ -15,7 +18,7 @@ function creerIconeApplication(app, progression, rang) {
 
   const lien = creerElement(app.disponible ? "a" : "div", "app" + (app.disponible ? "" : " indisponible"));
   if (app.disponible) lien.href = RACINE + app.page;
-  lien.title = app.description;
+  if (app.description) lien.title = app.description;
 
   const cadre = creerElement("span", "app-ic-wrap");
   cadre.append(Applications.icone(app));
@@ -25,7 +28,7 @@ function creerIconeApplication(app, progression, rang) {
     cadre.append(badge);
   }
 
-  lien.append(cadre, creerElement("span", "app-nom", app.titre), creerElement("span", "app-sous", app.accroche));
+  lien.append(cadre, creerElement("span", "app-nom", app.titre), creerElement("span", "app-sous", app.accroche || ""));
 
   // Ligne d'état : progression, ou nombre de modules si l'élève n'a pas commencé.
   const etat = creerElement("span", "app-etat");
@@ -39,7 +42,7 @@ function creerIconeApplication(app, progression, rang) {
     remplissage.style.width = (progression.valides / progression.total) * 100 + "%";
     barre.append(remplissage);
     etat.append(barre, document.createTextNode(progression.valides + " / " + progression.total));
-  } else {
+  } else if (app.modules) {
     etat.textContent = app.modules + " module" + (app.modules > 1 ? "s" : "");
   }
   lien.append(etat);
@@ -60,8 +63,94 @@ function creerEmplacementVide(rang) {
   return element;
 }
 
+// Le pictogramme d'une catégorie, dans un carré arrondi à son dégradé.
+function creerIconeCategorie(categorie) {
+  const icone = creerElement("span", "cat-ic");
+  icone.style.setProperty("--app-grad", "linear-gradient(160deg, " + categorie.teinte.join(", ") + ")");
+  icone.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + (ICONES[categorie.icone] || ICONES.plus) + "</svg>";
+  return icone;
+}
+
+// Les pastilles de navigation : 1 · Apport de connaissances, 2 · Outils…
+function afficherNavigationCategories() {
+  const nav = document.getElementById("nav-categories");
+  if (!nav || nav.childElementCount) return;
+  CATEGORIES.forEach(function (categorie) {
+    const lien = creerElement("a", "cat-lien");
+    lien.href = "#" + categorie.id;
+    lien.append(creerIconeCategorie(categorie), creerElement("b", "", categorie.nom), creerElement("small", "", categorie.accroche));
+    nav.append(lien);
+  });
+}
+
+// Une catégorie complète : en-tête, puis ses sous-catégories ou sa grille.
+function creerCategorie(categorie, progressionSuivi, compteur) {
+  const section = creerElement("section", "categorie");
+  section.id = categorie.id;
+
+  const entete = creerElement("header", "cat-hd");
+  const texte = creerElement("div");
+  texte.append(
+    creerElement("span", "eyebrow", "Catégorie " + categorie.numero),
+    creerElement("h2", "", categorie.nom),
+    creerElement("p", "", categorie.description)
+  );
+  entete.append(creerIconeCategorie(categorie), texte);
+  section.append(entete);
+
+  const apps = CATALOGUE.filter(function (app) { return Applications.rubrique(app).categorie === categorie; });
+
+  // La grille : applications publiées, puis applications prévues (grisées),
+  // ou à défaut une case « Prochainement ».
+  function grille(liste) {
+    const ul = creerElement("ul", "apps");
+    liste.forEach(function (app) {
+      ul.append(creerIconeApplication(app, app.disponible ? Applications.progression(app, progressionSuivi) : null, compteur.rang++));
+    });
+    (categorie.aVenir || []).forEach(function (prevue) {
+      ul.append(creerIconeApplication({
+        titre: prevue.titre,
+        accroche: prevue.accroche,
+        icone: prevue.icone,
+        teinte: categorie.teinte,
+        disponible: false
+      }, null, compteur.rang++));
+    });
+    if (!(categorie.aVenir || []).length) ul.append(creerEmplacementVide(compteur.rang++));
+    return ul;
+  }
+
+  if (categorie.sousCategories && categorie.sousCategories.length) {
+    // Une sous-section par rayon, puis « Autres » pour une application mal rangée.
+    const rayons = categorie.sousCategories.concat([{ id: categorie.id + "-autres", nom: "Autres", description: "" }]);
+    rayons.forEach(function (rayon, i) {
+      const contenu = apps.filter(function (app) {
+        const s = Applications.rubrique(app).sousCategorie;
+        return i < categorie.sousCategories.length ? s === rayon : s === null;
+      });
+      if (i === categorie.sousCategories.length && !contenu.length) return; // pas de rayon « Autres » vide
+      const sous = creerElement("section", "sous-cat");
+      sous.id = rayon.id;
+      const hd = creerElement("div", "sous-cat-hd");
+      hd.append(creerElement("h3", "", rayon.nom));
+      if (rayon.description) hd.append(creerElement("p", "", rayon.description));
+      sous.append(hd, grille(contenu));
+      section.append(sous);
+    });
+  } else {
+    section.append(grille(apps));
+    if (!apps.some(function (app) { return app.disponible; })) {
+      section.append(creerElement("p", "cat-bientot", "Ces applications sont en préparation : elles apparaîtront ici dès leur publication."));
+    }
+  }
+  return section;
+}
+
+let premierAffichage = true;
+
 async function afficherApplications() {
   const zone = document.getElementById("liste-applications");
+  afficherNavigationCategories();
 
   // La progression sert seulement à afficher l'avancement sous les icônes :
   // si sa lecture échoue, on affiche quand même les applications.
@@ -76,7 +165,7 @@ async function afficherApplications() {
   const resume = document.getElementById("resume-applications");
   if (resume) {
     const publiees = CATALOGUE.filter(function (app) { return app.disponible; });
-    const nbModules = publiees.reduce(function (s, app) { return s + app.modules; }, 0);
+    const nbModules = publiees.reduce(function (s, app) { return s + (app.modules || 0); }, 0);
     const nbValides = publiees.reduce(function (s, app) { return s + Applications.progression(app, progressionSuivi).valides; }, 0);
     resume.innerHTML = "";
     [
@@ -90,15 +179,19 @@ async function afficherApplications() {
     });
   }
 
-  // Une seule grille, dans l'ordre du catalogue.
   zone.textContent = "";
-  const grille = creerElement("ul", "apps");
-  let rang = 0;
-  CATALOGUE.forEach(function (app) {
-    grille.append(creerIconeApplication(app, app.disponible ? Applications.progression(app, progressionSuivi) : null, rang++));
+  const compteur = { rang: 0 };
+  CATEGORIES.forEach(function (categorie) {
+    zone.append(creerCategorie(categorie, progressionSuivi, compteur));
   });
-  grille.append(creerEmplacementVide(rang++));
-  zone.append(grille);
+
+  // Les sections sont créées après le chargement : si l'adresse vise l'une
+  // d'elles (index.html#outils, #numerique…), on s'y rend maintenant.
+  if (premierAffichage) {
+    premierAffichage = false;
+    const cible = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (cible && zone.contains(cible)) cible.scrollIntoView();
+  }
 }
 
 // On reconstruit la grille à chaque connexion / déconnexion, car la
