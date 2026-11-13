@@ -3,6 +3,7 @@
    --------------------------------------------------------------------------
    Utilisé par l'accueil, le tableau de bord et les applications :
      - Applications.icone(app)           fabrique l'icône (carré arrondi + dégradé)
+     - Applications.fond(app)            le dégradé de l'icône
      - Applications.rubrique(app)        la catégorie et la sous-catégorie d'une application
      - Applications.progression(app, p)  résume la progression d'une application
      - Applications.anneau(f, taille, e) dessine un anneau de progression (SVG)
@@ -16,10 +17,15 @@ const Applications = {
   // L'icône d'une application. « taille » est facultative (sinon : CSS).
   icone(app) {
     const icone = creerElement("span", "app-ic");
-    const couleurs = app.teinte && app.teinte.length ? app.teinte : ["#ff9500", "#ff2d55", "#af52de"];
-    icone.style.setProperty("--app-grad", "linear-gradient(160deg, " + couleurs.join(", ") + ")");
+    icone.style.setProperty("--app-grad", Applications.fond(app));
     icone.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + (ICONES[app.icone] || ICONES.plus) + "</svg>";
     return icone;
+  },
+
+  // Le dégradé de l'icône d'une application (repris par l'animation d'ouverture).
+  fond(app) {
+    const couleurs = app.teinte && app.teinte.length ? app.teinte : ["#ff9500", "#ff2d55", "#af52de"];
+    return "linear-gradient(160deg, " + couleurs.join(", ") + ")";
   },
 
   /* La catégorie et la sous-catégorie d'une application (voir CATEGORIES dans

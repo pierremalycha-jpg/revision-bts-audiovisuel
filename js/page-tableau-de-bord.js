@@ -53,6 +53,7 @@ async function afficherTableauDeBord(utilisateur) {
 
     const ligne = creerElement("a", "suivi-app rv");
     ligne.href = app.page;
+    ligne.dataset.appFond = Applications.fond(app); // animation d'ouverture (js/transition.js)
 
     // Où l'application est rangée sur l'accueil : sous-catégorie, sinon catégorie.
     const rubrique = Applications.rubrique(app);

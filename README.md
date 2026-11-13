@@ -61,13 +61,14 @@ revision-bts-audiovisuel/
 │   └── application.css         Mise en page des applications (kit)
 ├── js/
 │   ├── theme.js                Thème clair / sombre (partagé avec la photométrie)
+│   ├── transition.js           Animation « on entre dans l'application » (chargé dans le <head>)
 │   ├── firebase-config.js      Les coordonnées de TON projet Firebase (à remplir)
 │   ├── suivi.js                Comptes + enregistrement de la progression
 │   ├── commun.js               En-tête, pied de page, outils partagés
 │   ├── catalogue.js            La liste des applications, leurs icônes
 │   ├── applications.js         Icônes et lecture de la progression
 │   ├── application.js          Le moteur du kit application
-│   ├── page-accueil.js         Construit les catégories d'applications de index.html
+│   ├── page-accueil.js         Construit les catégories (sous-catégories en menus déroulants) de index.html
 │   ├── page-connexion.js       Fait fonctionner connexion.html
 │   └── page-tableau-de-bord.js Fait fonctionner tableau-de-bord.html
 └── modules/
