@@ -124,10 +124,10 @@ const CATALOGUE = [
     epreuve: "TES",
     titre: "Microphones",
     accroche: "De la vibration à la tension.",
-    description: "Pression acoustique et dB SPL, technologies de micro (dynamique, ruban, électrostatique, électret), capsules et effet de proximité, directivité, sensibilité et fiche technique, types de micros, liaisons symétriques et alimentation fantôme, couples stéréophoniques.",
+    description: "Pression acoustique et dB SPL, anatomie d’un micro et chaîne jusqu’au haut-parleur, technologies de micro (dynamique, ruban, électrostatique, électret), capsules et effet de proximité, directivité, sensibilité et fiche technique, types de micros, liaisons symétriques et alimentation fantôme, couples stéréophoniques.",
     icone: "micro",
     teinte: ["#ff375f", "#bf5af2", "#5e5ce6"],
-    modules: 8,
+    modules: 9,
     suivi: "kit",
     page: "modules/tes-microphones/index.html",
     disponible: true

@@ -437,7 +437,436 @@ labo(1, function () {
 });
 
 /* ==========================================================================
-   MODULE 2 — TECHNOLOGIES DE MICRO
+   MODULE 2 — ANATOMIE D'UN MICROPHONE, DU CHANTEUR AU HAUT-PARLEUR
+   ========================================================================== */
+
+/* --- Labo 2a : ouvrir le micro ----------------------------------------------
+   La coupe est dessinée dans le repère des schémas du cours (figMicro,
+   660 × 260), puis agrandie. Chaque pièce appartient à un groupe que la
+   « vue éclatée » écarte horizontalement. Une onde de pression (bandes
+   orange = compression, bleues = dépression) avance vers la membrane ; la
+   membrane suit la pression ; la tension produite parcourt les fils jusqu'à
+   la XLR. Valeurs : p = MICRO.pa(L), U = S × p (S = 2 mV/Pa pour le
+   dynamique, 20 mV/Pa pour le statique : exemples typiques). */
+labo(2, function () {
+  const cv = O.el("m2a-cv"), c = cv.getContext("2d");
+  const curN = O.el("m2a-niv"), btE = O.el("m2a-eclate"), btV = O.el("m2a-visite");
+  const K = 1.3, OX = 30, OY = 0, F_VIS = 0.6;   // échelle, décalage, fréquence affichée (Hz)
+  let tech = "dyn", t = 0, ecl = 0, eclVise = 0, choix = "membrane", visite = false, tVisite = 0;
+  const histP = [], histU = [];
+  // Décalage horizontal de chaque groupe en vue éclatée (repère local)
+  const DX = { tete: -52, mousse: -26, capsule: 0, susp: 28, corps: 54, xlr: 80 };
+
+  const PIECES = {
+    onde: { nom: "L’onde sonore", g: null, recoit: "La voix", produit: "Pression", txt: "<b>L’onde sonore</b> arrive : une suite de compressions (orange) et de dépressions (bleu) de l’air, qui avancent à 343 m/s. C’est elle que le micro doit transformer en tension." },
+    grille: { nom: "Grille", g: "tete", recoit: "Onde, chocs", produit: "Onde intacte", txt: "<b>La grille</b> protège la capsule des chocs et des postillons. Son treillis est assez ouvert pour laisser passer le son presque sans le modifier." },
+    mousse: { nom: "Mousse interne", g: "mousse", recoit: "Onde, souffles", produit: "Onde", txt: "<b>La mousse</b> freine les souffles (plosives « p », « b », respiration) avant qu’ils ne frappent la membrane. Elle laisse passer l’onde sonore." },
+    membrane: { nom: "Membrane", g: "capsule", recoit: "Pression", produit: "Mouvement", txt: "<b>La membrane</b> est poussée et tirée par la pression : elle transforme les variations de pression en <b>mouvement</b>. C’est l’entrée de la capsule." },
+    bobine: { nom: "Bobine mobile", g: "capsule", recoit: "Mouvement", produit: "Tension", txt: "<b>La bobine</b>, collée à la membrane, se déplace dans l’entrefer de l’aimant : une tension apparaît, e = B·l·v. Elle suit la <b>vitesse</b> de la membrane." },
+    aimant: { nom: "Aimant et pièces polaires", g: "capsule", recoit: "—", produit: "Champ B", txt: "<b>L’aimant</b> crée le champ ; les <b>pièces polaires</b> le concentrent dans l’entrefer, un espace d’environ 1 mm où bouge la bobine. Aucune alimentation n’est nécessaire." },
+    contre: { nom: "Contre-électrode", g: "capsule", recoit: "Mouvement", produit: "Tension", txt: "<b>La contre-électrode</b> perforée forme un condensateur avec la membrane métallisée. Quand la membrane bouge, la distance change, la capacité aussi : à charge constante, la tension varie." },
+    susp: { nom: "Suspension anti-choc", g: "susp", recoit: "Vibrations", produit: "Isolation", txt: "<b>La suspension</b> en élastomère relie la capsule au corps. Elle absorbe les vibrations de la main : ce sont les <b>bruits de manipulation</b>." },
+    corps: { nom: "Corps (blindage)", g: "corps", recoit: "Parasites", produit: "Blindage", txt: "<b>Le corps</b> métallique, relié à la masse (broche 1), forme une cage de Faraday autour de la capsule et des fils : il arrête les parasites électriques." },
+    transfo: { nom: "Transformateur", g: "corps", recoit: "Tension", produit: "Tension adaptée", txt: "<b>Le transformateur</b>, présent sur certains dynamiques, adapte l’impédance de la bobine à la ligne. Sur beaucoup de modèles, la bobine est reliée directement aux broches 2 et 3." },
+    elec: { nom: "Électronique", g: "corps", recoit: "Signal capsule", produit: "Signal adapté", txt: "<b>L’électronique</b> du statique polarise la capsule, convertit son impédance énorme en basse impédance et attaque la ligne. Elle est alimentée par le <b>fantôme 48 V</b>." },
+    commut: { nom: "Commutateurs", g: "corps", recoit: "Vos réglages", produit: "Coupe-bas, pad", txt: "<b>Les commutateurs</b> activent un <b>coupe-bas</b> (contre les bruits graves et l’effet de proximité) ou un <b>atténuateur</b> (pour les sources très fortes)." },
+    xlr: { nom: "Connecteur XLR", g: "xlr", recoit: "Tension", produit: "Broches 2 et 3", txt: "<b>La XLR mâle</b> envoie le signal sur le câble : broche 2 = point chaud, 3 = point froid, 1 = masse. Le signal symétrique résiste aux parasites." }
+  };
+  const ETAPES = { dyn: ["onde", "grille", "membrane", "bobine", "corps", "xlr"], stat: ["onde", "grille", "membrane", "contre", "elec", "xlr"] };
+
+  // Boîtes de détection (repère local, avant décalage) : [x, y, l, h]
+  function zones() {
+    const z = [["membrane", 96, 96, 20, 88], ["susp", 178, 96, 40, 88], ["xlr", 596, 110, 64, 60]];
+    if (tech === "dyn") z.push(["bobine", 118, 112, 22, 56], ["aimant", 140, 100, 44, 80], ["transfo", 334, 118, 46, 44]);
+    else z.push(["contre", 114, 96, 22, 88], ["elec", 296, 116, 118, 48], ["commut", 444, 94, 92, 24]);
+    return z;
+  }
+  function trouver(px, py) {
+    for (const z of zones()) {
+      const g = PIECES[z[0]].g, x = (px - OX) / K - DX[g] * ecl, y = (py - OY) / K;
+      if (x >= z[1] && x <= z[1] + z[3] && y >= z[2] && y <= z[2] + z[4]) return z[0];
+    }
+    // têtes : grille (anneau) et mousse (disque)
+    for (const g of ["tete", "mousse"]) {
+      const x = (px - OX) / K - DX[g] * ecl - 135, y = (py - OY) / K - 140, r = Math.hypot(x, y);
+      if (g === "tete" && r >= 76 && r <= 94) return "grille";
+      if (g === "mousse" && r < 76) return "mousse";
+    }
+    const x = (px - OX) / K - DX.corps * ecl, y = (py - OY) / K;
+    if (x >= 205 && x <= 600) { const demi = 48 - (x - 205) / 395 * 22; if (Math.abs(y - 140) <= demi) return "corps"; }
+    if ((px - OX) / K < 40 && py < 320) return "onde";
+    return null;
+  }
+
+  // Pression normalisée au point x (local) : l'onde avance vers la droite
+  const LAMBDA = 90;                                   // longueur d'onde affichée (local)
+  const phase = x => 2 * Math.PI * (F_VIS * t - x / LAMBDA);
+  const XM = 110;                                      // position de la membrane
+
+  function lueur(on) { if (on) { c.shadowColor = COUL.jaune; c.shadowBlur = 18; } else c.shadowBlur = 0; }
+
+  function dessiner() {
+    const L = +curN.value, S = tech === "dyn" ? 2 : 20, p = MICRO.pa(L), U = S * p / 1000;
+    const a = 2 + (L - 50) / 80 * 7;                   // déplacement affiché de la membrane (exagéré)
+    const pm = Math.cos(phase(XM));                    // pression sur la membrane
+    // Dynamique : tension ∝ vitesse ; statique : tension ∝ déplacement. Les deux suivent p (module 3) :
+    // on affiche ici la tension en phase avec la pression.
+    const dep = tech === "dyn" ? Math.sin(phase(XM)) : pm;   // dynamique : déplacement en retard de 90°
+    const sel = PIECES[choix] || PIECES.membrane;
+
+    Application.afficher("#m2a-nivo", L + " dB SPL");
+    Application.afficher("#m2a-piece", sel.nom);
+    Application.afficher("#m2a-recoit", sel.recoit);
+    Application.afficher("#m2a-produit", sel.produit);
+    Application.afficher("#m2a-u", O.volts(U));
+    O.note("m2a-msg", "note ok", sel.txt + (choix === "xlr" || choix === "onde" ? " Ici : " + O.pascals(p) + " → " + O.volts(U) + " pour un micro " + (tech === "dyn" ? "dynamique de 2 mV/Pa." : "statique de 20 mV/Pa.") : ""));
+
+    O.fond(c);
+    c.save(); c.translate(OX, OY); c.scale(K, K);
+    const dx = g => DX[g] * ecl;
+    const actif = g => sel.g === g || (choix === "onde" && g === null);
+
+    // 1. L'onde : bandes de pression, de la gauche jusqu'à la membrane
+    for (let x = -50; x < XM + dx("capsule"); x += 3) {
+      const pr = Math.cos(phase(x - dx("capsule"))), al = Math.abs(pr) * (0.12 + 0.35 * (L - 50) / 80);
+      c.fillStyle = pr > 0 ? "rgba(255,159,10," + al.toFixed(3) + ")" : "rgba(100,210,255," + al.toFixed(3) + ")";
+      c.fillRect(x, 48, 3, 184);
+    }
+    if (choix === "onde") { c.strokeStyle = COUL.jaune; c.lineWidth = 2; c.setLineDash([6, 4]); c.strokeRect(-50, 48, 40, 184); c.setLineDash([]); }
+
+    // 2. Corps (dessiné sous la tête)
+    c.save(); c.translate(dx("corps"), 0);
+    lueur(choix === "corps");
+    c.fillStyle = "#26292f"; c.strokeStyle = choix === "corps" ? COUL.jaune : "#8e8e93"; c.lineWidth = choix === "corps" ? 3 : 1.5;
+    c.beginPath(); c.moveTo(205, 92); c.lineTo(600, 114); c.lineTo(600, 166); c.lineTo(205, 188); c.closePath(); c.fill(); c.stroke();
+    lueur(false);
+    if (tech === "dyn") {
+      lueur(choix === "transfo");
+      c.fillStyle = "#3a3d44"; c.fillRect(340, 124, 34, 32); c.strokeStyle = choix === "transfo" ? COUL.jaune : "#8e8e93"; c.lineWidth = 1.5; c.strokeRect(340, 124, 34, 32);
+      c.fillStyle = COUL.cuivre; c.fillRect(345, 128, 10, 24); c.fillRect(359, 128, 10, 24);
+      lueur(false);
+    } else {
+      lueur(choix === "elec");
+      c.fillStyle = "#1d3b2a"; c.fillRect(300, 122, 110, 36); c.strokeStyle = choix === "elec" ? COUL.jaune : COUL.vert; c.lineWidth = 1.5; c.strokeRect(300, 122, 110, 36);
+      [312, 334, 356, 378].forEach((x, i) => { c.fillStyle = i === 1 ? COUL.indigo : "#8e8e93"; c.fillRect(x, i % 2 ? 130 : 136, 14, i % 2 ? 18 : 12); });
+      lueur(false); lueur(choix === "commut");
+      c.fillStyle = COUL.bleu; O.rect(c, 450, 101, 34, 10, 3); c.fill(); O.rect(c, 494, 102, 34, 10, 3); c.fill();
+      lueur(false);
+    }
+    c.restore();
+
+    // 3. Fils : de la capsule à l'électronique (ou au transformateur), puis à la XLR.
+    // Des points parcourent les fils : leur taille suit la tension à l'instant où ils sont partis.
+    const xCap = 136 + dx("capsule"), xE1 = (tech === "dyn" ? 340 : 300) + dx("corps"), xE2 = (tech === "dyn" ? 374 : 410) + dx("corps"), xX = 604 + dx("xlr");
+    const fils = [[[xCap, 136], [xE1, 136]], [[xE2, 134], [xX, 128]], [[xCap, 144], [xE1, 144]], [[xE2, 146], [xX, 152]]];
+    fils.forEach((f, i) => {
+      c.strokeStyle = i % 2 === 0 || i === 1 ? "rgba(255,55,95,.75)" : "rgba(10,132,255,.75)";
+      if (i >= 2) c.strokeStyle = "rgba(10,132,255,.75)"; else c.strokeStyle = "rgba(255,55,95,.75)";
+      c.lineWidth = 1.4; c.beginPath(); c.moveTo(f[0][0], f[0][1]); c.lineTo(f[1][0], f[1][1]); c.stroke();
+    });
+    const VIT = 160;                                    // vitesse affichée du signal (local / s)
+    [[0, 1, 1], [2, 3, -1]].forEach(paire => {
+      const a1 = fils[paire[0]], a2 = fils[paire[1]], l1 = a1[1][0] - a1[0][0], l2 = a2[1][0] - a2[0][0], tot = l1 + l2;
+      for (let s = (t * VIT) % 22; s < tot; s += 22) {
+        const ret = s / VIT, v = Math.cos(2 * Math.PI * F_VIS * (t - ret) - 2 * Math.PI * (-XM / LAMBDA)) * paire[2];
+        const seg = s < l1 ? a1 : a2, u = s < l1 ? s / l1 : (s - l1) / l2;
+        const x = seg[0][0] + (seg[1][0] - seg[0][0]) * u, y = seg[0][1] + (seg[1][1] - seg[0][1]) * u;
+        c.fillStyle = v > 0 ? COUL.rose : COUL.ciel; c.globalAlpha = 0.25 + 0.75 * Math.abs(v);
+        c.beginPath(); c.arc(x, y, 1 + 2.2 * Math.abs(v), 0, Math.PI * 2); c.fill();
+      }
+    });
+    c.globalAlpha = 1;
+
+    // 4. Suspension
+    c.save(); c.translate(dx("susp"), 0); lueur(choix === "susp");
+    c.strokeStyle = choix === "susp" ? COUL.jaune : COUL.vert; c.lineWidth = 2;
+    [110, 170].forEach(y => { c.beginPath(); c.moveTo(182, y); for (let k = 0; k < 6; k++) c.lineTo(187 + k * 5, y + (k % 2 ? 7 : -7)); c.lineTo(214, y); c.stroke(); });
+    lueur(false); c.restore();
+
+    // 5. Tête : mousse puis grille (anneau hachuré)
+    c.save(); c.translate(dx("mousse"), 0); lueur(choix === "mousse");
+    c.fillStyle = "rgba(100,210,255,.07)"; c.strokeStyle = choix === "mousse" ? COUL.jaune : "rgba(255,255,255,.14)"; c.lineWidth = choix === "mousse" ? 2.5 : 1;
+    c.beginPath(); c.arc(135, 140, 76, 0, Math.PI * 2); c.fill(); c.stroke(); lueur(false); c.restore();
+    c.save(); c.translate(dx("tete"), 0); lueur(choix === "grille");
+    c.strokeStyle = choix === "grille" ? COUL.jaune : "#c7c7cc"; c.lineWidth = 2;
+    c.beginPath(); c.arc(135, 140, 88, 0, Math.PI * 2); c.stroke();
+    c.strokeStyle = choix === "grille" ? "rgba(255,214,10,.55)" : "rgba(229,229,234,.4)"; c.lineWidth = 1;
+    for (let k = 0; k < 120; k++) { const an = k / 120 * Math.PI * 2; c.beginPath(); c.moveTo(135 + 80 * Math.cos(an), 140 + 80 * Math.sin(an)); c.lineTo(135 + 88 * Math.cos(an + 0.05), 140 + 88 * Math.sin(an + 0.05)); c.stroke(); }
+    lueur(false); c.restore();
+
+    // 6. Capsule
+    c.save(); c.translate(dx("capsule"), 0);
+    const dm = a * dep * 0.6;                          // déplacement de la membrane (local)
+    if (tech === "dyn") {
+      lueur(choix === "aimant");
+      c.fillStyle = choix === "aimant" ? "#b8b8bd" : "#8e8e93"; c.fillRect(126, 104, 54, 14); c.fillRect(126, 162, 54, 14); c.fillRect(170, 104, 10, 72);
+      c.fillStyle = COUL.rose; c.fillRect(148, 120, 22, 40); c.fillStyle = "#aeaeb2"; c.fillRect(130, 128, 18, 24);
+      lueur(false);
+      O.ecrire(c, "N", 159, 144, { s: 10, c: "#fff", a: "center" });
+      // lignes de champ dans l'entrefer
+      c.strokeStyle = "rgba(255,214,10,.35)"; c.lineWidth = 0.8;
+      [121, 125, 155, 159].forEach(y => { c.beginPath(); c.moveTo(126, y); c.lineTo(148, y); c.stroke(); });
+      lueur(choix === "bobine");
+      c.fillStyle = COUL.cuivre; O.rect(c, 122 + dm, 119, 14, 8, 2); c.fill(); O.rect(c, 122 + dm, 153, 14, 8, 2); c.fill();
+      lueur(false);
+      c.strokeStyle = COUL.jaune; c.lineWidth = 1.5; c.beginPath(); c.moveTo(111 + dm, 123); c.lineTo(122 + dm, 123); c.moveTo(111 + dm, 157); c.lineTo(122 + dm, 157); c.stroke();
+      lueur(choix === "membrane");
+      c.strokeStyle = COUL.jaune; c.lineWidth = choix === "membrane" ? 4 : 3;
+      c.beginPath(); c.moveTo(112, 100); c.quadraticCurveTo(98 + 2 * dm, 140, 112, 180); c.stroke();
+      lueur(false);
+    } else {
+      c.strokeStyle = "#8e8e93"; c.lineWidth = 2; O.rect(c, 104, 98, 30, 84, 4); c.stroke();
+      lueur(choix === "contre");
+      c.fillStyle = choix === "contre" ? "#d1d1d6" : "#aeaeb2";
+      for (let y = 102; y < 178; y += 10) c.fillRect(117, y, 9, 7);
+      lueur(false);
+      lueur(choix === "membrane");
+      c.strokeStyle = COUL.jaune; c.lineWidth = choix === "membrane" ? 3.4 : 2.4;
+      c.beginPath(); c.moveTo(110, 102); c.quadraticCurveTo(110 + 2 * dm, 140, 110, 178); c.stroke();
+      lueur(false);
+      // charges : + sur la membrane, − sur la contre-électrode
+      O.ecrire(c, "+", 106 + dm, 132, { s: 9, c: COUL.orange, a: "center" }); O.ecrire(c, "+", 106 + dm, 152, { s: 9, c: COUL.orange, a: "center" });
+      O.ecrire(c, "−", 130, 132, { s: 9, c: COUL.ciel, a: "center" }); O.ecrire(c, "−", 130, 152, { s: 9, c: COUL.ciel, a: "center" });
+    }
+    c.restore();
+
+    // 7. XLR
+    c.save(); c.translate(dx("xlr"), 0); lueur(choix === "xlr");
+    c.fillStyle = "#3a3d44"; O.rect(c, 598, 114, 40, 52, 4); c.fill(); c.strokeStyle = choix === "xlr" ? COUL.jaune : "#c7c7cc"; c.lineWidth = 1.5; c.stroke();
+    lueur(false);
+    [[126, "2", COUL.rose], [140, "1", "#8e8e93"], [154, "3", COUL.ciel]].forEach(b => { c.strokeStyle = b[2]; c.lineWidth = 3; c.beginPath(); c.moveTo(638, b[0]); c.lineTo(654, b[0]); c.stroke(); O.ecrire(c, b[1], 626, b[0] + 4, { s: 9, c: "#8e8e93", a: "center" }); });
+    c.restore();
+    c.restore();
+
+    // Étiquettes (repère du canvas)
+    const etiq = (txt, xl, yl, g) => { const x = OX + (xl + (g ? DX[g] * ecl : 0)) * K, y = OY + yl * K; O.ecrire(c, txt, x, y, { s: 12, c: COUL.doux, a: "center" }); };
+    etiq("grille", 135, 22, "tete"); etiq("membrane", 104, 200, "capsule"); etiq(tech === "dyn" ? "bobine + aimant" : "condensateur", 150, 76, "capsule");
+    etiq("suspension", 198, 204, "susp"); etiq(tech === "dyn" ? "transformateur" : "électronique", 357, 182, "corps"); etiq("XLR", 618, 186, "xlr");
+    O.ecrire(c, "son →", 18, 168 * K, { s: 13, c: COUL.orange });
+
+    // 8. Oscillogrammes : pression sur la membrane, tension aux broches 2-3
+    histP.push(pm); histU.push(Math.cos(2 * Math.PI * F_VIS * (t - 0.9) - 2 * Math.PI * (-XM / LAMBDA)));
+    if (histP.length > 260) { histP.shift(); histU.shift(); }
+    const trace = (h, x0, titre, val, coul) => {
+      const y0 = 340, w = 430, hh = 128;
+      c.fillStyle = COUL.panneau; O.rect(c, x0, y0, w, hh + 40, 12); c.fill();
+      O.ecrire(c, titre, x0 + 14, y0 + 22, { s: 13 });
+      O.ecrire(c, val, x0 + w - 14, y0 + 22, { s: 13, c: coul, a: "right", m: true });
+      c.strokeStyle = COUL.grille; c.beginPath(); c.moveTo(x0 + 10, y0 + 40 + hh / 2); c.lineTo(x0 + w - 10, y0 + 40 + hh / 2); c.stroke();
+      c.strokeStyle = coul; c.lineWidth = 2; c.beginPath();
+      h.forEach((v, i) => { const x = x0 + 10 + i / 260 * (w - 20), y = y0 + 40 + hh / 2 - v * (hh / 2 - 8); i ? c.lineTo(x, y) : c.moveTo(x, y); });
+      c.stroke();
+    };
+    trace(histP, 30, "Pression sur la membrane", O.pascals(p) + " (" + L + " dB SPL)", COUL.orange);
+    trace(histU, 540, "Tension entre les broches 2 et 3", O.volts(U), COUL.rose);
+    O.ecrire(c, "→", 500, 430, { s: 26, c: COUL.doux, a: "center" });
+  }
+
+  // Animation : temps, vue éclatée progressive, visite guidée
+  const boucle = O.boucle(cv, dt => {
+    t += dt;
+    ecl += (eclVise - ecl) * Math.min(1, dt * 5);
+    if (visite) {
+      tVisite += dt;
+      if (tVisite > 3.2) { tVisite = 0; const e = ETAPES[tech], i = e.indexOf(choix); choix = e[(i + 1) % e.length]; }
+    }
+    dessiner();
+  });
+  O.boutonPause("m2a-pause", boucle, dessiner);
+
+  Application.segment("#m2a-tech", [["dyn", "Dynamique"], ["stat", "Statique"]], "dyn", v => {
+    tech = v;
+    if (["bobine", "aimant", "transfo"].includes(choix) && v === "stat") choix = { bobine: "contre", aimant: "contre", transfo: "elec" }[choix];
+    if (["contre", "elec", "commut"].includes(choix) && v === "dyn") choix = { contre: "bobine", elec: "transfo", commut: "corps" }[choix];
+    dessiner();
+  });
+  curN.addEventListener("input", dessiner);
+  btE.addEventListener("click", () => {
+    eclVise = eclVise ? 0 : 1; btE.textContent = eclVise ? "Vue assemblée" : "Vue éclatée";
+    if (!boucle.actif()) { ecl = eclVise; dessiner(); }
+  });
+  btV.addEventListener("click", () => {
+    visite = !visite; tVisite = 0; btV.textContent = visite ? "⏸ Arrêter la visite" : "▶ Visite guidée";
+    if (visite) { choix = "onde"; if (!boucle.actif()) { boucle.pause(false); O.el("m2a-pause").textContent = "⏸ Pause"; } }
+    dessiner();
+  });
+  O.situations("m2a-situ", s => { visite = false; btV.textContent = "▶ Visite guidée"; choix = ETAPES[tech][+s]; dessiner(); });
+  cv.addEventListener("click", e => {
+    const pt = O.clic(cv, e), z = trouver(pt[0], pt[1]);
+    if (z) { visite = false; btV.textContent = "▶ Visite guidée"; choix = z; dessiner(); }
+  });
+  dessiner();
+});
+
+/* --- Labo 2b : du chanteur au haut-parleur ----------------------------------
+   Valeurs efficaces calculées à chaque étape :
+     p = MICRO.pa(L)                       pression au micro
+     Umic = S × p                          S = 2 mV/Pa (dynamique) ou 20 mV/Pa (statique)
+     Upré = Umic × 10^(G/20)               écrêtage à +24 dBu (12,3 V)
+     Ucons = Upré × 10^(F/20)              écrêtage à +24 dBu
+     Uampli = Ucons × 20 (26 dB)           écrêtage à 28,3 V (100 W sur 8 Ω)
+     P = U² / 8 ; I = U / 8
+     L(1 m) = 90 + 10 log P ; L(d) = L(1 m) − 20 log d (champ libre) */
+labo(2, function () {
+  const cv = O.el("m2b-cv"), c = cv.getContext("2d");
+  const curN = O.el("m2b-niv"), curG = O.el("m2b-gain"), curF = O.el("m2b-fader"), curD = O.el("m2b-dist");
+  const CLIP = MICRO.voltsDbu(24), UMAX = Math.sqrt(100 * 8), F_VIS = 0.7;
+  let micro = "stat", t = 0;
+
+  function calcul() {
+    const L = +curN.value, G = +curG.value, F = +curF.value, d = O.valLog(+curD.value, 1, 30), S = micro === "dyn" ? 2 : 20;
+    const p = MICRO.pa(L), Umic = S * p / 1000;
+    const Upre0 = Umic * Math.pow(10, G / 20), Upre = Math.min(Upre0, CLIP);
+    const Ucons0 = Upre * Math.pow(10, F / 20), Ucons = Math.min(Ucons0, CLIP);
+    const Uamp0 = Ucons * 20, Uamp = Math.min(Uamp0, UMAX);
+    const P = Uamp * Uamp / 8, I = Uamp / 8, L1 = 90 + 10 * Math.log10(P), Ld = L1 - 20 * Math.log10(d);
+    return { L, G, F, d, S, p, Umic, Upre, Ucons, Uamp, P, I, L1, Ld, clipPre: Upre0 > CLIP, clipCons: Ucons0 > CLIP, clipAmp: Uamp0 > UMAX };
+  }
+
+  // Forme du signal : sinusoïde, ou sinusoïde écrêtée (sommets plats) si un étage
+  // en amont a saturé. A = crête relative à la pleine échelle de l'oscillogramme.
+  const forme = (ph, A, sature) => A * (sature ? Math.max(-1, Math.min(1, 1.6 * Math.sin(ph))) : Math.sin(ph));
+
+  // o : { A, sature, seuil (lignes d'écrêtage à ±1), ret (retard), sous }
+  function scope(x0, y0, w, h, titre, val, coul, o) {
+    c.fillStyle = COUL.panneau; O.rect(c, x0, y0, w, h, 10); c.fill();
+    O.ecrire(c, titre, x0 + w / 2, y0 + 18, { s: 11.5, a: "center" });
+    const ym = y0 + 30 + (h - 70) / 2, hh = (h - 70) / 2 - 6;
+    c.strokeStyle = COUL.grille; c.lineWidth = 1; c.beginPath(); c.moveTo(x0 + 8, ym); c.lineTo(x0 + w - 8, ym); c.stroke();
+    if (o.seuil) { c.strokeStyle = "rgba(255,69,58,.6)"; c.setLineDash([4, 3]); [ym - hh, ym + hh].forEach(y => { c.beginPath(); c.moveTo(x0 + 8, y); c.lineTo(x0 + w - 8, y); c.stroke(); }); c.setLineDash([]); }
+    c.strokeStyle = coul; c.lineWidth = 2; c.beginPath();
+    for (let i = 0; i <= 80; i++) {
+      const x = x0 + 8 + i / 80 * (w - 16), ph = 2 * Math.PI * (F_VIS * (t - o.ret) + i / 80 * 1.6);
+      const y = ym - forme(ph, Math.max(0.02, Math.min(1, o.A)), o.sature) * hh; i ? c.lineTo(x, y) : c.moveTo(x, y);
+    }
+    c.stroke();
+    O.ecrire(c, val, x0 + w / 2, y0 + h - 22, { s: 12, c: coul, a: "center", m: true });
+    if (o.sous) O.ecrire(c, o.sous, x0 + w / 2, y0 + h - 7, { s: 10.5, c: o.sature ? COUL.rouge : COUL.doux, a: "center", g: false });
+  }
+
+  function boite(x, y, w, h, titre, coul, alerte) {
+    c.fillStyle = "#1c1e23"; O.rect(c, x, y, w, h, 10); c.fill();
+    c.strokeStyle = alerte ? COUL.rouge : coul; c.lineWidth = alerte ? 3 : 2; c.stroke();
+    O.ecrire(c, titre, x + w / 2, y + 18, { s: 11.5, a: "center" });
+  }
+
+  function dessiner() {
+    const r = calcul(), ph = 2 * Math.PI * F_VIS * t;
+    Application.afficher("#m2b-nivo", r.L + " dB SPL");
+    Application.afficher("#m2b-gaino", "+" + r.G + " dB");
+    Application.afficher("#m2b-fadero", O.signe(r.F, 0) + " dB");
+    Application.afficher("#m2b-disto", O.metres(r.d));
+    Application.afficher("#m2b-umic", O.volts(r.Umic));
+    Application.afficher("#m2b-upre", O.signe(MICRO.dbu(r.Upre), 1) + " dBu");
+    Application.afficher("#m2b-php", O.nb(r.P, r.P < 1 ? 3 : 1) + " W");
+    Application.afficher("#m2b-laud", O.nb(r.Ld, 1) + " dB SPL");
+    O.html("m2b-calc",
+      '<div><span class="c">p = 2·10⁻⁵ × 10^(' + r.L + "/20) = </span>" + O.pascals(r.p) + "</div>" +
+      '<div><span class="c">Umic = ' + r.S + " mV/Pa × " + O.nb(r.p, 4) + " Pa = </span>" + O.volts(r.Umic) + "</div>" +
+      '<div><span class="c">Upré = Umic × 10^(' + r.G + "/20) = </span>" + O.volts(r.Upre) + (r.clipPre ? " <b>(écrêté)</b>" : "") + "</div>" +
+      '<div><span class="c">Ucons = Upré × 10^(' + O.signe(r.F, 0) + "/20) = </span>" + O.volts(r.Ucons) + (r.clipCons ? " <b>(écrêté)</b>" : "") + "</div>" +
+      '<div><span class="c">Uampli = Ucons × 20 = </span>' + O.volts(r.Uamp) + (r.clipAmp ? " <b>(écrêté)</b>" : "") + "</div>" +
+      '<div><span class="c">P = U² / 8 = </span>' + O.nb(r.P, r.P < 1 ? 3 : 1) + ' W <span class="c">; I = U / 8 = </span>' + O.nb(r.I, 2) + " A</div>" +
+      '<div><span class="c">L(1 m) = 90 + 10 log P = </span>' + O.nb(r.L1, 1) + " dB SPL</div>" +
+      '<div><span class="c">L(' + O.metres(r.d) + ") = L(1 m) − 20 log d = </span><b>" + O.nb(r.Ld, 1) + " dB SPL</b></div>");
+
+    let cl = "note ok", txt;
+    if (r.clipPre) { cl = "note bad"; txt = "<b>Le préampli sature.</b> Sa sortie voudrait dépasser +24 dBu : les crêtes sont coupées, le son est distordu. Baissez le gain (ou activez l’atténuateur du micro)."; }
+    else if (r.clipCons) { cl = "note bad"; txt = "<b>La console sature.</b> Le fader pousse le signal au-delà de +24 dBu : baissez le fader."; }
+    else if (r.clipAmp) { cl = "note bad"; txt = "<b>L’ampli est à bout de puissance</b> (100 W) : il écrête. Un signal écrêté envoie des aigus parasites et peut détruire le haut-parleur. Baissez le fader."; }
+    else if (MICRO.dbu(r.Upre) < -20) { cl = "note warn"; txt = "<b>Le préampli ne monte pas assez le signal</b> (" + O.signe(MICRO.dbu(r.Upre), 1) + " dBu, loin du niveau ligne +4 dBu). Il faudra trop pousser la suite : le bruit augmente. Montez le gain."; }
+    else txt = "<b>Chaîne bien réglée.</b> Le micro donne " + O.volts(r.Umic) + ", le préampli remonte au niveau ligne (" + O.volts(r.Upre) + "), l’ampli fournit " + O.nb(r.P, 1) + " W au haut-parleur, qui redonne " + O.nb(r.Ld, 0) + " dB SPL à " + O.metres(r.d) + "." + (r.Ld > 100 ? " Au-delà de 100 dB SPL, la durée d’écoute sans danger devient courte." : "");
+    O.note("m2b-msg", cl, txt);
+
+    O.fond(c);
+    // --- rangée du haut : les appareils ---
+    const yA = 70, hA = 110;
+    // chanteur
+    c.fillStyle = "#3a3d44"; c.beginPath(); c.arc(56, 118, 26, 0, Math.PI * 2); c.fill(); c.fillRect(34, 144, 44, 60);
+    c.fillStyle = COUL.rose; c.beginPath(); c.ellipse(80, 124, 3, 3 + 3 * Math.abs(Math.sin(ph)), 0, 0, Math.PI * 2); c.fill();
+    O.ecrire(c, "Chanteur", 56, 222, { s: 12, c: COUL.doux, a: "center" });
+    // ondes vers le micro
+    for (let k = 0; k < 3; k++) { const x = 88 + ((t * 40 + k * 16) % 48); c.strokeStyle = "rgba(255,159,10," + (1 - (x - 88) / 48).toFixed(2) + ")"; c.lineWidth = 2; c.beginPath(); c.arc(x - 10, 124, 14, -0.7, 0.7); c.stroke(); }
+    // micro
+    c.save(); c.translate(150, 124); c.rotate(Math.PI / 2);
+    c.fillStyle = "#c7c7cc"; c.beginPath(); c.arc(0, -14, 11, 0, Math.PI * 2); c.fill(); c.fillStyle = "#3a3d44"; c.beginPath(); c.moveTo(-8, -6); c.lineTo(8, -6); c.lineTo(5, 30); c.lineTo(-5, 30); c.closePath(); c.fill();
+    c.restore();
+    O.ecrire(c, micro === "dyn" ? "Micro dynamique" : "Micro statique", 160, 222, { s: 12, c: COUL.doux, a: "center" });
+    // câbles animés
+    const cable = (x1, x2, y, coul, ret) => {
+      c.strokeStyle = "rgba(255,255,255,.18)"; c.lineWidth = 3; c.beginPath(); c.moveTo(x1, y); c.lineTo(x2, y); c.stroke();
+      for (let s = (t * 70) % 16; s < x2 - x1; s += 16) { const v = Math.sin(2 * Math.PI * F_VIS * (t - ret - s / 70)); c.fillStyle = coul; c.globalAlpha = 0.3 + 0.7 * Math.abs(v); c.beginPath(); c.arc(x1 + s, y, 1.2 + 2 * Math.abs(v), 0, Math.PI * 2); c.fill(); }
+      c.globalAlpha = 1;
+    };
+    cable(184, 236, 124, COUL.jaune, 0.1); cable(346, 372, 124, COUL.ciel, 0.3); cable(482, 508, 124, COUL.ciel, 0.4); cable(618, 650, 124, COUL.violet, 0.5);
+    // préampli (bouton de gain)
+    boite(236, yA, 110, hA, "Préampli", COUL.ciel, r.clipPre);
+    const ang = -2.4 + r.G / 70 * 4.8;
+    c.fillStyle = "#3a3d44"; c.beginPath(); c.arc(291, 130, 22, 0, Math.PI * 2); c.fill(); c.strokeStyle = COUL.ciel; c.lineWidth = 3; c.beginPath(); c.moveTo(291, 130); c.lineTo(291 + 18 * Math.sin(ang), 130 - 18 * Math.cos(ang)); c.stroke();
+    O.ecrire(c, "+" + r.G + " dB", 291, 172, { s: 11, c: COUL.doux, a: "center", m: true });
+    // console (fader)
+    boite(372, yA, 110, hA, "Console", COUL.ciel, r.clipCons);
+    const yF = 168 - (r.F + 40) / 50 * 66;
+    c.fillStyle = "#111"; c.fillRect(424, 100, 6, 70); c.fillStyle = "#e5e5ea"; O.rect(c, 414, yF - 6, 26, 12, 3); c.fill();
+    O.ecrire(c, O.signe(r.F, 0) + " dB", 460, 176, { s: 11, c: COUL.doux, a: "center", m: true });
+    // ampli (barre de puissance)
+    boite(508, yA, 110, hA, "Ampli", COUL.violet, r.clipAmp);
+    const fP = Math.max(0, Math.min(1, (10 * Math.log10(Math.max(r.P, 1e-4)) + 20) / 40));
+    for (let k = 0; k < 10; k++) { c.fillStyle = k / 10 < fP ? (k >= 8 ? COUL.rouge : k >= 6 ? COUL.orange : COUL.vert) : "#2a2d33"; c.fillRect(526 + k * 7.5, 120, 5.5, 22); }
+    O.ecrire(c, O.nb(r.P, r.P < 1 ? 2 : 0) + " W", 563, 168, { s: 11, c: COUL.doux, a: "center", m: true });
+    // haut-parleur en coupe (moteur à gauche, cône vers la droite)
+    const amp = r.Uamp / UMAX, dc = 6 * amp * Math.sin(2 * Math.PI * F_VIS * (t - 0.55)) * (r.clipAmp ? 1 : 1);
+    c.fillStyle = "#8e8e93"; c.fillRect(650, 100, 8, 48); c.fillStyle = COUL.rose; c.fillRect(658, 100, 14, 14); c.fillRect(658, 134, 14, 14); c.fillStyle = "#aeaeb2"; c.fillRect(658, 118, 22, 12);
+    c.fillStyle = COUL.cuivre; c.fillRect(674 + dc, 114, 8, 3); c.fillRect(674 + dc, 131, 8, 3);
+    c.strokeStyle = COUL.jaune; c.lineWidth = 3; c.beginPath(); c.moveTo(682 + dc, 116); c.lineTo(736 + dc, 76); c.moveTo(682 + dc, 132); c.lineTo(736 + dc, 172); c.stroke();
+    c.strokeStyle = "#8e8e93"; c.lineWidth = 2; c.beginPath(); c.moveTo(672, 100); c.lineTo(742, 70); c.moveTo(672, 148); c.lineTo(742, 178); c.stroke();
+    O.ecrire(c, "Haut-parleur", 696, 222, { s: 12, c: COUL.doux, a: "center" });
+    // ondes vers l'auditeur
+    for (let k = 0; k < 4; k++) { const x = 750 + ((t * 60 + k * 30) % 120); c.strokeStyle = "rgba(255,159,10," + (Math.min(1, amp * 2 + 0.15) * (1 - (x - 750) / 120)).toFixed(2) + ")"; c.lineWidth = 2; c.beginPath(); c.arc(x - 20, 124, 40, -0.6, 0.6); c.stroke(); }
+    // auditeur
+    c.fillStyle = "#3a3d44"; c.beginPath(); c.arc(924, 118, 26, 0, Math.PI * 2); c.fill(); c.fillRect(902, 144, 44, 60);
+    c.fillStyle = "#5a5d64"; c.beginPath(); c.ellipse(900, 120, 5, 9, 0, 0, Math.PI * 2); c.fill();
+    O.ecrire(c, "Auditeur à " + O.metres(r.d), 924, 222, { s: 12, c: COUL.doux, a: "center" });
+    O.ecrire(c, "(pas à l’échelle)", 924, 238, { s: 10, c: COUL.doux, a: "center", g: false });
+    // légende des deux mondes
+    O.ecrire(c, "acoustique", 56, 36, { s: 12, c: COUL.orange, a: "center" });
+    O.ecrire(c, "électrique : tension et courant", 445, 36, { s: 12, c: COUL.ciel, a: "center" });
+    O.ecrire(c, "acoustique", 860, 36, { s: 12, c: COUL.orange, a: "center" });
+    c.strokeStyle = "rgba(255,255,255,.12)"; c.setLineDash([3, 4]); [120, 760].forEach(x => { c.beginPath(); c.moveTo(x, 26); c.lineTo(x, 240); c.stroke(); }); c.setLineDash([]);
+
+    // --- rangée du bas : six oscillogrammes ---
+    const w = 152, gap = 8, y0 = 262, h = 262;
+    const sc = (i, titre, val, coul, o) => scope(14 + i * (w + gap), y0, w, h, titre, val, coul, o);
+    const sat1 = r.clipPre, sat2 = sat1 || r.clipCons, sat3 = sat2 || r.clipAmp;
+    sc(0, "Air au micro", O.pascals(r.p), COUL.orange, { A: 0.8, ret: 0, sous: r.L + " dB SPL" });
+    sc(1, "Sortie du micro", O.volts(r.Umic), COUL.jaune, { A: 0.8, ret: 0.1, sous: O.signe(MICRO.dbu(r.Umic), 1) + " dBu" });
+    sc(2, "Sortie du préampli", O.volts(r.Upre), COUL.ciel, { A: r.Upre / CLIP, sature: sat1, seuil: true, ret: 0.3, sous: O.signe(MICRO.dbu(r.Upre), 1) + " dBu" + (sat1 ? " · écrêté" : "") });
+    sc(3, "Sortie de la console", O.volts(r.Ucons), COUL.ciel, { A: r.Ucons / CLIP, sature: sat2, seuil: true, ret: 0.4, sous: O.signe(MICRO.dbu(r.Ucons), 1) + " dBu" + (sat2 ? " · écrêté" : "") });
+    sc(4, "Sortie de l’ampli", O.volts(r.Uamp) + " · " + O.nb(r.I, 2) + " A", COUL.violet, { A: r.Uamp / UMAX, sature: sat3, seuil: true, ret: 0.5, sous: O.nb(r.P, r.P < 1 ? 3 : 1) + " W sur 8 Ω" + (sat3 ? " · écrêté" : "") });
+    sc(5, "Air chez l’auditeur", O.pascals(MICRO.pa(r.Ld)), COUL.orange, { A: 0.8, sature: sat3, ret: 0.7, sous: O.nb(r.Ld, 1) + " dB SPL" });
+    O.ecrire(c, "Échelles : air et micro automatiques ; préampli et console jusqu’à +24 dBu, ampli jusqu’à 100 W (pointillés rouges : écrêtage).", 500, 536, { s: 10.5, c: COUL.doux, a: "center", g: false });
+  }
+
+  const boucle = O.boucle(cv, dt => { t += dt; dessiner(); });
+  O.boutonPause("m2b-pause", boucle, dessiner);
+  Application.segment("#m2b-micro", [["dyn", "Dynamique (2 mV/Pa)"], ["stat", "Statique (20 mV/Pa)"]], "stat", v => { micro = v; dessiner(); });
+  const segMicro = O.el("m2b-micro");
+  [curN, curG, curF, curD].forEach(el => el.addEventListener("input", dessiner));
+  O.el("m2b-auto").addEventListener("click", () => {
+    const r = calcul(); O.curseur(curG, Math.max(0, Math.min(70, Math.round(4 - MICRO.dbu(r.Umic)))));
+  });
+  O.situations("m2b-situ", s => {
+    const regle = (L, m, G, F, d) => { if (m !== micro) segMicro._choisir(m); O.curseur(curN, L); O.curseur(curG, G); O.curseur(curF, F); O.curseur(curD, O.posLog(d, 1, 30)); };
+    if (s === "voix") regle(74, "stat", 56, -9, 4);
+    else if (s === "chant") regle(100, "dyn", 50, -6, 6);
+    else if (s === "trop") regle(100, "stat", 60, 0, 4);
+    else if (s === "fort") regle(94, "stat", 36, 6, 10);
+  });
+  dessiner();
+});
+
+/* ==========================================================================
+   MODULE 3 — TECHNOLOGIES DE MICRO
    ========================================================================== */
 
 /* --- Labo 2a : quatre capsules ouvertes ------------------------------------
@@ -449,9 +878,9 @@ labo(1, function () {
      et d'autant plus petit que f est haute) ; tension e = B·l·v ∝ p.
    Toutes donnent une tension proportionnelle à p : seule la SENSIBILITÉ
    (mV/Pa) change. L'oscillogramme et les barres gardent une échelle commune. */
-labo(2, function () {
-  const cv = O.el("m2a-cv"), c = cv.getContext("2d");
-  const curF = O.el("m2a-f"), curL = O.el("m2a-niv");
+labo(3, function () {
+  const cv = O.el("m3a-cv"), c = cv.getContext("2d");
+  const curF = O.el("m3a-f"), curL = O.el("m3a-niv");
   const F_VIS = 0.55;
   const TECH = {
     dyn: { nom: "Dynamique", S: 2, princ: "Induction (e = B·l·v)", gr: "Vitesse de la membrane", alim: "Aucune", sens: "≈ 1,5 à 3 mV/Pa", z: "≈ 150 à 600 Ω", vitesse: true, couleur: COUL.orange },
@@ -607,13 +1036,13 @@ labo(2, function () {
     });
 
     // --- valeurs et explication
-    Application.afficher("#m2a-fo", O.hz(f));
-    Application.afficher("#m2a-nivo", L + " dB SPL");
-    Application.afficher("#m2a-gr", T.vitesse ? "Vitesse" : "Déplacement");
-    Application.afficher("#m2a-sex", O.nb(T.S, 1) + " mV/Pa");
-    Application.afficher("#m2a-p", O.pascals(p));
-    Application.afficher("#m2a-u", O.volts(T.S / 1000 * p));
-    O.html("m2a-fiche",
+    Application.afficher("#m3a-fo", O.hz(f));
+    Application.afficher("#m3a-nivo", L + " dB SPL");
+    Application.afficher("#m3a-gr", T.vitesse ? "Vitesse" : "Déplacement");
+    Application.afficher("#m3a-sex", O.nb(T.S, 1) + " mV/Pa");
+    Application.afficher("#m3a-p", O.pascals(p));
+    Application.afficher("#m3a-u", O.volts(T.S / 1000 * p));
+    O.html("m3a-fiche",
       '<div><span class="c">Principe</span> ' + T.princ + "</div>" +
       '<div><span class="c">Grandeur captée</span> ' + T.gr.toLowerCase() + "</div>" +
       '<div><span class="c">Alimentation</span> ' + T.alim + "</div>" +
@@ -626,26 +1055,26 @@ labo(2, function () {
     txt += " Au même niveau, ce " + T.nom.toLowerCase() + " délivre " + O.volts(T.S / 1000 * p) + ", soit " + (T.S >= 8 ? "≈ " + O.nb(T.S / 2, 0) + " fois plus qu’un dynamique." : "≈ " + O.nb(20 / T.S, 0) + " fois moins qu’un statique : le préampli devra apporter davantage de gain.");
     if (L >= 120 && !T.vitesse) { cls = "note warn"; txt += " À ce niveau, vérifiez le niveau maximal admissible du micro (et son atténuateur)."; }
     if (L >= 120 && tech === "ruban") { cls = "note warn"; txt += " Un ruban est fragile : gare aux souffles et aux pressions très fortes de près."; }
-    O.note("m2a-msg", cls, txt);
+    O.note("m3a-msg", cls, txt);
   }
 
   const boucle = O.boucle(cv, dt => { tAnim += dt; dessiner(); });
-  O.boutonPause("m2a-pause", boucle);
+  O.boutonPause("m3a-pause", boucle);
   curF.addEventListener("input", dessiner);
   curL.addEventListener("input", dessiner);
-  Application.segment("#m2a-tech", [["dyn", "Dynamique"], ["ruban", "Ruban"], ["stat", "Statique"], ["electret", "Électret"]], "dyn", v => { tech = v; dessiner(); });
+  Application.segment("#m3a-tech", [["dyn", "Dynamique"], ["ruban", "Ruban"], ["stat", "Statique"], ["electret", "Électret"]], "dyn", v => { tech = v; dessiner(); });
   const SITU = { voix: [1000, 74], pa: [1000, 94], grave: [100, 94], caisse: [1000, 125] };
-  O.situations("m2a-situ", s => { curF.value = O.posLog(SITU[s][0], 50, 10000); O.curseur(curL, SITU[s][1]); });
+  O.situations("m3a-situ", s => { curF.value = O.posLog(SITU[s][0], 50, 10000); O.curseur(curL, SITU[s][1]); });
   dessiner();
 });
 
 /* --- Labo 2b : le condensateur à charge constante --------------------------
    C0 = ε0·S/d0 ; Q = C0·U0 (fixée) ; U(d) = Q·d/(ε0·S) = U0·d/d0 ;
    ΔU = U0·Δd/d0 (ne dépend pas de la surface, à déplacement égal). */
-labo(2, function () {
-  const cv = O.el("m2b-cv"), c = cv.getContext("2d");
+labo(3, function () {
+  const cv = O.el("m3b-cv"), c = cv.getContext("2d");
   const E0 = 8.85e-12;
-  const cur = { dia: O.el("m2b-dia"), d0: O.el("m2b-d0"), u0: O.el("m2b-u0"), dd: O.el("m2b-dd") };
+  const cur = { dia: O.el("m3b-dia"), d0: O.el("m3b-d0"), u0: O.el("m3b-u0"), dd: O.el("m3b-dd") };
   let tAnim = 0;
 
   function dessiner() {
@@ -705,15 +1134,15 @@ labo(2, function () {
     O.ecrire(c, "repos (d₀ ; U₀) — balayage exagéré", X(d0) + 10, Y(U0) + 20, { s: 11, g: false, c: COUL.doux });
 
     // --- valeurs, calcul, explication
-    Application.afficher("#m2b-diao", D + " mm");
-    Application.afficher("#m2b-d0o", d0 + " µm");
-    Application.afficher("#m2b-u0o", U0 + " V");
-    Application.afficher("#m2b-ddo", dd + " nm");
-    Application.afficher("#m2b-s", O.nb(S * 1e4, 2) + " cm²");
-    Application.afficher("#m2b-c", O.nb(C0 * 1e12, 0) + " pF");
-    Application.afficher("#m2b-q", O.nb(Q * 1e9, 2) + " nC");
-    Application.afficher("#m2b-du", O.nb(dU * 1000, 1) + " mV");
-    O.html("m2b-calc",
+    Application.afficher("#m3b-diao", D + " mm");
+    Application.afficher("#m3b-d0o", d0 + " µm");
+    Application.afficher("#m3b-u0o", U0 + " V");
+    Application.afficher("#m3b-ddo", dd + " nm");
+    Application.afficher("#m3b-s", O.nb(S * 1e4, 2) + " cm²");
+    Application.afficher("#m3b-c", O.nb(C0 * 1e12, 0) + " pF");
+    Application.afficher("#m3b-q", O.nb(Q * 1e9, 2) + " nC");
+    Application.afficher("#m3b-du", O.nb(dU * 1000, 1) + " mV");
+    O.html("m3b-calc",
       '<div><span class="c">S = π × (D/2)²</span> = ' + O.nb(S * 1e4, 2) + " cm²</div>" +
       '<div><span class="c">C₀ = ε₀·S / d₀</span> = 8,85·10⁻¹² × ' + O.nb(S * 1e4, 2) + "·10⁻⁴ / " + d0 + "·10⁻⁶ = <b>" + O.nb(C0 * 1e12, 0) + " pF</b></div>" +
       '<div><span class="c">Q = C₀·U₀</span> = ' + O.nb(C0 * 1e12, 0) + " pF × " + U0 + " V = <b>" + O.nb(Q * 1e9, 2) + " nC</b></div>" +
@@ -722,23 +1151,23 @@ labo(2, function () {
     if (dd === 0) { cls = "note warn"; txt = "<b>Membrane immobile : aucune tension de signal.</b> La polarisation seule ne produit qu’une tension continue U₀."; }
     else txt += " Remarquez que ΔU ne dépend <b>pas du diamètre</b> : à déplacement égal, seuls U₀ et d₀ comptent. Une membrane plus grande est plus sensible parce qu’elle se déplace davantage pour une même pression.";
     if (d0 <= 15) { cls = "note warn"; txt += " Un écart très faible augmente la sensibilité, mais la membrane risque de venir toucher la contre-électrode aux forts niveaux."; }
-    O.note("m2b-msg", cls, txt);
+    O.note("m3b-msg", cls, txt);
   }
 
   const boucle = O.boucle(cv, dt => { tAnim += dt; dessiner(); });
-  O.boutonPause("m2b-pause", boucle);
+  O.boutonPause("m3b-pause", boucle);
   Object.values(cur).forEach(el => el.addEventListener("input", dessiner));
   const SITU = { cours: [20, 25, 48, 10], petite: [12, 20, 48, 6], grande: [25, 30, 60, 14], serre: [20, 12, 48, 10] };
-  O.situations("m2b-situ", s => { const v = SITU[s]; cur.dia.value = v[0]; cur.d0.value = v[1]; cur.u0.value = v[2]; O.curseur(cur.dd, v[3]); });
+  O.situations("m3b-situ", s => { const v = SITU[s]; cur.dia.value = v[0]; cur.d0.value = v[1]; cur.u0.value = v[2]; O.curseur(cur.dd, v[3]); });
   dessiner();
 });
 
 /* --- Labo 2c : l'induction ---------------------------------------------------
    Fil perpendiculaire au plan, champ B horizontal (de N vers S), mouvement
    vertical sinusoïdal : y = ŷ·sin ωt, v = v̂·cos ωt, e = B·l·v. */
-labo(2, function () {
-  const cv = O.el("m2c-cv"), c = cv.getContext("2d");
-  const cB = O.el("m2c-b"), cL = O.el("m2c-l"), cV = O.el("m2c-vit");
+labo(3, function () {
+  const cv = O.el("m3c-cv"), c = cv.getContext("2d");
+  const cB = O.el("m3c-b"), cL = O.el("m3c-l"), cV = O.el("m3c-vit");
   const W_VIS = 2 * Math.PI * 0.45;
   let tAnim = 0;
 
@@ -781,24 +1210,24 @@ labo(2, function () {
     });
     O.ecrire(c, "e max = " + O.nb(eMax, 2) + " mV", gx + gw, 352, { s: 13, c: COUL.jaune, a: "right" });
 
-    Application.afficher("#m2c-bo", O.nb(B, 1) + " T");
-    Application.afficher("#m2c-lo", O.nb(l, 1) + " m");
-    Application.afficher("#m2c-vito", O.nb(v, 1) + " mm/s");
-    Application.afficher("#m2c-v", O.nb(v, 1) + " mm/s");
-    Application.afficher("#m2c-e", O.nb(eMax, 2) + " mV");
-    Application.afficher("#m2c-eff", O.nb(eMax / Math.SQRT2, 2) + " mV");
-    O.html("m2c-calc", '<div><span class="c">e = B · l · v</span></div><div>= ' + O.nb(B, 1) + " × " + O.nb(l, 1) + " × " + O.nb(v / 1000, 4) + " = <b>" + O.nb(eMax, 2) + " mV</b> (crête)</div>" + '<div><span class="c">efficace = crête / √2</span> = <b>' + O.nb(eMax / Math.SQRT2, 2) + " mV</b></div>");
-    O.note("m2c-msg", "note ok", "<b>La tension est maximale quand le fil passe au centre</b>, là où il va le plus vite, et nulle aux extrémités, quand il s’arrête pour repartir : e suit la vitesse, pas la position. Doublez B, l ou v : la tension double.");
+    Application.afficher("#m3c-bo", O.nb(B, 1) + " T");
+    Application.afficher("#m3c-lo", O.nb(l, 1) + " m");
+    Application.afficher("#m3c-vito", O.nb(v, 1) + " mm/s");
+    Application.afficher("#m3c-v", O.nb(v, 1) + " mm/s");
+    Application.afficher("#m3c-e", O.nb(eMax, 2) + " mV");
+    Application.afficher("#m3c-eff", O.nb(eMax / Math.SQRT2, 2) + " mV");
+    O.html("m3c-calc", '<div><span class="c">e = B · l · v</span></div><div>= ' + O.nb(B, 1) + " × " + O.nb(l, 1) + " × " + O.nb(v / 1000, 4) + " = <b>" + O.nb(eMax, 2) + " mV</b> (crête)</div>" + '<div><span class="c">efficace = crête / √2</span> = <b>' + O.nb(eMax / Math.SQRT2, 2) + " mV</b></div>");
+    O.note("m3c-msg", "note ok", "<b>La tension est maximale quand le fil passe au centre</b>, là où il va le plus vite, et nulle aux extrémités, quand il s’arrête pour repartir : e suit la vitesse, pas la position. Doublez B, l ou v : la tension double.");
   }
 
   const boucle = O.boucle(cv, dt => { tAnim += dt; dessiner(); });
-  O.boutonPause("m2c-pause", boucle);
+  O.boutonPause("m3c-pause", boucle);
   [cB, cL, cV].forEach(el => el.addEventListener("input", dessiner));
   dessiner();
 });
 
 /* ==========================================================================
-   MODULE 3 — LES CAPSULES
+   MODULE 4 — LES CAPSULES
    ========================================================================== */
 
 /* --- Labo 3a : ce que voit la membrane ------------------------------------
@@ -810,8 +1239,8 @@ labo(2, function () {
    Capsule à pression : signal = p_av (l'arrière est clos).
    Capsule à gradient : signal = p_av − p_ar, d'amplitude 2·sin((kΔ·cos θ + φ)/2).
    Avec φ = (A/B)·kΔ on retrouve r(θ) ≈ A + B·cos θ (cardio : φ = kΔ). */
-labo(3, function () {
-  const cv = O.el("m3a-cv"), c = cv.getContext("2d"), W = cv.width, Hc = cv.height;
+labo(4, function () {
+  const cv = O.el("m4a-cv"), c = cv.getContext("2d"), W = cv.width, Hc = cv.height;
   const cx = 270, cy = 262, RS = 205;           // capsule et cercle de la source
   const KD = 0.6;                               // kΔ (déphasage avant-arrière sur l'axe)
   const LV = 110, kv = 2 * Math.PI / LV;        // longueur d'onde à l'écran (px)
@@ -825,7 +1254,7 @@ labo(3, function () {
   };
   let type = "pression", ang = 40, t = 0, balayage = null;
   const mesures = new Map();                    // angle (pas de 5°) → amplitude signée
-  const curseur = O.el("m3a-ang");
+  const curseur = O.el("m4a-ang");
 
   const phi = () => type === "pression" ? 0 : TYPES[type].A / (1 - TYPES[type].A) * KD;
   function amplitude(deg) {
@@ -946,42 +1375,42 @@ labo(3, function () {
 
     // --- Valeurs et explication ---
     const a = amplitude(ang), L = 20 * Math.log10(Math.max(Math.abs(a), 1e-6));
-    Application.afficher("#m3a-th", ang + "°");
-    Application.afficher("#m3a-ango", ang + "°");
-    Application.afficher("#m3a-amp", Math.abs(a) < 0.01 ? "−∞ dB" : O.db(L));
-    Application.afficher("#m3a-pol", Math.abs(a) < 0.01 ? "—" : a > 0 ? "normale" : "inversée");
-    Application.afficher("#m3a-nom", TYPES[type].nom);
+    Application.afficher("#m4a-th", ang + "°");
+    Application.afficher("#m4a-ango", ang + "°");
+    Application.afficher("#m4a-amp", Math.abs(a) < 0.01 ? "−∞ dB" : O.db(L));
+    Application.afficher("#m4a-pol", Math.abs(a) < 0.01 ? "—" : a > 0 ? "normale" : "inversée");
+    Application.afficher("#m4a-nom", TYPES[type].nom);
     let cl = "note ok", m;
     if (type === "pression") m = "<b>La pression n’a pas de direction.</b> L’arrière est clos : seule la face avant reçoit le son, et elle reçoit la même pression quel que soit l’angle. Le diagramme est un cercle : capsule omnidirectionnelle.";
     else if (Math.abs(a) < 0.03) { cl = "note warn"; m = "<b>Annulation.</b> À " + ang + "°, les deux faces de la membrane reçoivent la même pression au même instant : la force est nulle, le micro n’entend rien."; }
     else if (a < 0) { cl = "note warn"; m = "<b>Polarité inversée.</b> Le son atteint d’abord la face arrière : la membrane part dans l’autre sens. Le niveau est " + O.db(L) + " par rapport à l’axe."; }
     else if (type === "gradient") m = "<b>Seule la différence compte.</b> Les deux faces reçoivent la même onde, décalée du petit trajet Δ·cos θ. Plus la source s’écarte de l’axe, plus ce décalage diminue : la réponse suit cos θ (en huit).";
     else m = "<b>Le labyrinthe retarde l’arrière.</b> Le son qui atteint la face arrière est retardé de " + (type === "cardio" ? "Δ/c : il annule exactement un son venant de 180°" : "Δ/(3c) : l’annulation tombe vers 109°") + ". Balayez les 360° pour voir la courbe apparaître.";
-    O.note("m3a-msg", cl, m);
+    O.note("m4a-msg", cl, m);
   }
 
   const boucle = O.boucle(cv, (dt, tt) => {
     t = tt;
     if (balayage !== null) {
       balayage += dt * 80; ang = Math.round(balayage) % 360; mesurer(); curseur.value = ang;
-      Application.afficher("#m3a-ango", ang + "°");
+      Application.afficher("#m4a-ango", ang + "°");
       if (balayage >= 360) { balayage = null; ang = 0; curseur.value = 0; }
     }
     dessiner();
   });
-  O.boutonPause("m3a-pause", boucle, dessiner);
+  O.boutonPause("m4a-pause", boucle, dessiner);
 
   function regler(deg) { ang = ((Math.round(deg) % 360) + 360) % 360; curseur.value = ang; curseur.dispatchEvent(new Event("input")); }
   curseur.addEventListener("input", () => { ang = +curseur.value; mesurer(); dessiner(); });
   O.glisser(cv, (x, y) => { if (x < 560) regler(Math.atan2(x - cx, -(y - cy)) * 180 / Math.PI); });
-  O.situations("m3a-situ", s => regler(+s));
-  O.el("m3a-eff").addEventListener("click", () => { mesures.clear(); balayage = null; dessiner(); });
-  O.el("m3a-balai").addEventListener("click", () => {
+  O.situations("m4a-situ", s => regler(+s));
+  O.el("m4a-eff").addEventListener("click", () => { mesures.clear(); balayage = null; dessiner(); });
+  O.el("m4a-balai").addEventListener("click", () => {
     mesures.clear();
     if (boucle.actif()) balayage = 0;
     else { for (let d = 0; d < 360; d += 5) mesures.set(d, amplitude(d)); dessiner(); }
   });
-  Application.segment("#m3a-type", [["pression", "Pression"], ["gradient", "Gradient"], ["cardio", "Cardio"], ["hyper", "Hyper"]], type, v => { type = v; mesures.clear(); mesurer(); dessiner(); });
+  Application.segment("#m4a-type", [["pression", "Pression"], ["gradient", "Gradient"], ["cardio", "Cardio"], ["hyper", "Hyper"]], type, v => { type = v; mesures.clear(); mesurer(); dessiner(); });
   mesurer();
   dessiner();
 });
@@ -990,9 +1419,9 @@ labo(3, function () {
    Réponse sur l'axe d'une capsule A + B·cos θ face à une source ponctuelle à la
    distance r : G = 10 log(1 + (B/kr)²) (MICRO.proximite). Coupe-bas : filtre
    passe-haut de Butterworth d'ordre 2 (12 dB/octave) : −10 log(1 + (fc/f)⁴). */
-labo(3, function () {
-  const cv = O.el("m3b-cv"), c = cv.getContext("2d"), W = cv.width;
-  const curseur = O.el("m3b-d");
+labo(4, function () {
+  const cv = O.el("m4b-cv"), c = cv.getContext("2d"), W = cv.width;
+  const curseur = O.el("m4b-d");
   const x0 = 70, x1 = 970, y0 = 132, y1 = 430, DBM = 30;
   const X = f => O.log(f, 20, 20000, x0, x1), Y = v => y0 + (DBM - O.borne(v, -DBM, DBM)) / (2 * DBM) * (y1 - y0);
   let A = 0.5, fc = 0;
@@ -1053,14 +1482,14 @@ labo(3, function () {
 
     // --- Valeurs, calcul, explication ---
     const f3 = B > 0 ? B * MICRO.c / (2 * Math.PI * r) : 0;
-    Application.afficher("#m3b-dist", O.metres(r));
-    Application.afficher("#m3b-do", O.metres(r));
-    Application.afficher("#m3b-g100", O.signe(g100, 1) + " dB");
-    Application.afficher("#m3b-g50", O.signe(total(50), 1) + " dB");
-    Application.afficher("#m3b-f3", B > 0 ? "≈ " + O.hz(f3) : "aucun effet");
-    O.el("m3b-titre").textContent = DIRECTIVITES.find(d => Math.abs(d.A - A) < 0.01).nom;
+    Application.afficher("#m4b-dist", O.metres(r));
+    Application.afficher("#m4b-do", O.metres(r));
+    Application.afficher("#m4b-g100", O.signe(g100, 1) + " dB");
+    Application.afficher("#m4b-g50", O.signe(total(50), 1) + " dB");
+    Application.afficher("#m4b-f3", B > 0 ? "≈ " + O.hz(f3) : "aucun effet");
+    O.el("m4b-titre").textContent = DIRECTIVITES.find(d => Math.abs(d.A - A) < 0.01).nom;
     const k = 2 * Math.PI * 100 / MICRO.c;
-    O.html("m3b-calc", B > 0
+    O.html("m4b-calc", B > 0
       ? '<div><span class="c">k = 2π × 100 / 343</span> = ' + O.nb(k, 3) + ' rad/m</div><div><span class="c">kr</span> = ' + O.nb(k, 3) + " × " + O.nb(r, 3) + " = " + O.nb(k * r, 3) + '</div><div><span class="c">B / kr</span> = ' + O.nb(B, 2) + " / " + O.nb(k * r, 3) + " = " + O.nb(B / (k * r), 2) + '</div><div><span class="c">G</span> = 10 log(1 + ' + O.nb(Math.pow(B / (k * r), 2), 2) + ") = <b>" + O.signe(brut(100), 1) + " dB</b></div>" + (fc ? '<div><span class="c">coupe-bas</span> ' + O.signe(hp(100), 1) + " dB → <b>" + O.signe(g100, 1) + " dB</b></div>" : "")
       : '<div><span class="c">B = 0</span> (capsule à pression)</div><div>G = 10 log(1 + 0) = <b>0 dB</b></div>' + (fc ? '<div><span class="c">coupe-bas</span> ' + O.signe(hp(100), 1) + " dB</div>" : ""));
     let cl, m;
@@ -1069,14 +1498,14 @@ labo(3, function () {
     else if (fc && Math.abs(g100) < 4 && total(50) < 3) { cl = "note ok"; m = "<b>Compensé.</b> Le coupe-bas retire à peu près ce que l’effet de proximité ajoute : la voix retrouve un grave naturel."; }
     else if (g100 > 2) { cl = "note"; m = "<b>Un peu de chaleur.</b> Les graves montent sous ≈ " + O.hz(f3) + ". C’est souvent recherché sur une voix, à condition de garder la même distance."; }
     else { cl = "note ok"; m = "<b>Effet négligeable.</b> À " + O.metres(r) + ", le terme B/kr est petit dans tout le spectre utile : la réponse reste plate." + (fc && hp(100) < -1 ? " Le coupe-bas, lui, retire alors de vrais graves." : ""); }
-    O.note("m3b-msg", cl, m);
+    O.note("m4b-msg", cl, m);
   }
 
   curseur.addEventListener("input", dessiner);
-  const segDir = Application.segment("#m3b-dir", [["1", "Omni"], ["0.5", "Cardio"], ["0.25", "Hyper"], ["0", "Huit"]], "0.5", v => { A = +v; dessiner(); });
-  const segHp = Application.segment("#m3b-hp", [["0", "Aucun"], ["80", "80 Hz"], ["150", "150 Hz"]], "0", v => { fc = +v; dessiner(); });
+  const segDir = Application.segment("#m4b-dir", [["1", "Omni"], ["0.5", "Cardio"], ["0.25", "Hyper"], ["0", "Huit"]], "0.5", v => { A = +v; dessiner(); });
+  const segHp = Application.segment("#m4b-hp", [["0", "Aucun"], ["80", "80 Hz"], ["150", "150 Hz"]], "0", v => { fc = +v; dessiner(); });
   const SITU = { radio: ["0.5", 0.03, "0"], chant: ["0.5", 0.1, "0"], perche: ["0.25", 1, "0"], huit: ["0", 0.05, "0"], omni: ["1", 0.03, "0"] };
-  O.situations("m3b-situ", s => { const v = SITU[s]; A = +v[0]; fc = +v[2]; segDir.choisir(v[0]); segHp.choisir(v[2]); O.curseur(curseur, O.posLog(v[1], 0.02, 2)); });
+  O.situations("m4b-situ", s => { const v = SITU[s]; A = +v[0]; fc = +v[2]; segDir.choisir(v[0]); segHp.choisir(v[2]); O.curseur(curseur, O.posLog(v[1], 0.02, 2)); });
   O.curseur(curseur, O.posLog(0.05, 0.02, 2));
   dessiner();
 });
@@ -1085,9 +1514,9 @@ labo(3, function () {
    Membrane avant : ½(1 + cos θ) ; membrane arrière : ½(1 − cos θ).
    Sortie = avant + m × arrière, m réglé par la polarisation de la membrane
    arrière (de −1 à +1). On obtient A + B·cos θ avec A = (1 + m)/2. */
-labo(3, function () {
-  const cv = O.el("m3c-cv"), c = cv.getContext("2d");
-  const curseur = O.el("m3c-r");
+labo(4, function () {
+  const cv = O.el("m4c-cv"), c = cv.getContext("2d");
+  const curseur = O.el("m4c-r");
 
   function dessiner() {
     const m = +curseur.value / 100, A = (1 + m) / 2;
@@ -1127,37 +1556,37 @@ labo(3, function () {
     // --- Valeurs, explication ---
     const proche = DIRECTIVITES.find(d => Math.abs(d.A - A) < 0.012);
     const nul = MICRO.annulation(A);
-    Application.afficher("#m3c-m", O.nb(m, 2).replace("-", "−"));
-    Application.afficher("#m3c-ro", O.nb(m, 2).replace("-", "−"));
-    Application.afficher("#m3c-A", O.nb(A, 3));
-    Application.afficher("#m3c-nom", proche ? proche.court : "intermédiaire");
-    Application.afficher("#m3c-nul", nul === null ? "aucune" : "± " + O.nb(nul, 0) + "°");
+    Application.afficher("#m4c-m", O.nb(m, 2).replace("-", "−"));
+    Application.afficher("#m4c-ro", O.nb(m, 2).replace("-", "−"));
+    Application.afficher("#m4c-A", O.nb(A, 3));
+    Application.afficher("#m4c-nom", proche ? proche.court : "intermédiaire");
+    Application.afficher("#m4c-nul", nul === null ? "aucune" : "± " + O.nb(nul, 0) + "°");
     let m2;
     if (m > 0.98) m2 = "<b>Somme des deux cardios.</b> ½(1 + cos θ) + ½(1 − cos θ) = 1 : la même valeur dans toutes les directions, c’est un omni.";
     else if (Math.abs(m) < 0.02) m2 = "<b>Membrane arrière éteinte.</b> Sans polarisation, elle ne produit aucun signal : il reste le cardio de la membrane avant.";
     else if (m < -0.98) m2 = "<b>Différence des deux cardios.</b> ½(1 + cos θ) − ½(1 − cos θ) = cos θ : c’est le huit, avec son lobe arrière inversé.";
     else if (m > 0) m2 = "<b>Un peu d’arrière, en phase.</b> Le lobe arrière comble le creux du cardio : la directivité s’élargit vers l’omni (A = " + O.nb(A, 2) + ").";
     else m2 = "<b>Un peu d’arrière, inversé.</b> Le signal arrière se soustrait : la directivité se resserre, un petit lobe arrière inversé apparaît, l’annulation passe à ± " + O.nb(nul, 0) + "°.";
-    O.note("m3c-msg", "note ok", m2);
+    O.note("m4c-msg", "note ok", m2);
   }
 
   curseur.addEventListener("input", dessiner);
-  O.situations("m3c-situ", s => O.curseur(curseur, +s));
+  O.situations("m4c-situ", s => O.curseur(curseur, +s));
   dessiner();
 });
 
 /* ==========================================================================
-   MODULE 4 — LA DIRECTIVITÉ
+   MODULE 5 — LA DIRECTIVITÉ
    ========================================================================== */
 
 /* --- Labo 4a : le diagramme polaire ----------------------------------------
    r(θ) = A + B·cos θ ; DF, DI, facteur de distance et angle d'annulation
    viennent de MICRO (contenu.js). Une voix et une source gênante se placent
    autour du micro ; leur niveau dans le micro = 20 log |r(θ)|. */
-labo(4, function () {
-  const cv = O.el("m4a-cv"), c = cv.getContext("2d"), W = cv.width, Hc = cv.height;
+labo(5, function () {
+  const cv = O.el("m5a-cv"), c = cv.getContext("2d"), W = cv.width, Hc = cv.height;
   const PX = 285, PY = 265, R = 186;
-  const curseur = O.el("m4a-a");
+  const curseur = O.el("m5a-a");
   let db = false, comp = "aucune", voix = 0, gene = 180, cible = null;
   const niveau = (A, d) => { const g = MICRO.gain(A, d); return Math.abs(g) < 1e-3 ? -Infinity : 20 * Math.log10(Math.abs(g)); };
   const txtDb = v => isFinite(v) ? O.db(v) : "−∞ dB";
@@ -1230,21 +1659,21 @@ labo(4, function () {
     O.ecrire(c, "(sources de même niveau, même distance)", 600, 470, { s: 11, g: false, c: COUL.doux });
 
     // --- Valeurs, calcul, explication ---
-    Application.afficher("#m4a-ao", O.nb(A, 3));
-    Application.afficher("#m4a-ab", O.nb(A, 2) + " · " + O.nb(B, 2));
-    Application.afficher("#m4a-di", O.nb(df, 2) + " · " + O.nb(MICRO.di(A), 1) + " dB");
-    Application.afficher("#m4a-dist", O.nb(fd, 2));
-    Application.afficher("#m4a-nul", nul === null ? "aucune" : "± " + O.nb(nul, 1) + "°");
-    Application.afficher("#m4a-att", txtDb(niveau(A, 90)).replace(" dB", "") + " · " + txtDb(niveau(A, 180)));
+    Application.afficher("#m5a-ao", O.nb(A, 3));
+    Application.afficher("#m5a-ab", O.nb(A, 2) + " · " + O.nb(B, 2));
+    Application.afficher("#m5a-di", O.nb(df, 2) + " · " + O.nb(MICRO.di(A), 1) + " dB");
+    Application.afficher("#m5a-dist", O.nb(fd, 2));
+    Application.afficher("#m5a-nul", nul === null ? "aucune" : "± " + O.nb(nul, 1) + "°");
+    Application.afficher("#m5a-att", txtDb(niveau(A, 90)).replace(" dB", "") + " · " + txtDb(niveau(A, 180)));
     const g = MICRO.gain(A, gene);
-    O.html("m4a-calc", '<div><span class="c">r(' + norm(gene) + "°) = A + B·cos " + norm(gene) + '°</span></div><div>= ' + O.nb(A, 3) + " + " + O.nb(B, 3) + " × " + O.nb(Math.cos(gene * Math.PI / 180), 3).replace("-", "−") + " = " + O.nb(g, 3).replace("-", "−") + '</div><div><span class="c">gêne</span> 20 log |r| = <b>' + txtDb(Lg) + '</b></div><div><span class="c">DF</span> = 1 / (A² + B²/3) = ' + O.nb(df, 2) + " → DI = " + O.nb(MICRO.di(A), 1) + " dB</div>");
+    O.html("m5a-calc", '<div><span class="c">r(' + norm(gene) + "°) = A + B·cos " + norm(gene) + '°</span></div><div>= ' + O.nb(A, 3) + " + " + O.nb(B, 3) + " × " + O.nb(Math.cos(gene * Math.PI / 180), 3).replace("-", "−") + " = " + O.nb(g, 3).replace("-", "−") + '</div><div><span class="c">gêne</span> 20 log |r| = <b>' + txtDb(Lg) + '</b></div><div><span class="c">DF</span> = 1 / (A² + B²/3) = ' + O.nb(df, 2) + " → DI = " + O.nb(MICRO.di(A), 1) + " dB</div>");
     let cl, m;
     if (ecart(voix, 0) > 45) { cl = "note warn"; m = "<b>La voix est hors axe.</b> À " + norm(voix) + "°, elle perd " + txtDb(Lv).replace("−", "") + " et, sur un vrai micro, son timbre change aussi : remettez la voix dans l’axe."; }
     else if (!isFinite(Lg)) { cl = "note ok"; m = "<b>La gêne est dans l’angle d’annulation.</b> À " + norm(gene) + "°, A + B·cos θ = 0 : en théorie, le micro ne l’entend pas. En pratique, on gagne souvent 15 à 25 dB."; }
     else if (dif >= 15) { cl = "note ok"; m = "<b>Bon rejet.</b> La gêne arrive " + O.nb(dif, 0) + " dB sous la voix." + (nul !== null ? " Pour faire mieux, placez-la vers ±" + O.nb(nul, 0) + "°, l’angle d’annulation." : ""); }
     else if (dif >= 6) { cl = "note"; m = "<b>Rejet moyen.</b> " + O.nb(dif, 0) + " dB seulement entre la voix et la gêne." + (nul !== null ? " L’annulation de ce micro est à ±" + O.nb(nul, 0) + "° : déplacez la gêne ou changez de directivité." : " Cette directivité n’a pas d’annulation : prenez un micro plus directif."); }
     else { cl = "note bad"; m = "<b>La gêne passe presque autant que la voix.</b> " + (A > 0.9 ? "Un omni ne trie pas les directions." : g < 0 ? "Elle tombe dans le lobe arrière, de polarité inversée." : "Elle est trop près de l’axe.") + " Cherchez la directivité dont l’angle d’annulation tombe sur la gêne."; }
-    O.note("m4a-msg", cl, m);
+    O.note("m5a-msg", cl, m);
   }
 
   O.glisser(cv, (x, y, debut) => {
@@ -1255,11 +1684,11 @@ labo(4, function () {
     dessiner();
   });
   curseur.addEventListener("input", dessiner);
-  O.situations("m4a-dirs", s => O.curseur(curseur, Math.round(DIR(s).A * 1000)));
-  Application.segment("#m4a-echelle", [["lin", "Linéaire"], ["db", "En dB"]], "lin", v => { db = v === "db"; dessiner(); });
-  Application.segment("#m4a-comp", [["aucune", "Aucune"], ["omni", "Omni"], ["cardio", "Cardio"]], "aucune", v => { comp = v; dessiner(); });
+  O.situations("m5a-dirs", s => O.curseur(curseur, Math.round(DIR(s).A * 1000)));
+  Application.segment("#m5a-echelle", [["lin", "Linéaire"], ["db", "En dB"]], "lin", v => { db = v === "db"; dessiner(); });
+  Application.segment("#m5a-comp", [["aucune", "Aucune"], ["omni", "Omni"], ["cardio", "Cardio"]], "aucune", v => { comp = v; dessiner(); });
   const SITU = { retour: ["cardio", 180], deux: ["super", 125], cotes: ["huit", 90], piege: ["hyper", 180] };
-  O.situations("m4a-situ", s => { voix = 0; gene = SITU[s][1]; O.curseur(curseur, Math.round(DIR(SITU[s][0]).A * 1000)); });
+  O.situations("m5a-situ", s => { voix = 0; gene = SITU[s][1]; O.curseur(curseur, Math.round(DIR(SITU[s][0]).A * 1000)); });
   dessiner();
 });
 
@@ -1269,9 +1698,9 @@ labo(4, function () {
    apporte une contribution décalée de k·s·(1 − cos θ). La somme continue de
    ces contributions vaut R(θ) = sin x / x, x = (πL/λ)(1 − cos θ).
    Réponse du canon = capsule(θ) × R(θ). */
-labo(4, function () {
-  const cv = O.el("m4b-cv"), c = cv.getContext("2d"), W = cv.width, Hc = cv.height;
-  const cf = O.el("m4b-f"), cl = O.el("m4b-l"), ct = O.el("m4b-t");
+labo(5, function () {
+  const cv = O.el("m5b-cv"), c = cv.getContext("2d"), W = cv.width, Hc = cv.height;
+  const cf = O.el("m5b-f"), cl = O.el("m5b-l"), ct = O.el("m5b-t");
   const PX = 268, PY = 262, R = 196, N = 12;
   let capA = 0.366;
   const olson = (L, f, deg) => { const x = Math.PI * L / MICRO.lambda(f) * (1 - Math.cos(deg * Math.PI / 180)); return x < 1e-9 ? 1 : Math.sin(x) / x; };
@@ -1356,31 +1785,31 @@ labo(4, function () {
     let ouv = null;
     for (let d = 0; d <= 180; d += 0.5) if (Math.abs(tot(d)) <= 0.5) { ouv = 2 * d; break; }
     const xTh = Math.PI * L / lam * (1 - Math.cos(t));
-    Application.afficher("#m4b-fo", O.hz(f));
-    Application.afficher("#m4b-lo", O.nb(L * 100, 0) + " cm");
-    Application.afficher("#m4b-to", th + "°");
-    Application.afficher("#m4b-lam", O.metres(lam));
-    Application.afficher("#m4b-fc", "≈ " + O.hz(fc));
-    Application.afficher("#m4b-tot", txtDb(dbAbs(tot(th))));
-    Application.afficher("#m4b-cap", txtDb(dbAbs(cap(th))));
-    Application.afficher("#m4b-ouv", ouv === null ? "> 360°" : "≈ " + O.nb(ouv, 0) + "°");
-    O.el("m4b-titre").textContent = "Tube de " + O.nb(L * 100, 0) + " cm · " + O.hz(f);
+    Application.afficher("#m5b-fo", O.hz(f));
+    Application.afficher("#m5b-lo", O.nb(L * 100, 0) + " cm");
+    Application.afficher("#m5b-to", th + "°");
+    Application.afficher("#m5b-lam", O.metres(lam));
+    Application.afficher("#m5b-fc", "≈ " + O.hz(fc));
+    Application.afficher("#m5b-tot", txtDb(dbAbs(tot(th))));
+    Application.afficher("#m5b-cap", txtDb(dbAbs(cap(th))));
+    Application.afficher("#m5b-ouv", ouv === null ? "> 360°" : "≈ " + O.nb(ouv, 0) + "°");
+    O.el("m5b-titre").textContent = "Tube de " + O.nb(L * 100, 0) + " cm · " + O.hz(f);
     let cls, m;
     if (f < fc * 0.7) { cls = "note warn"; m = "<b>Le tube n’agit presque pas.</b> λ = " + O.metres(lam) + " est plus longue que le tube (" + O.nb(L * 100, 0) + " cm) : les flèches des fentes restent presque alignées. Le canon se comporte comme sa capsule. Il faudrait dépasser ≈ " + O.hz(fc) + "."; }
     else if (xTh > Math.PI && Math.abs(Rk) > 0.08) { cls = "note"; m = "<b>Lobe secondaire.</b> À " + th + "°, les flèches ont fait plus d’un tour et ne s’annulent plus tout à fait : une partie du son repasse, avec un timbre coloré. C’est pour cela qu’un canon sonne mal dans une pièce réverbérante."; }
     else { cls = "note ok"; m = "<b>Le tube resserre la directivité.</b> λ = " + O.metres(lam) + " est plus courte que le tube : les contributions des fentes se décalent et s’annulent en partie. Ouverture à −6 dB ≈ " + (ouv === null ? "—" : O.nb(ouv, 0) + "°") + ", contre ≈ " + O.nb(2 * Math.acos((0.5 - capA) / (1 - capA)) * 180 / Math.PI, 0) + "° pour la capsule seule."; }
-    O.note("m4b-msg", cls, m);
+    O.note("m5b-msg", cls, m);
   }
 
   [cf, cl, ct].forEach(e => e.addEventListener("input", dessiner));
-  Application.segment("#m4b-cap-s", [["0.366", "Supercardio"], ["0.25", "Hypercardio"]], "0.366", v => { capA = +v; dessiner(); });
+  Application.segment("#m5b-cap-s", [["0.366", "Supercardio"], ["0.25", "Hypercardio"]], "0.366", v => { capA = +v; dessiner(); });
   const SITU = { grave: [25, 300, 90], voix: [25, 4000, 90], long: [50, 2000, 60], lobe: [25, 4000, 60] };
-  O.situations("m4b-situ", s => { const v = SITU[s]; O.curseur(cl, v[0]); O.curseur(ct, v[2]); O.curseur(cf, O.posLog(v[1], 100, 16000)); });
+  O.situations("m5b-situ", s => { const v = SITU[s]; O.curseur(cl, v[0]); O.curseur(ct, v[2]); O.curseur(cf, O.posLog(v[1], 100, 16000)); });
   O.curseur(cf, O.posLog(2000, 100, 16000));
 });
 
 /* ==========================================================================
-   MODULE 5 — SENSIBILITÉ ET FICHE TECHNIQUE
+   MODULE 6 — SENSIBILITÉ ET FICHE TECHNIQUE
    ========================================================================== */
 
 /* --- Labo 1 : la chaîne des niveaux ---------------------------------------
@@ -1390,8 +1819,8 @@ labo(4, function () {
    Simplification assumée : l'atténuateur réduit le signal de la capsule ;
    le bruit propre (en dB SPL) est gardé constant, alors qu'en réalité il
    augmente un peu (la fiche donne alors une seconde valeur). */
-labo(5, function () {
-  const cv = O.el("m5a-cv"), c = cv.getContext("2d"), W = cv.width;
+labo(6, function () {
+  const cv = O.el("m6a-cv"), c = cv.getContext("2d"), W = cv.width;
   const EIN = -128, SATURATION = 24, VISE = 4;
   const MICS = [
     { id: "dyn", nom: "Dynamique de chant (type)", S: 1.8, bruit: null, max: null, pad: false },
@@ -1401,10 +1830,10 @@ labo(5, function () {
     { id: "crav", nom: "Cravate électret (type)", S: 6, bruit: 26, max: 130, pad: false },
     { id: "canon", nom: "Micro canon (type)", S: 30, bruit: 13, max: 130, pad: false }
   ];
-  const sel = O.el("m5a-mic"), cL = O.el("m5a-l"), cG = O.el("m5a-g");
+  const sel = O.el("m6a-mic"), cL = O.el("m6a-l"), cG = O.el("m6a-g");
   O.options(sel, MICS.map(m => [m.id, m.nom]), "spm");
   let pad = 0, env = 0, crete = -200;
-  const segPad = Application.segment("#m5a-pad", [[0, "0 dB"], [10, "−10 dB"], [20, "−20 dB"]], 0, v => { pad = +v; dessiner(); });
+  const segPad = Application.segment("#m6a-pad", [[0, "0 dB"], [10, "−10 dB"], [20, "−20 dB"]], 0, v => { pad = +v; dessiner(); });
   const dbu = v => O.signe(v, 1) + " dBu";
   const somme = (a, b) => 10 * Math.log10(Math.pow(10, a / 10) + Math.pow(10, b / 10));
 
@@ -1446,15 +1875,15 @@ labo(5, function () {
   function dessiner() {
     const r = calculer(), m = r.mic;
     // Réglages et fiche
-    Application.afficher("#m5a-lo", r.L + " dB SPL");
-    Application.afficher("#m5a-go", "+" + r.G + " dB");
-    O.html("m5a-fiche", "Sensibilité : " + O.nb(m.S, 1) + " mV/Pa (" + O.db(MICRO.dbv(m.S)).replace(" dB", " dBV") + ")<br>Bruit propre : " + (m.bruit === null ? "non indiqué" : m.bruit + " dB(A)") + "<br>SPL max : " + (m.max === null ? "très élevé (non indiqué)" : m.max + " dB") + "<br>Atténuateur : " + (m.pad ? "0 / −10 / −20 dB" : "aucun"));
-    const zp = O.el("m5a-pad"); zp.style.opacity = m.pad ? "" : ".4"; zp.style.pointerEvents = m.pad ? "" : "none";
-    Application.afficher("#m5a-p", O.pascals(r.p));
-    Application.afficher("#m5a-u", O.volts(r.U));
-    Application.afficher("#m5a-lm", dbu(r.Lm));
-    Application.afficher("#m5a-ls", dbu(r.Ls));
-    Application.afficher("#m5a-sb", O.nb(r.SB, 0) + " dB");
+    Application.afficher("#m6a-lo", r.L + " dB SPL");
+    Application.afficher("#m6a-go", "+" + r.G + " dB");
+    O.html("m6a-fiche", "Sensibilité : " + O.nb(m.S, 1) + " mV/Pa (" + O.db(MICRO.dbv(m.S)).replace(" dB", " dBV") + ")<br>Bruit propre : " + (m.bruit === null ? "non indiqué" : m.bruit + " dB(A)") + "<br>SPL max : " + (m.max === null ? "très élevé (non indiqué)" : m.max + " dB") + "<br>Atténuateur : " + (m.pad ? "0 / −10 / −20 dB" : "aucun"));
+    const zp = O.el("m6a-pad"); zp.style.opacity = m.pad ? "" : ".4"; zp.style.pointerEvents = m.pad ? "" : "none";
+    Application.afficher("#m6a-p", O.pascals(r.p));
+    Application.afficher("#m6a-u", O.volts(r.U));
+    Application.afficher("#m6a-lm", dbu(r.Lm));
+    Application.afficher("#m6a-ls", dbu(r.Ls));
+    Application.afficher("#m6a-sb", O.nb(r.SB, 0) + " dB");
 
     // Scène
     O.fond(c);
@@ -1528,8 +1957,8 @@ labo(5, function () {
     else if (r.Ls < VISE - 10) { cls = "note warn"; msg = "<b>Niveau trop faible.</b> La sortie est à " + dbu(r.Ls) + ", loin des +4 dBu visés : montez le gain d’environ " + O.nb(VISE - r.Ls, 0) + " dB."; }
     else if (r.Ls > VISE + 12) { cls = "note warn"; msg = "<b>Niveau élevé.</b> La sortie est à " + dbu(r.Ls) + " : il ne reste que " + O.nb(SATURATION - r.Ls, 0) + " dB avant la saturation du préampli. Baissez un peu le gain."; }
     else { cls = "note ok"; msg = "<b>Chaîne bien réglée.</b> Sortie à " + dbu(r.Ls) + ", signal ≈ " + O.nb(r.SB, 0) + " dB au-dessus du bruit" + (r.maxEff !== null ? ", marge de " + O.nb(r.maxEff - r.L, 0) + " dB avant la saturation du micro." : ".") + (m.S < 3 ? " Notez le gain élevé qu’il faut à ce micro peu sensible." : ""); }
-    O.note("m5a-msg", cls, msg);
-    O.html("m5a-calc",
+    O.note("m6a-msg", cls, msg);
+    O.html("m6a-calc",
       '<div><span class="c">p = 2·10⁻⁵ × 10^(' + r.L + "/20)</span> = " + O.pascals(r.p) + "</div>" +
       '<div><span class="c">U = S × p</span> = ' + O.nb(m.S, 1) + " mV/Pa" + (r.padEff ? " × 10^(−" + r.padEff + "/20)" : "") + " × " + O.nb(r.p, 3) + " Pa = " + O.volts(r.U) + "</div>" +
       '<div><span class="c">L = 20 log(U / 0,775)</span> = ' + dbu(r.Lm) + "</div>" +
@@ -1541,14 +1970,14 @@ labo(5, function () {
     env = -5 + 5 * (0.55 * Math.sin(2.3 * t) + 0.3 * Math.sin(5.7 * t + 1) + 0.15 * Math.sin(11.1 * t + 2));
     dessiner();
   });
-  O.boutonPause("m5a-pause", boucle, () => { if (!boucle.actif()) { env = 0; crete = -200; dessiner(); } });
+  O.boutonPause("m6a-pause", boucle, () => { if (!boucle.actif()) { env = 0; crete = -200; dessiner(); } });
 
   sel.addEventListener("change", () => { const m = MICS.find(x => x.id === sel.value); if (!m.pad && pad) segPad.choisir(0); else dessiner(); });
   cL.addEventListener("input", dessiner);
   cG.addEventListener("input", dessiner);
-  O.el("m5a-auto").addEventListener("click", () => { const r = calculer(); O.curseur(cG, O.borne(Math.round(VISE - r.Lm), 0, 80)); });
+  O.el("m6a-auto").addEventListener("click", () => { const r = calculer(); O.curseur(cG, O.borne(Math.round(VISE - r.Lm), 0, 80)); });
   const SITU = { calme: 30, voix: 70, guitare: 90, chant: 115, caisse: 135 };
-  O.situations("m5a-situ", s => O.curseur(cL, SITU[s]));
+  O.situations("m6a-situ", s => O.curseur(cL, SITU[s]));
   dessiner();
 });
 
@@ -1557,14 +1986,14 @@ labo(5, function () {
    sensibilités, bruit propre et S/B, dynamique, diviseur de tension des
    impédances, courbe de réponse (coupe-bas du 2ᵉ ordre : −3 dB à sa
    fréquence, puis −12 dB par octave ; présence en cloche autour de 5 kHz). */
-labo(5, function () {
-  const cv = O.el("m5b-cv"), c = cv.getContext("2d");
-  const cS = O.el("m5b-s"), cB = O.el("m5b-b"), cM = O.el("m5b-m"), cZs = O.el("m5b-zs"), cZc = O.el("m5b-zc"), cPr = O.el("m5b-pr");
+labo(6, function () {
+  const cv = O.el("m6b-cv"), c = cv.getContext("2d");
+  const cS = O.el("m6b-s"), cB = O.el("m6b-b"), cM = O.el("m6b-m"), cZs = O.el("m6b-zs"), cZc = O.el("m6b-zc"), cPr = O.el("m6b-pr");
   cS.value = O.posLog(15, 0.5, 60); cZc.value = O.posLog(2000, 100, 10000);
   let ligne = "sens", coupeBas = false;
   const NOMS = { sens: "Sensibilité", bruit: "Bruit propre", max: "SPL max", z: "Impédance", rep: "Courbe" };
-  const segLigne = Application.segment("#m5b-ligne", Object.keys(NOMS).map(k => [k, NOMS[k]]), "sens", v => { ligne = v; dessiner(); });
-  Application.segment("#m5b-cb", [["non", "Désactivé"], ["oui", "80 Hz"]], "non", v => { coupeBas = v === "oui"; dessiner(); });
+  const segLigne = Application.segment("#m6b-ligne", Object.keys(NOMS).map(k => [k, NOMS[k]]), "sens", v => { ligne = v; dessiner(); });
+  Application.segment("#m6b-cb", [["non", "Désactivé"], ["oui", "80 Hz"]], "non", v => { coupeBas = v === "oui"; dessiner(); });
 
   const val = () => ({ S: O.valLog(+cS.value, 0.5, 60), bp: +cB.value, max: +cM.value, zs: +cZs.value, zc: O.valLog(+cZc.value, 100, 10000), pr: +cPr.value });
   const rangees = v => [
@@ -1590,17 +2019,17 @@ labo(5, function () {
 
   function dessiner() {
     const v = val(), Lc = 20 * Math.log10(v.zc / (v.zs + v.zc));
-    Application.afficher("#m5b-so", O.nb(v.S, v.S < 10 ? 1 : 0) + " mV/Pa");
-    Application.afficher("#m5b-bo", v.bp + " dB(A)");
-    Application.afficher("#m5b-mo", v.max + " dB");
-    Application.afficher("#m5b-zso", O.nb(v.zs, 0) + " Ω");
-    Application.afficher("#m5b-zco", v.zc >= 1000 ? O.nb(v.zc / 1000, 1) + " kΩ" : O.nb(v.zc, 0) + " Ω");
-    Application.afficher("#m5b-pro", v.pr ? "+" + v.pr + " dB" : "aucune");
-    Application.afficher("#m5b-dbv", O.db(MICRO.dbv(v.S)).replace(" dB", " dBV"));
-    Application.afficher("#m5b-sb", (94 - v.bp) + " dB");
-    Application.afficher("#m5b-dyn", (v.max - v.bp) + " dB");
-    Application.afficher("#m5b-perte", O.db(Lc, 1));
-    O.html("m5b-titre", NOMS[ligne]);
+    Application.afficher("#m6b-so", O.nb(v.S, v.S < 10 ? 1 : 0) + " mV/Pa");
+    Application.afficher("#m6b-bo", v.bp + " dB(A)");
+    Application.afficher("#m6b-mo", v.max + " dB");
+    Application.afficher("#m6b-zso", O.nb(v.zs, 0) + " Ω");
+    Application.afficher("#m6b-zco", v.zc >= 1000 ? O.nb(v.zc / 1000, 1) + " kΩ" : O.nb(v.zc, 0) + " Ω");
+    Application.afficher("#m6b-pro", v.pr ? "+" + v.pr + " dB" : "aucune");
+    Application.afficher("#m6b-dbv", O.db(MICRO.dbv(v.S)).replace(" dB", " dBV"));
+    Application.afficher("#m6b-sb", (94 - v.bp) + " dB");
+    Application.afficher("#m6b-dyn", (v.max - v.bp) + " dB");
+    Application.afficher("#m6b-perte", O.db(Lc, 1));
+    O.html("m6b-titre", NOMS[ligne]);
 
     O.fond(c);
     // La fiche
@@ -1723,7 +2152,7 @@ labo(5, function () {
       O.ecrire(c, "Sensibilité relative (dB) par rapport à 1 kHz", X0, 486, { s: 14, g: false, c: COUL.doux });
       msg = "<b>La sensibilité varie avec la fréquence.</b> " + (v.pr ? "La bosse de +" + v.pr + " dB vers 5 kHz rend la voix plus présente et plus intelligible. " : "Sans bosse de présence, la courbe reste dans la tolérance de ± 2 dB : c’est un micro « neutre ». ") + (coupeBas ? "Le coupe-bas retire les grondements (vent, manipulation, effet de proximité) : −3 dB à 80 Hz, −12 dB une octave plus bas." : "Activez le coupe-bas pour voir son effet dans le grave.");
     }
-    O.note("m5b-msg", cls, msg);
+    O.note("m6b-msg", cls, msg);
   }
 
   // Toucher une ligne de la fiche
@@ -1739,7 +2168,7 @@ labo(5, function () {
     cravate: { S: 6, bp: 26, max: 130, pr: 5 },
     adapt: { zc: +0 }
   };
-  O.situations("m5b-situ", s => {
+  O.situations("m6b-situ", s => {
     const f = FICHES[s];
     if (s === "adapt") { cZc.value = O.posLog(+cZs.value, 100, 10000); segLigne.choisir("z"); return; }
     cS.value = O.posLog(f.S, 0.5, 60); cB.value = f.bp; cM.value = f.max; cPr.value = f.pr;
@@ -1750,7 +2179,7 @@ labo(5, function () {
 });
 
 /* ==========================================================================
-   MODULE 6 — TYPES DE MICROS ET PRISE DE SON
+   MODULE 7 — TYPES DE MICROS ET PRISE DE SON
    ========================================================================== */
 
 /* --- Labo 1 : distance critique ---------------------------------------------
@@ -1758,9 +2187,9 @@ labo(5, function () {
    Champ réverbéré capté : constant, égal au direct à la distance critique
    d_c = √DF × r_H, avec r_H ≈ 0,057 √(V/T) (source omnidirectionnelle).
    Total : somme des énergies. Proportions de la salle supposées 1,6 × 1,2 × 1. */
-labo(6, function () {
-  const cv = O.el("m6a-cv"), c = cv.getContext("2d");
-  const cV = O.el("m6a-v"), cT = O.el("m6a-t"), cD = O.el("m6a-d"), sel = O.el("m6a-dir");
+labo(7, function () {
+  const cv = O.el("m7a-cv"), c = cv.getContext("2d");
+  const cV = O.el("m7a-v"), cT = O.el("m7a-t"), cD = O.el("m7a-d"), sel = O.el("m7a-dir");
   const VMIN = 5, VMAX = 20000, DMIN = 0.05, DMAX = 20;
   O.options(sel, DIRECTIVITES.map(d => [d.id, d.nom]), "cardio");
   cV.value = O.posLog(200, VMIN, VMAX); cD.value = O.posLog(0.5, DMIN, DMAX);
@@ -1779,13 +2208,13 @@ labo(6, function () {
     const LR = -20 * Math.log10(dc), LRomni = -20 * Math.log10(rH), LD = x => -20 * Math.log10(x);
     const total = x => 10 * Math.log10(Math.pow(10, LD(x) / 10) + Math.pow(10, LR / 10));
 
-    Application.afficher("#m6a-vo", O.nb(V < 100 ? V : Math.round(V / 10) * 10, 0) + " m³");
-    Application.afficher("#m6a-to", O.nb(T, 2) + " s");
-    Application.afficher("#m6a-do", O.metres(d));
-    Application.afficher("#m6a-rh", O.metres(rH));
-    Application.afficher("#m6a-dc", O.metres(dc));
-    Application.afficher("#m6a-dr", O.signe(dr, 1) + " dB");
-    Application.afficher("#m6a-champ", dr >= 6 ? "Direct" : dr <= -6 ? "Réverbéré" : "Mélange");
+    Application.afficher("#m7a-vo", O.nb(V < 100 ? V : Math.round(V / 10) * 10, 0) + " m³");
+    Application.afficher("#m7a-to", O.nb(T, 2) + " s");
+    Application.afficher("#m7a-do", O.metres(d));
+    Application.afficher("#m7a-rh", O.metres(rH));
+    Application.afficher("#m7a-dc", O.metres(dc));
+    Application.afficher("#m7a-dr", O.signe(dr, 1) + " dB");
+    Application.afficher("#m7a-champ", dr >= 6 ? "Direct" : dr <= -6 ? "Réverbéré" : "Mélange");
 
     O.fond(c);
     // --- Graphique ---
@@ -1872,19 +2301,19 @@ labo(6, function () {
     else { cls = "note bad"; msg = "<b>Champ réverbéré dominant</b> (D/R = " + O.signe(dr, 1) + " dB) : la voix paraît lointaine, noyée dans la salle. Monter le gain n’y changerait rien : il amplifie aussi la réverbération."; }
     msg += D.id === "omni" ? " Avec un omni, la distance critique est le rayon de réverbération de la salle." : " Ce micro " + D.nom.toLowerCase() + " (DF = " + O.nb(df, 2) + ") repousse la distance critique de √DF = " + O.nb(Math.sqrt(df), 2) + " fois.";
     if (dehors) msg += " Attention : à cette distance, le micro serait hors de la salle.";
-    O.note("m6a-msg", cls, msg);
-    O.html("m6a-calc",
+    O.note("m7a-msg", cls, msg);
+    O.html("m7a-calc",
       '<div><span class="c">rH = 0,057 × √(V / T)</span> = 0,057 × √(' + O.nb(V, 0) + " / " + O.nb(T, 2) + ") = " + O.metres(rH) + "</div>" +
       '<div><span class="c">dc = √DF × rH</span> = √' + O.nb(df, 2) + " × " + O.nb(rH, 2) + " = <b>" + O.metres(dc) + "</b></div>" +
       '<div><span class="c">D/R = 20 log(dc / d)</span> = 20 log(' + O.nb(dc, 2) + " / " + O.nb(d, 2) + ") = " + O.signe(dr, 1) + " dB</div>");
   }
 
   const boucle = O.boucle(cv, (dt, t) => { temps = t; dessiner(); });
-  O.boutonPause("m6a-pause", boucle);
+  O.boutonPause("m7a-pause", boucle);
   [cV, cT, cD].forEach(el => el.addEventListener("input", dessiner));
   sel.addEventListener("change", dessiner);
   const SALLES = { cabine: [10, 0.25], classe: [200, 0.8], plateau: [1500, 0.7], eglise: [8000, 4] };
-  O.situations("m6a-situ", s => { cV.value = O.posLog(SALLES[s][0], VMIN, VMAX); O.curseur(cT, SALLES[s][1]); });
+  O.situations("m7a-situ", s => { cV.value = O.posLog(SALLES[s][0], VMIN, VMAX); O.curseur(cT, SALLES[s][1]); });
   dessiner();
 });
 
@@ -1894,9 +2323,9 @@ labo(6, function () {
    Réponse : |1 + a·e^(−j2πfτ)| avec a = ρ × r_direct / r_réfléchi
    (ρ : réflexion de la table, r_d / r_r : la réflexion a fait plus de chemin).
    L'animation est ralentie d'environ 300 fois. */
-labo(6, function () {
-  const cv = O.el("m6b-cv"), c = cv.getContext("2d");
-  const cH = O.el("m6b-h"), cD = O.el("m6b-d"), cHs = O.el("m6b-hs"), cR = O.el("m6b-r");
+labo(7, function () {
+  const cv = O.el("m7b-cv"), c = cv.getContext("2d");
+  const cH = O.el("m7b-h"), cD = O.el("m7b-d"), cHs = O.el("m7b-hs"), cR = O.el("m7b-r");
   const HMIN = 0.002, HMAX = 0.6;
   cH.value = O.posLog(0.25, HMIN, HMAX);
   let temps = 0;
@@ -1918,14 +2347,14 @@ labo(6, function () {
     const rep = f => 10 * Math.log10(1 + a * a + 2 * a * Math.cos(2 * Math.PI * f * tau));
     const creux = a > 0 ? 20 * Math.log10(Math.max(1 - a, 1e-4)) : 0, bosse = 20 * Math.log10(1 + a);
 
-    Application.afficher("#m6b-ho", O.metres(h));
-    Application.afficher("#m6b-do", O.metres(d));
-    Application.afficher("#m6b-hso", O.metres(hs));
-    Application.afficher("#m6b-ro", O.nb(rho * 100, 0) + " %");
-    Application.afficher("#m6b-delta", O.metres(delta));
-    Application.afficher("#m6b-tau", tau >= 1e-3 ? O.nb(tau * 1000, 2) + " ms" : O.nb(tau * 1e6, 0) + " µs");
-    Application.afficher("#m6b-f1", O.hz(f1));
-    Application.afficher("#m6b-prof", a < 0.01 ? "aucune" : O.db(creux, 1));
+    Application.afficher("#m7b-ho", O.metres(h));
+    Application.afficher("#m7b-do", O.metres(d));
+    Application.afficher("#m7b-hso", O.metres(hs));
+    Application.afficher("#m7b-ro", O.nb(rho * 100, 0) + " %");
+    Application.afficher("#m7b-delta", O.metres(delta));
+    Application.afficher("#m7b-tau", tau >= 1e-3 ? O.nb(tau * 1000, 2) + " ms" : O.nb(tau * 1e6, 0) + " µs");
+    Application.afficher("#m7b-f1", O.hz(f1));
+    Application.afficher("#m7b-prof", a < 0.01 ? "aucune" : O.db(creux, 1));
 
     O.fond(c);
     // --- Vue de côté ---
@@ -2002,8 +2431,8 @@ labo(6, function () {
     if (f1 > 20000) { cls = "note ok"; msg = "<b>Aucun creux audible.</b> Le premier creux tombe à " + O.hz(f1) + ", au-delà de 20 kHz : le direct et la réflexion s’additionnent en phase sur toute la bande, d’où " + O.db(bosse, 1) + (rho > 0.95 ? " (le doublement de pression d’un micro de surface)." : "."); }
     else if (a < 0.45) { cls = "note ok"; msg = "<b>Réflexion faible</b> (a = " + O.nb(a, 2) + ") : les creux ne descendent qu’à " + O.db(creux, 1) + ". Un revêtement absorbant sur la table atténue le filtre en peigne."; }
     else { cls = "note warn"; msg = "<b>Filtre en peigne.</b> Creux à " + O.hz(f1) + ", " + O.hz(3 * f1) + ", " + O.hz(5 * f1) + "… profonds de " + O.db(creux, 0) + " : la voix sonne creuse, métallique. Solutions : un micro de surface posé sur la table, ou une table absorbante."; }
-    O.note("m6b-msg", cls, msg);
-    O.html("m6b-calc",
+    O.note("m7b-msg", cls, msg);
+    O.html("m7b-calc",
       '<div><span class="c">rd = √(d² + (hs − h)²)</span> = ' + O.metres(rd) + "</div>" +
       '<div><span class="c">rr = √(d² + (hs + h)²)</span> = ' + O.metres(rr) + "</div>" +
       '<div><span class="c">τ = (rr − rd) / c</span> = ' + O.nb(delta, 4) + " / 343 = " + (tau >= 1e-3 ? O.nb(tau * 1000, 3) + " ms" : O.nb(tau * 1e6, 1) + " µs") + "</div>" +
@@ -2011,9 +2440,9 @@ labo(6, function () {
   }
 
   const boucle = O.boucle(cv, (dt, t) => { temps = t; dessiner(); });
-  O.boutonPause("m6b-pause", boucle);
+  O.boutonPause("m7b-pause", boucle);
   [cH, cD, cHs, cR].forEach(el => el.addEventListener("input", dessiner));
-  O.situations("m6b-situ", s => {
+  O.situations("m7b-situ", s => {
     if (s === "pied") { cR.value = 0.9; O.curseur(cH, O.posLog(0.25, HMIN, HMAX)); }
     else if (s === "bas") { cR.value = 0.9; O.curseur(cH, O.posLog(0.06, HMIN, HMAX)); }
     else if (s === "surface") { cR.value = 1; O.curseur(cH, O.posLog(0.003, HMIN, HMAX)); }
@@ -2023,7 +2452,7 @@ labo(6, function () {
 });
 
 /* ==========================================================================
-   MODULE 7 — LIAISONS ET ALIMENTATIONS
+   MODULE 8 — LIAISONS ET ALIMENTATIONS
    ========================================================================== */
 
 /* --- Labo 1 : symétrique contre asymétrique ---------------------------------
@@ -2031,11 +2460,11 @@ labo(6, function () {
    le niveau croît avec la longueur (tension induite ∝ longueur : +20 log(L/10)).
    Symétrique : chaud = s/2 + h, froid = −s/2 + h, sortie = s + h·10^(−TRMC/20).
    Asymétrique : conducteur = s + h, blindage = 0, sortie = s + h. */
-labo(7, function () {
-  const cv = O.el("m7a-cv"), c = cv.getContext("2d"), W = cv.width, Hc = cv.height;
+labo(8, function () {
+  const cv = O.el("m8a-cv"), c = cv.getContext("2d"), W = cv.width, Hc = cv.height;
   const SIG = -50;
   let type = "sym";
-  const eP = O.el("m7a-p"), eL = O.el("m7a-l"), eT = O.el("m7a-t");
+  const eP = O.el("m8a-p"), eL = O.el("m8a-l"), eT = O.el("m8a-t");
   const longueur = () => O.valLog(+eL.value, 1, 200);
   let t = 0;
 
@@ -2129,17 +2558,17 @@ labo(7, function () {
     O.ecrire(c, "Écrans : 40 ms, même échelle verticale pour les trois · signal à 250 Hz, parasite à 50 Hz et 150 Hz", 500, Hc - 4, { s: 11, g: false, c: COUL.doux, a: "center" });
 
     // --- valeurs
-    Application.afficher("#m7a-po", O.nb(+eP.value, 0).replace("-", "−") + " dBu");
-    Application.afficher("#m7a-lo", O.metres(n.L));
-    Application.afficher("#m7a-to", O.nb(n.T, 0) + " dB");
-    Application.afficher("#m7a-sig", "−50 dBu");
-    Application.afficher("#m7a-par", O.nb(n.P, 1).replace("-", "−") + " dBu");
-    Application.afficher("#m7a-res", O.nb(n.res, 1).replace("-", "−") + " dBu");
-    Application.afficher("#m7a-sb", O.db(n.sb, 0));
-    O.el("m7a-ligne-t").style.opacity = type === "sym" ? 1 : 0.4;
-    O.el("m7a-t").disabled = type !== "sym";
+    Application.afficher("#m8a-po", O.nb(+eP.value, 0).replace("-", "−") + " dBu");
+    Application.afficher("#m8a-lo", O.metres(n.L));
+    Application.afficher("#m8a-to", O.nb(n.T, 0) + " dB");
+    Application.afficher("#m8a-sig", "−50 dBu");
+    Application.afficher("#m8a-par", O.nb(n.P, 1).replace("-", "−") + " dBu");
+    Application.afficher("#m8a-res", O.nb(n.res, 1).replace("-", "−") + " dBu");
+    Application.afficher("#m8a-sb", O.db(n.sb, 0));
+    O.el("m8a-ligne-t").style.opacity = type === "sym" ? 1 : 0.4;
+    O.el("m8a-t").disabled = type !== "sym";
 
-    O.html("m7a-calc",
+    O.html("m8a-calc",
       '<div><span class="c">Parasite capté = parasite pour 10 m + 20 log(L / 10)</span></div>' +
       "<div>= " + O.nb(+eP.value, 0).replace("-", "−") + " + 20 log(" + O.nb(n.L, 1) + " / 10) = <b>" + O.nb(n.P, 1).replace("-", "−") + " dBu</b></div>" +
       (type === "sym"
@@ -2158,14 +2587,14 @@ labo(7, function () {
       txt = n.sb < 60 ? "<b>Le TRMC est trop faible pour ce parasite.</b> L’entrée retire " + n.T + " dB du parasite de mode commun, cela ne suffit pas. Une entrée mal équilibrée (ou un câble abîmé) perd sa réjection." :
         "<b>Le parasite est le même sur le chaud et sur le froid.</b> Regardez les deux premiers écrans : il domine parfois le signal. La soustraction l’efface, le signal reste : " + O.db(n.sb, 0) + " de rapport signal / parasite.";
     }
-    O.note("m7a-msg", cl, txt);
+    O.note("m8a-msg", cl, txt);
   }
 
   const anim = O.boucle(cv, dt => { t += dt * 0.05; dessiner(); }); // 20 fois ralenti
-  O.boutonPause("m7a-pause", anim);
-  const seg = Application.segment("#m7a-type", [["sym", "Symétrique"], ["asym", "Asymétrique"]], "sym", v => { type = v; dessiner(); });
+  O.boutonPause("m8a-pause", anim);
+  const seg = Application.segment("#m8a-type", [["sym", "Symétrique"], ["asym", "Asymétrique"]], "sym", v => { type = v; dessiner(); });
   [eP, eL, eT].forEach(e => e.addEventListener("input", dessiner));
-  O.situations("m7a-situ", s => {
+  O.situations("m8a-situ", s => {
     const S = { court: ["sym", -60, 5, 70], scene: ["sym", -40, 80, 70], jack: ["asym", -55, 10, 70], abime: ["sym", -45, 30, 30] }[s];
     seg.choisir(S[0]); type = S[0];
     eP.value = S[1]; eL.value = O.posLog(S[2], 1, 200); eT.value = S[3];
@@ -2183,10 +2612,10 @@ labo(7, function () {
    Bobine d'un micro dynamique (ou secondaire du transformateur d'un ruban) :
    ≈ 300 Ω, ordre de grandeur pour les calculs.
    Câble défectueux : broche 3 en court-circuit avec la masse. */
-labo(7, function () {
-  const cv = O.el("m7b-cv"), c = cv.getContext("2d"), W = cv.width, Hc = cv.height;
+labo(8, function () {
+  const cv = O.el("m8b-cv"), c = cv.getContext("2d"), W = cv.width, Hc = cv.height;
   let alim = "p48", micro = "stat", t = 0, pinChoisie = null;
-  const eC = O.el("m7b-c"), eD = O.el("m7b-def");
+  const eC = O.el("m8b-c"), eD = O.el("m8b-def");
   const ALIM = { aucune: null, p48: { U: 48, R: 6.8, nom: "P48" }, p24: { U: 24, R: 1.2, nom: "P24" }, p12: { U: 12, R: 0.68, nom: "P12" }, t12: { U: 12, R: 0.18, nom: "T12" }, pip: { nom: "Plug-in power" } };
   const RB = 0.3; // kΩ : bobine ou transformateur (ordre de grandeur)
   const NOMS = { stat: "Micro statique", dyn: "Micro dynamique", rub: "Ruban passif", elec: "Électret" };
@@ -2391,35 +2820,35 @@ labo(7, function () {
 
     // --- valeurs
     const v = u => u === null ? "—" : O.nb(u, 1) + " V";
-    Application.afficher("#m7b-co", O.nb(+eC.value, 1) + " mA");
-    Application.afficher("#m7b-u2", e.pip ? "—" : alim === "t12" ? "flottante" : v(e.u2));
-    Application.afficher("#m7b-u3", e.pip ? "—" : alim === "t12" ? "flottante" : v(e.u3));
-    Application.afficher("#m7b-u23", e.pip ? "—" : v(e.u23));
-    Application.afficher("#m7b-um", e.um === null ? "—" : O.nb(e.um, 1) + " V");
-    Application.afficher("#m7b-i", O.nb(e.I, 1) + " mA");
+    Application.afficher("#m8b-co", O.nb(+eC.value, 1) + " mA");
+    Application.afficher("#m8b-u2", e.pip ? "—" : alim === "t12" ? "flottante" : v(e.u2));
+    Application.afficher("#m8b-u3", e.pip ? "—" : alim === "t12" ? "flottante" : v(e.u3));
+    Application.afficher("#m8b-u23", e.pip ? "—" : v(e.u23));
+    Application.afficher("#m8b-um", e.um === null ? "—" : O.nb(e.um, 1) + " V");
+    Application.afficher("#m8b-i", O.nb(e.I, 1) + " mA");
     const conso = micro === "stat" || micro === "elec";
-    O.el("m7b-ligne-i").style.display = conso ? "" : "none";
-    O.note("m7b-msg", e.cl, e.msg + (e.chemin === "fantome" && alim === "p48" ? " <br><span class=\"muted small\">U = 48 − " + O.nb(e.I, 1) + " × 3,4 = " + O.nb(e.um, 1) + " V</span>" : ""));
+    O.el("m8b-ligne-i").style.display = conso ? "" : "none";
+    O.note("m8b-msg", e.cl, e.msg + (e.chemin === "fantome" && alim === "p48" ? " <br><span class=\"muted small\">U = 48 − " + O.nb(e.I, 1) + " × 3,4 = " + O.nb(e.um, 1) + " V</span>" : ""));
   }
 
   cv.addEventListener("click", ev => {
     const p = O.clic(cv, ev);
     FACES.forEach(F => [1, 2, 3].forEach(k => {
-      if (Math.hypot(p[0] - F.cx - F.pins[k][0], p[1] - F.cy - F.pins[k][1]) < 20) { pinChoisie = k; O.note("m7b-pin", "note", ROLE[k]); dessiner(); }
+      if (Math.hypot(p[0] - F.cx - F.pins[k][0], p[1] - F.cy - F.pins[k][1]) < 20) { pinChoisie = k; O.note("m8b-pin", "note", ROLE[k]); dessiner(); }
     }));
   });
   const anim = O.boucle(cv, dt => { t += dt; dessiner(); });
-  O.boutonPause("m7b-pause", anim);
-  Application.segment("#m7b-alim", [["aucune", "Aucune"], ["p48", "P48"], ["p24", "P24"], ["p12", "P12"], ["t12", "T12"], ["pip", "Plug-in"]], "p48", v => { alim = v; dessiner(); });
-  Application.segment("#m7b-micro", [["stat", "Statique"], ["dyn", "Dynamique"], ["rub", "Ruban"], ["elec", "Électret"]], "stat", v => { micro = v; if (v === "elec" && +eC.value > 3) O.curseur(eC, 1); dessiner(); });
+  O.boutonPause("m8b-pause", anim);
+  Application.segment("#m8b-alim", [["aucune", "Aucune"], ["p48", "P48"], ["p24", "P24"], ["p12", "P12"], ["t12", "T12"], ["pip", "Plug-in"]], "p48", v => { alim = v; dessiner(); });
+  Application.segment("#m8b-micro", [["stat", "Statique"], ["dyn", "Dynamique"], ["rub", "Ruban"], ["elec", "Électret"]], "stat", v => { micro = v; if (v === "elec" && +eC.value > 3) O.curseur(eC, 1); dessiner(); });
   eC.addEventListener("input", dessiner); eD.addEventListener("change", dessiner);
   dessiner();
 });
 
 /* --- Labo 3 : l'échelle des niveaux --------------------------------------- */
-labo(7, function () {
-  const cv = O.el("m7c-cv"), c = cv.getContext("2d"), W = cv.width;
-  const eL = O.el("m7c-l");
+labo(8, function () {
+  const cv = O.el("m8c-cv"), c = cv.getContext("2d"), W = cv.width;
+  const eL = O.el("m8c-l");
   const X = L => O.borne(60 + (L + 80) / 104 * 880, 60, 940);
   function dessiner() {
     const L = +eL.value, U = MICRO.voltsDbu(L), Lv = MICRO.dbvU(U);
@@ -2464,27 +2893,27 @@ labo(7, function () {
       O.ecrire(c, txt, bx + 7, p[0] + 50, { s: 13, c: "#000" });
     });
     // valeurs
-    Application.afficher("#m7c-lo", O.signe(L, 1) + " dBu");
-    Application.afficher("#m7c-dbu", O.signe(L, 1) + " dBu");
-    Application.afficher("#m7c-dbv", O.signe(Lv, 1) + " dBV");
-    Application.afficher("#m7c-v", O.volts(U));
-    Application.afficher("#m7c-ecart", O.db(L - 4, 1));
-    O.html("m7c-calc", '<div><span class="c">U = 0,775 × 10^(L / 20)</span></div><div>= 0,775 × 10^(' + O.nb(L, 1).replace("-", "−") + " / 20) = <b>" + O.volts(U) + "</b></div>" +
+    Application.afficher("#m8c-lo", O.signe(L, 1) + " dBu");
+    Application.afficher("#m8c-dbu", O.signe(L, 1) + " dBu");
+    Application.afficher("#m8c-dbv", O.signe(Lv, 1) + " dBV");
+    Application.afficher("#m8c-v", O.volts(U));
+    Application.afficher("#m8c-ecart", O.db(L - 4, 1));
+    O.html("m8c-calc", '<div><span class="c">U = 0,775 × 10^(L / 20)</span></div><div>= 0,775 × 10^(' + O.nb(L, 1).replace("-", "−") + " / 20) = <b>" + O.volts(U) + "</b></div>" +
       '<div><span class="c">L(dBV) = L(dBu) − 2,2</span></div><div>= ' + O.nb(L, 1).replace("-", "−") + " − 2,2 = <b>" + O.nb(Lv, 1).replace("-", "−") + " dBV</b></div>");
     let cl = "note ok", txt;
     if (L < -20) txt = "<b>Niveau micro.</b> Il faut un préamplificateur de " + O.nb(4 - L, 0) + " dB pour atteindre le niveau ligne de +4 dBu. C’est ce signal fragile que la liaison symétrique protège.";
     else if (L < -12) { cl = "note warn"; txt = "<b>Entre micro et ligne.</b> Un micro très sensible devant une source forte peut sortir à ce niveau : pensez au commutateur d’atténuation (pad)."; }
     else if (L <= 8) txt = "<b>Niveau ligne.</b> +4 dBu (1,228 V) en professionnel, −10 dBV (0,316 V, soit −7,8 dBu) en grand public : environ 11,8 dB d’écart.";
     else { cl = L > 18 ? "note bad" : "note warn"; txt = L > 18 ? "<b>Au-delà de +18 dBu.</b> Avec un alignement EBU R68, un convertisseur numérique écrêterait ici." : "<b>Niveau élevé.</b> Il reste peu de marge avant la pleine échelle numérique de +18 dBu (EBU R68)."; }
-    O.note("m7c-msg", cl, txt);
+    O.note("m8c-msg", cl, txt);
   }
   eL.addEventListener("input", dessiner);
-  O.situations("m7c-situ", s => O.curseur(eL, { dyn: -60, stat: -40, gp: -7.8, pro: 4 }[s]));
+  O.situations("m8c-situ", s => O.curseur(eL, { dyn: -60, stat: -40, gp: -7.8, pro: 4 }[s]));
   dessiner();
 });
 
 /* ==========================================================================
-   MODULE 8 — COUPLES STÉRÉOPHONIQUES
+   MODULE 9 — COUPLES STÉRÉOPHONIQUES
    Angles : 0° = axe du couple (vers la scène), positif à DROITE.
    Micro gauche orienté à −angle/2, micro droit à +angle/2, écartés de d.
    Source lointaine (champ lointain) :
@@ -2522,14 +2951,14 @@ const STEREO = {
 };
 
 /* --- Labo 1 : plan de scène ---------------------------------------------- */
-labo(8, function () {
-  const cv = O.el("m8a-cv"), c = cv.getContext("2d"), W = cv.width, Hc = cv.height;
+labo(9, function () {
+  const cv = O.el("m9a-cv"), c = cv.getContext("2d"), W = cv.width, Hc = cv.height;
   const PRESETS = {
     xy: { A: 0.5, ang: 90, d: 0, nom: "XY" }, blum: { A: 0, ang: 90, d: 0, nom: "Blumlein" },
     ab: { A: 1, ang: 0, d: 50, nom: "AB" }, ortf: { A: 0.5, ang: 110, d: 17, nom: "ORTF" },
     nos: { A: 0.5, ang: 90, d: 30, nom: "NOS" }, din: { A: 0.5, ang: 90, d: 20, nom: "DIN" }
   };
-  const eDir = O.el("m8a-dir"), eAng = O.el("m8a-ang"), eD = O.el("m8a-d"), eW = O.el("m8a-w");
+  const eDir = O.el("m9a-dir"), eAng = O.el("m9a-ang"), eD = O.el("m9a-d"), eW = O.el("m9a-w");
   O.options(eDir, DIRECTIVITES.map(d => [d.A, d.nom]), 0.5);
   let couple = "ortf", soliste = 25, t = 0;
   const INSTR = [["Violons", COUL.ciel], ["Altos", COUL.vert], ["Bois", COUL.violet], ["Cuivres", COUL.orange], ["Violoncelles", COUL.rose]];
@@ -2628,15 +3057,15 @@ labo(8, function () {
     O.ecrire(c, "total (plafonné) : " + O.signe(ss * 100, 0) + " %", x0, yb + 126, { s: 13, c: COUL.jaune });
 
     // ---------- valeurs
-    Application.afficher("#m8a-ango", O.nb(p.ang, 0) + "°");
-    Application.afficher("#m8a-do", O.nb(p.d * 100, 0) + " cm");
-    Application.afficher("#m8a-wo", O.nb(w, 0) + "°");
-    Application.afficher("#m8a-dl", O.signe(l, 1) + " dB");
-    Application.afficher("#m8a-dt", O.signe(dtm, 2) + " ms");
-    Application.afficher("#m8a-dec", O.signe(ss * 100, 0) + " %");
-    Application.afficher("#m8a-apds", ra === null ? "> 180°" : O.nb(ra, 0) + "°");
+    Application.afficher("#m9a-ango", O.nb(p.ang, 0) + "°");
+    Application.afficher("#m9a-do", O.nb(p.d * 100, 0) + " cm");
+    Application.afficher("#m9a-wo", O.nb(w, 0) + "°");
+    Application.afficher("#m9a-dl", O.signe(l, 1) + " dB");
+    Application.afficher("#m9a-dt", O.signe(dtm, 2) + " ms");
+    Application.afficher("#m9a-dec", O.signe(ss * 100, 0) + " %");
+    Application.afficher("#m9a-apds", ra === null ? "> 180°" : O.nb(ra, 0) + "°");
     const gD = STEREO.gain(p.A, p.ang / 2, soliste), gG = STEREO.gain(p.A, -p.ang / 2, soliste);
-    O.html("m8a-calc",
+    O.html("m9a-calc",
       '<div><span class="c">Soliste à θ = ' + O.signe(soliste, 0) + "°</span></div>" +
       '<div><span class="c">r<sub>D</sub> = A + B cos(θ − ' + O.nb(p.ang / 2, 0) + "°) = </span>" + O.nb(gD, 3).replace("-", "−") + "</div>" +
       '<div><span class="c">r<sub>G</sub> = A + B cos(θ + ' + O.nb(p.ang / 2, 0) + "°) = </span>" + O.nb(gG, 3).replace("-", "−") + "</div>" +
@@ -2653,7 +3082,7 @@ labo(8, function () {
     if (inverse) { cl = "note warn"; txt += " <b>Attention :</b> le soliste est dans le lobe arrière d’un des huit, les deux voies sont en opposition de polarité."; }
     txt += p.d === 0 ? " Couple coïncident : Δt = 0, compatible mono." : " Couple espacé de " + O.nb(p.d * 100, 0) + " cm : en mono, filtre en peigne (premier creux à " + (Math.abs(dtm) > 0.01 ? O.hz(1000 / (2 * Math.abs(dtm))) : "—") + " pour le soliste).";
     txt += ' <span class="muted small">Modèle du labo : décalage ≈ ΔL / 13 dB + Δt / 1 ms.</span>';
-    O.note("m8a-msg", cl, txt);
+    O.note("m9a-msg", cl, txt);
   }
 
   function choisirCouple(v) {
@@ -2661,19 +3090,19 @@ labo(8, function () {
     if (PRESETS[v]) { const P = PRESETS[v]; eDir.value = P.A; eAng.value = P.ang; eD.value = P.d; [eAng, eD].forEach(e => e.dispatchEvent(new Event("input", { bubbles: true }))); couple = v; }
     dessiner();
   }
-  const seg = Application.segment("#m8a-couple", [["xy", "XY"], ["blum", "Blumlein"], ["ab", "AB"], ["ortf", "ORTF"], ["nos", "NOS"], ["din", "DIN"], ["libre", "Libre"]], "ortf", v => { if (v !== "libre") choisirCouple(v); else { couple = "libre"; dessiner(); } });
+  const seg = Application.segment("#m9a-couple", [["xy", "XY"], ["blum", "Blumlein"], ["ab", "AB"], ["ortf", "ORTF"], ["nos", "NOS"], ["din", "DIN"], ["libre", "Libre"]], "ortf", v => { if (v !== "libre") choisirCouple(v); else { couple = "libre"; dessiner(); } });
   // Toucher un réglage passe en couple « libre »
   [eAng, eD].forEach(e => e.addEventListener("input", ev => { if (ev.isTrusted && couple !== "libre") { couple = "libre"; seg.choisir("libre"); } dessiner(); }));
   eDir.addEventListener("change", () => { if (couple !== "libre") { couple = "libre"; seg.choisir("libre"); } dessiner(); });
   eW.addEventListener("input", () => dessiner());
   O.glisser(cv, (x, y) => { if (x > 630) return; soliste = O.borne(Math.atan2(x - CX, CY - y) * 180 / Math.PI, -88, 88); dessiner(); });
-  O.situations("m8a-situ", s => {
+  O.situations("m9a-situ", s => {
     if (s === "orch") O.curseur(eW, 140);
     if (s === "quat") O.curseur(eW, 60);
     if (s === "bord") { soliste = +eW.value / 2; dessiner(); }
   });
   const anim = O.boucle(cv, dt => { t += dt; dessiner(dt); });
-  O.boutonPause("m8a-pause", anim);
+  O.boutonPause("m9a-pause", anim);
   choisirCouple("ortf");
 });
 
@@ -2685,9 +3114,9 @@ labo(8, function () {
    avec R = √(B_M² + g²) et θmax = atan2(g, B_M).
    Chaque micro virtuel est donc un micro du premier ordre, de directivité
    A_eq = A_M / (A_M + R), orienté à ±θmax. */
-labo(8, function () {
-  const cv = O.el("m8b-cv"), c = cv.getContext("2d"), W = cv.width, Hc = cv.height;
-  const eG = O.el("m8b-g");
+labo(9, function () {
+  const cv = O.el("m9b-cv"), c = cv.getContext("2d"), W = cv.width, Hc = cv.height;
+  const eG = O.el("m9b-g");
   let AM = 0.5, t = 0;
   const NOMM = { 1: "omni", 0.5: "cardioïde", 0: "en huit" };
 
@@ -2736,12 +3165,12 @@ labo(8, function () {
 
     // valeurs
     const proche = DIRECTIVITES.reduce((a, b) => Math.abs(b.A - Aeq) < Math.abs(a.A - Aeq) ? b : a);
-    Application.afficher("#m8b-go", O.nb(g, 2));
-    Application.afficher("#m8b-axes", g === 0 ? "confondus (0°)" : "±" + O.nb(thmax, 0) + "°");
-    Application.afficher("#m8b-dir", "A ≈ " + O.nb(Aeq, 2));
-    Application.afficher("#m8b-gdb", g === 0 ? "coupé" : O.db(20 * Math.log10(g), 1));
-    Application.afficher("#m8b-mono", "G + D = 2M");
-    O.html("m8b-calc",
+    Application.afficher("#m9b-go", O.nb(g, 2));
+    Application.afficher("#m9b-axes", g === 0 ? "confondus (0°)" : "±" + O.nb(thmax, 0) + "°");
+    Application.afficher("#m9b-dir", "A ≈ " + O.nb(Aeq, 2));
+    Application.afficher("#m9b-gdb", g === 0 ? "coupé" : O.db(20 * Math.log10(g), 1));
+    Application.afficher("#m9b-mono", "G + D = 2M");
+    O.html("m9b-calc",
       '<div><span class="c">G = M + S = A + B cos θ − g sin θ</span></div>' +
       '<div><span class="c">R = √(B² + g²) = √(' + O.nb(BM * BM, 3) + " + " + O.nb(g * g, 3) + ") = </span><b>" + O.nb(R, 3) + "</b></div>" +
       '<div><span class="c">θmax = atan(g / B) = </span><b>' + (BM === 0 ? (g ? "90" : "0") : O.nb(thmax, 1)) + "°</b></div>" +
@@ -2750,17 +3179,17 @@ labo(8, function () {
     if (g === 0) { cl = "note warn"; txt = "<b>S est coupé : G = D = M.</b> Les deux voies sont identiques, l’image est mono, au centre. Montez le niveau de S."; }
     else if (AM === 0 && Math.abs(g - 1) < 0.02) txt = "<b>Équivalent Blumlein.</b> M en huit et S au même niveau : deux huit virtuels croisés à ±45°.";
     else txt = "<b>Deux micros virtuels " + (AM === 0 ? "en huit" : "proches de : " + proche.nom.toLowerCase()) + " (A ≈ " + O.nb(Aeq, 2) + "), orientés à ±" + O.nb(thmax, 0) + "°.</b> " + (thmax > 60 ? "L’image est très large." + (Aeq < 0.49 ? " Les lobes arrière, en polarité inversée, grandissent." : "") : thmax < 30 ? "L’image est étroite : peu de différence entre G et D." : "Une largeur courante.") + " En mono, G + D = 2M : S disparaît, rien ne s’annule.";
-    O.note("m8b-msg", cl, txt);
+    O.note("m9b-msg", cl, txt);
   }
-  Application.segment("#m8b-m", [["1", "Omni"], ["0.5", "Cardioïde"], ["0", "En huit"]], "0.5", v => { AM = +v; dessiner(); });
-  const segM = O.el("m8b-m");
+  Application.segment("#m9b-m", [["1", "Omni"], ["0.5", "Cardioïde"], ["0", "En huit"]], "0.5", v => { AM = +v; dessiner(); });
+  const segM = O.el("m9b-m");
   eG.addEventListener("input", dessiner);
-  O.situations("m8b-situ", s => {
+  O.situations("m9b-situ", s => {
     const P = { etroit: ["0.5", 0.25], xy: ["0.5", 0.5], blum: ["0", 1], large: ["0.5", 1] }[s];
     segM._choisir(P[0]); O.curseur(eG, P[1]);
   });
   const anim = O.boucle(cv, dt => { t += dt; dessiner(); });
-  O.boutonPause("m8b-pause", anim);
+  O.boutonPause("m9b-pause", anim);
   dessiner();
 });
 })();
