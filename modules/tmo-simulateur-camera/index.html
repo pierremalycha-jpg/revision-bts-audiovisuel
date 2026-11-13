@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simulateur caméra — Révision BTS Audiovisuel</title>
+  <meta name="description" content="Simulateur de caméra et d'objectif : une caméra de plateau 2/3 de pouce et son zoom parfocal, un boîtier plein format et son zoom photo varifocal. Exposition, profondeur de champ, défauts optiques, knee, black gamma.">
+  <!-- « ../../ » remonte de deux dossiers : modules/tmo-simulateur-camera/ → racine -->
+  <script src="../../js/theme.js"></script>
+  <script src="../../js/transition.js"></script>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="simulateur.css">
+</head>
+
+<!-- ======================================================================
+     SIMULATEUR CAMÉRA — une application pratique (pas de modules ni de note)
+     ----------------------------------------------------------------------
+     Interface épurée : une seule grande scène (le plateau, caméra au centre)
+     et, par-dessus, des éléments semi-transparents que l'on affiche ou non :
+       - en haut : retour à l'accueil, choix de la configuration, expériences ;
+       - en bas : le « dock », quatre familles de réglages et le menu Afficher ;
+       - des fenêtres que l'on déplace, agrandit, réduit ou ferme : le retour
+         caméra, puis, à la demande, la profondeur de champ, la coupe de
+         l'objectif, le capteur, le signal et les explications.
+
+     Cette page ne contient que la charpente. Les fichiers, dans l'ordre :
+       optique.js     les deux configurations et les lois physiques
+       decor.js       le plateau TV, dessiné calque par calque (2,5D)
+       materiel.js    les dessins des caméras et de la régie
+       rendu.js       l'image de la caméra (WebGL)
+       scene.js       la grande scène en perspective (WebGL)
+       profondeur.js  le schéma de profondeur de champ (côté / dessus)
+       anatomie.js    la coupe des objectifs et le schéma des capteurs
+       signal.js      l'oscilloscope et la courbe de transfert
+       textes.js      les explications et les expériences guidées
+       simulateur.js  l'état, les réglages, les fenêtres, le lien entre tout
+     ====================================================================== -->
+<body data-racine="../../" class="sim-page">
+
+  <!-- LA SCÈNE : tout le fond de la page -->
+  <canvas id="scene" tabindex="0" aria-label="Le plateau vu en perspective, la caméra au centre. Glisser pour tourner autour, molette pour s’approcher ou reculer."></canvas>
+  <div class="scene-message" id="scene-message" hidden></div>
+  <div id="reperes"></div>
+  <div class="etq-net" id="etq-net" hidden></div>
+
+  <!-- EN HAUT : trois pastilles discrètes -->
+  <header class="haut">
+    <div class="pastille verre">
+      <a class="rond" href="../../index.html#pratique" title="Retour à toutes les applications" aria-label="Retour à toutes les applications">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <span class="app-ic" id="sim-icone" aria-hidden="true"></span>
+      <h1>Simulateur caméra</h1>
+    </div>
+    <div class="seg verre config" id="choix-config" role="group" aria-label="Configuration de prise de vue"></div>
+    <div class="pastille verre">
+      <button class="plat" id="btn-experiences" type="button" title="Douze manipulations guidées, pas à pas">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 2h4M6.5 2v4L3 12.2A1.2 1.2 0 0 0 4 14h8a1.2 1.2 0 0 0 1-1.8L9.5 6V2M4.6 10h6.8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Expériences</span>
+      </button>
+      <button class="rond" id="bouton-theme" type="button"></button>
+    </div>
+  </header>
+
+  <!-- ===================== LES FENÊTRES =====================
+       Chacune se déplace par sa barre de titre, se redimensionne par son coin
+       bas droit, s'agrandit d'un double-clic sur le titre et se ferme par ×.
+       Leur taille et leur place de départ sont dans simulateur.js (FENETRES). -->
+
+  <section class="fen verre" id="fen-retour" aria-labelledby="t-retour" hidden>
+    <header class="fen-tete">
+      <h2 id="t-retour">Retour caméra</h2>
+      <div class="fen-outils">
+        <button class="mini" id="aide-zebra" type="button" aria-pressed="false">Zébra</button>
+        <button class="mini" id="aide-peaking" type="button" aria-pressed="false">Peaking</button>
+        <button class="mini" id="aide-loupe" type="button" aria-pressed="false">×1</button>
+      </div>
+      <button class="fen-x" type="button" aria-label="Fermer">×</button>
+    </header>
+    <div class="fen-corps nu">
+      <div class="moniteur" id="moniteur" tabindex="0" aria-label="Image de la caméra. Glisser pour cadrer : panoramique et inclinaison.">
+        <canvas id="image" width="960" height="540"></canvas>
+        <div class="mon-info" id="mon-info" aria-hidden="true"></div>
+        <div class="mon-expo" id="mon-expo" aria-live="polite"></div>
+        <div class="mon-badges" id="mon-badges" aria-hidden="true"></div>
+        <div class="mon-message" id="mon-message" hidden></div>
+      </div>
+    </div>
+    <i class="fen-poignee" aria-hidden="true"></i>
+  </section>
+
+  <section class="fen verre" id="fen-profondeur" aria-labelledby="t-profondeur" hidden>
+    <header class="fen-tete">
+      <h2 id="t-profondeur">Profondeur de champ</h2>
+      <div class="fen-outils"><div class="seg mini" id="choix-profondeur" role="group" aria-label="Point de vue du schéma"></div></div>
+      <button class="fen-x" type="button" aria-label="Fermer">×</button>
+    </header>
+    <div class="fen-corps">
+      <canvas id="profondeur" class="dessin etire" role="img" aria-label="Schéma de profondeur de champ : la caméra, les distances, le champ, le plan net et la zone nette"></canvas>
+      <p class="legende" id="profondeur-resume"></p>
+    </div>
+    <i class="fen-poignee" aria-hidden="true"></i>
+  </section>
+
+  <section class="fen verre" id="fen-anatomie" aria-labelledby="t-anatomie" hidden>
+    <header class="fen-tete"><h2 id="t-anatomie">Coupe de l’objectif</h2><button class="fen-x" type="button" aria-label="Fermer">×</button></header>
+    <div class="fen-corps">
+      <svg id="anatomie" class="dessin schema" role="img" aria-label="Coupe de l’objectif : groupes de lentilles, diaphragme, bagues, et trajet de la lumière jusqu’au capteur"></svg>
+    </div>
+    <i class="fen-poignee" aria-hidden="true"></i>
+  </section>
+
+  <section class="fen verre" id="fen-capteur" aria-labelledby="t-capteur" hidden>
+    <header class="fen-tete"><h2 id="t-capteur">Capteur et chaîne du signal</h2><button class="fen-x" type="button" aria-label="Fermer">×</button></header>
+    <div class="fen-corps">
+      <svg id="capteur" class="dessin schema" role="img" aria-label="Comparaison des deux capteurs à la même échelle, et mesure de la couleur"></svg>
+      <div class="chaine" id="chaine" aria-label="Chaîne de traitement du signal"></div>
+    </div>
+    <i class="fen-poignee" aria-hidden="true"></i>
+  </section>
+
+  <section class="fen verre" id="fen-signal" aria-labelledby="t-signal" hidden>
+    <header class="fen-tete"><h2 id="t-signal">Signal</h2><button class="fen-x" type="button" aria-label="Fermer">×</button></header>
+    <div class="fen-corps deux">
+      <figure><canvas id="oscilloscope" class="dessin etire" role="img" aria-label="Oscilloscope : niveaux vidéo de l’image, de 0 à 109 %"></canvas><figcaption>Oscilloscope</figcaption></figure>
+      <figure><canvas id="courbe" class="dessin etire" role="img" aria-label="Courbe de transfert de la caméra"></canvas><figcaption>Courbe de la caméra</figcaption></figure>
+    </div>
+    <i class="fen-poignee" aria-hidden="true"></i>
+  </section>
+
+  <section class="fen verre" id="fen-explications" aria-labelledby="t-explications" hidden>
+    <header class="fen-tete"><h2 id="t-explications">Explications</h2><button class="fen-x" type="button" aria-label="Fermer">×</button></header>
+    <div class="fen-corps texte" id="explications" aria-live="polite"></div>
+    <i class="fen-poignee" aria-hidden="true"></i>
+  </section>
+
+  <section class="fen verre" id="fen-experience" aria-labelledby="t-experience" hidden>
+    <header class="fen-tete"><h2 id="t-experience">Expérience</h2><button class="fen-x" type="button" aria-label="Quitter l’expérience">×</button></header>
+    <div class="fen-corps texte" id="exp-carte"></div>
+    <i class="fen-poignee" aria-hidden="true"></i>
+  </section>
+
+  <!-- EN BAS : la feuille des réglages (ouverte par le dock), le menu Afficher, le dock -->
+  <section class="feuille verre" id="feuille" aria-labelledby="feuille-titre" hidden>
+    <header><h2 id="feuille-titre"></h2><span class="muted" id="feuille-sous"></span><button class="fen-x" id="feuille-x" type="button" aria-label="Fermer les réglages">×</button></header>
+    <div class="panneau" id="panneau"></div>
+  </section>
+  <div class="menu verre" id="menu-afficher" role="menu" aria-label="Afficher" hidden></div>
+  <nav class="dock verre" id="dock" aria-label="Réglages et affichage"></nav>
+  <p class="astuce" id="astuce">Glissez pour tourner autour de la caméra · molette pour vous approcher</p>
+
+  <!-- La liste des expériences guidées -->
+  <dialog class="exp-fenetre" id="exp-fenetre" aria-labelledby="exp-titre">
+    <div class="exp-tete">
+      <div><span class="eyebrow">Pour découvrir pas à pas</span><h2 id="exp-titre">Expériences guidées</h2></div>
+      <button class="btn small" id="exp-fermer" type="button">Fermer</button>
+    </div>
+    <div class="exp-liste" id="exp-liste"></div>
+  </dialog>
+
+  <!-- catalogue.js : pour l'icône et les couleurs de l'application -->
+  <script src="../../js/catalogue.js"></script>
+  <script src="optique.js"></script>
+  <script src="decor.js"></script>
+  <script src="materiel.js"></script>
+  <script src="rendu.js"></script>
+  <script src="scene.js"></script>
+  <script src="profondeur.js"></script>
+  <script src="anatomie.js"></script>
+  <script src="signal.js"></script>
+  <script src="textes.js"></script>
+  <script src="simulateur.js"></script>
+</body>
+</html>

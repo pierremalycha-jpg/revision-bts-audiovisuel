@@ -9,7 +9,7 @@ Chaque notion a sa propre **application de révision**. La page d'accueil prése
 
 1. **Apport de connaissances** — comprendre les notions techniques, avec trois sous-catégories : *Caméra, éclairage, filtres*, *Le numérique* et *Son* ;
 2. **Outils** — préparer ses projets (plans de feu, schémas de câblage, synoptiques de régie, workflows) : à venir ;
-3. **Applications pratiques** — simulateurs (régie, caméra, car régie) : à venir.
+3. **Applications pratiques** — simulateurs : le **simulateur caméra** est en ligne ; régie et car régie sont à venir.
 
 Les applications d'apport de connaissances suivent le modèle de l'application **Photométrie**, qui sert de référence : un parcours de modules, et dans chaque module quatre étapes — **Comprendre**, **Manipuler**, **Retenir**, **S'évaluer** (évaluation sur 20, 12/20 pour ouvrir le module suivant).
 
@@ -34,6 +34,7 @@ La progression des étudiants est enregistrée avec Firebase. Le site est héber
 | Éclairage — *LED, gélatines et ombres.* | Connaissances › Caméra, éclairage, filtres | TES | 3 | `modules/tes-eclairage/` |
 | Compression vidéo — *Moins de bits, même image.* | Connaissances › Le numérique | TES | 6 | `modules/tes-compression-video/` |
 | Microphones — *De la vibration à la tension.* | Connaissances › Son | TES | 9 | `modules/tes-microphones/` |
+| Simulateur caméra — *Deux caméras, deux objectifs.* | Applications pratiques | TMO | accès libre, sans note | `modules/tmo-simulateur-camera/` |
 
 ## Choix techniques
 
@@ -90,9 +91,47 @@ revision-bts-audiovisuel/
     ├── tes-compression-video/        Application avec un film de module
     │   ├── index.html, contenu.js, labos.js
     │   └── films/                    Les vidéos terminées (module-1.mp4 et son affiche)
-    └── tes-microphones/              Sous-catégorie « Son » : neuf modules sur les microphones
-        └── index.html, contenu.js, labos.js
+    ├── tes-microphones/              Sous-catégorie « Son » : neuf modules sur les microphones
+    │   └── index.html, contenu.js, labos.js
+    └── tmo-simulateur-camera/        Application pratique : le simulateur caméra (voir plus bas)
+        ├── index.html, simulateur.css  La page et son interface épurée (scène, dock, fenêtres)
+        ├── optique.js                Les deux configurations et les lois physiques
+        ├── decor.js, materiel.js     Le plateau TV et le matériel, dessinés à plat (2,5D)
+        ├── scene.js                  La grande scène en perspective, caméra au centre (WebGL)
+        ├── rendu.js                  L'image de la caméra (WebGL)
+        ├── profondeur.js, anatomie.js, signal.js   Les schémas facultatifs : profondeur de champ, objectifs, signal
+        ├── textes.js                 Les explications et les expériences guidées
+        └── simulateur.js             L'état, les réglages, les fenêtres, le lien entre tout le reste
 ```
+
+## Le simulateur caméra
+
+Première **application pratique** : on y manipule deux configurations de prise de vue et on voit l'image réagir.
+
+| | Caméra de plateau | Boîtier cinéma |
+|---|---|---|
+| Modèle de référence | type Sony HXC-FB80, avec sa CCU, son RCP et le câble fibre | type Sony FX3 |
+| Capteur | trois CMOS 2/3″ derrière un prisme | un CMOS plein format à matrice de Bayer |
+| Objectif | zoom broadcast 8,5–170 mm f/1,8, **parfocal**, doubleur ×2, tirage optique | zoom photo 24–70 mm f/2,8, **varifocal**, autofocus |
+
+Ce que l'on règle : les bagues (zoom, mise au point, diaphragme), la lumière du plateau, le filtre ND, l'obturation, le gain ou les ISO, la balance des blancs, puis la courbe de la caméra (gamma, master black, **black gamma** — black stretch et black press —, **knee**, saturation, détail). Ce que l'on voit : l'image de la caméra, avec l'exposition, la **profondeur de champ** et les **défauts optiques** (aberrations chromatiques latérale et longitudinale, vignettage, diffraction, distorsion, mollesse à pleine ouverture) qui varient avec l'objectif, la focale et l'ouverture.
+
+**Une interface épurée.** La page est une seule grande scène : le plateau en perspective, la caméra au centre ; on tourne autour en glissant, on s'approche avec la molette. Tout le reste flotte par-dessus, en semi-transparence, et ne s'affiche que si on le demande :
+
+- en bas, le **dock** : quatre familles de réglages (Objectif, Exposition, Image, Défauts) qui s'ouvrent et se referment d'un clic, et le menu **Afficher** ;
+- le **retour caméra** est une fenêtre : on la déplace par son titre, on la redimensionne par son coin, on l'agrandit d'un double-clic sur le titre ;
+- le menu **Afficher** propose, au choix : le champ et la zone nette dans la scène, la **vue de côté / de dessus** (schéma de profondeur de champ), la coupe de l'objectif (ses lentilles bougent avec les bagues), le capteur et la chaîne du signal, l'oscilloscope et la courbe de transfert, et les **explications** (une fiche qui suit le réglage que l'on touche, plus des repères cliquables sur le matériel) ;
+- en haut à droite, douze **expériences guidées**.
+
+À savoir pour le faire évoluer :
+
+- **Aucune note, aucun module** : dans le catalogue, l'application a `modules: 0` et `suivi: "aucun"`. Elle n'apparaît donc pas dans « Ma progression ».
+- **Le décor est en 2,5D** : des dessins plats (les « calques » de `decor.js`), posés à leur vraie distance. Pour ajouter un élément, écris sa fonction de dessin (en mètres) et ajoute une ligne à la liste `calques` : il apparaît dans la scène et dans l'image de la caméra.
+- **Ce qui est affiché au départ** se règle dans `simulateur.js` (`etat.affiche`) ; la taille et la place des fenêtres, dans `FENETRES`.
+- **Les valeurs physiques** (sensibilité, bruit, force des défauts de chaque objectif) sont regroupées en tête de `optique.js`, dans `CONFIGS`. Ce sont des ordres de grandeur réalistes, pas des mesures d'un modèle précis.
+- **Les textes** (une fiche par réglage, les expériences) sont tous dans `textes.js`.
+- **Les défauts sont accentués ×3 par défaut**, pour être visibles sur un vidéoprojecteur ; l'onglet « Défauts » permet de revenir à leur force réelle ou de les corriger.
+- **L'image est calculée par la carte graphique** (WebGL 2). Sur un appareil lent, le simulateur allège tout seul la définition ; ajoute `?hd` à l'adresse pour l'en empêcher. Sans WebGL 2, l'image est remplacée par un message et le reste de la page fonctionne.
 
 ## Tester le site sur ton ordinateur
 
@@ -117,6 +156,8 @@ Résumé (le détail est dans [docs/CHARTE-APPLICATIONS.md](docs/CHARTE-APPLICAT
 ## Contenu pédagogique : à valider
 
 Les applications « Signal vidéo numérique », « Compression vidéo » et « Microphones » ont été rédigées à partir de connaissances techniques générales, **pas à partir du référentiel du BTS**. Avant de les proposer aux étudiants, relis les notions et les questions, et ajuste le vocabulaire, le niveau et les notions à ce que le référentiel exige.
+
+Même remarque pour le **simulateur caméra** : ses explications (`modules/tmo-simulateur-camera/textes.js`) sont à relire, et ses chiffres sont des ordres de grandeur. Seules quelques données viennent des fiches constructeur (trois capteurs 2/3″, F13 à 2 000 lux, filtres ND 1/4, 1/16 et 1/64 et liaison fibre pour la caméra de plateau ; plages du knee et du black gamma du profil d'image pour le boîtier).
 
 ## Données enregistrées
 
