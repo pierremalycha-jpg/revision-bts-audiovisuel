@@ -7,8 +7,8 @@
      Accueil de l'application  héros, progression, parcours des modules
      En haut de chaque module  le film du module (facultatif) : une vidéo courte,
                                en musique et sans voix, qui résume l'essentiel
-     Pour chaque module, quatre étapes, dans cet ordre :
-       1. Comprendre   les mots et les formules, en questions dépliables
+     Pour chaque module, quatre étapes, dans cet ordre (une à la fois à l'écran) :
+       1. Comprendre   les mots et les formules, en tuiles qui ouvrent leur fiche
        2. Manipuler    animations et simulations (le « labo » du module)
        3. Retenir      l'essentiel avant l'évaluation
        4. S'évaluer    10 questions, notées sur 20 ; 12/20 ouvre le module suivant
@@ -69,9 +69,10 @@ const Application = (function () {
   const labosLances = {};
   const auAffichage = {};    // fonctions à rappeler à chaque affichage d'un module
   const evaluations = {};    // état de l'évaluation de chaque module
-  /* Interface épurée (voir la section « INTERFACE ÉPURÉE ») : activée par
-     « epure: true » dans contenu.js. « ?classique » dans l'adresse rend
-     l'ancienne présentation (une seule longue page), pour comparer. */
+  /* Interface épurée (voir la section « INTERFACE ÉPURÉE ») : c'est la
+     présentation par défaut de toutes les applications. « epure: false » dans
+     contenu.js, ou « ?classique » dans l'adresse, rend l'ancienne présentation
+     (une seule longue page, les notions en questions dépliables). */
   let EPURE = false;
   const etapeDe = {};        // étape affichée dans chaque module (interface épurée)
   const fiches = {};         // les fiches « mots » et « formules » de chaque module
@@ -487,7 +488,7 @@ const Application = (function () {
   }
 
   /* ==========================================================================
-     INTERFACE ÉPURÉE  (contenu.js : « epure: true »)
+     INTERFACE ÉPURÉE  (par défaut ; « epure: false » dans contenu.js pour l'ancienne)
      --------------------------------------------------------------------------
      Le même contenu, présenté pour ne pas noyer l'élève :
        - une ÉTAPE à la fois (Comprendre, Manipuler, Retenir, S'évaluer), avec
@@ -659,6 +660,7 @@ const Application = (function () {
   }
 
   function organiserLabos(zone) {
+    const n = +zone.id.slice(6); // « labo-3 » → 3
     // « Calcul pas à pas » : replié derrière un « + »
     $$(".lab-ctl .card", zone).forEach(card => {
       if (!$(".calc", card)) return;
@@ -702,9 +704,11 @@ const Application = (function () {
       panneaux.forEach((p, k) => p.classList.toggle("on", k === i));
       const p = panneaux[i];
       if (anime && i !== actuel && !mouvementReduit()) { p.classList.remove("in-d", "in-g"); void p.offsetWidth; p.classList.add(i > actuel ? "in-d" : "in-g"); }
+      const change = i !== actuel;
       actuel = i;
       $$(".seg.glisse", p).forEach(s => s._placer && s._placer());
       remplirCurseurs(p);
+      if (change) rappelerAffichage(n);
     }
     segment(seg, noms.map((x, i) => [String(i), "<small>" + echapper(x.court) + "</small><span>" + echapper(x.nom) + "</span>"]), "0", v => montrer(+v, true));
     zone.addEventListener("click", e => {
@@ -714,6 +718,15 @@ const Application = (function () {
       window.scrollTo({ top: Math.max(0, y), behavior: mouvementReduit() ? "auto" : "smooth" });
     });
     montrer(0, false);
+  }
+
+  /* Un labo qui était masqué redevient visible (étape « Manipuler », onglet
+     d'un labo) : on rappelle les fonctions « surAffichage » du module, comme à
+     l'ouverture du module. Les labos y relancent leurs animations, qui
+     s'arrêtent d'elles-mêmes quand leur scène est cachée. */
+  function rappelerAffichage(n) {
+    if (ongletCourant !== "m" + n) return;
+    (auAffichage[n] || []).forEach(f => { try { f(); } catch (e) { console.error(e); } });
   }
 
   // Affiche une étape du module n (les autres sont masquées).
@@ -735,7 +748,7 @@ const Application = (function () {
       const b = $(".pas-barre", sec), y = b.getBoundingClientRect().top + window.scrollY - $("#ctx").offsetHeight - 8;
       if (Math.abs(window.scrollY - y) > 4) window.scrollTo({ top: Math.max(0, y), behavior: mouvementReduit() ? "auto" : "smooth" });
     }
-    if (ongletCourant === "m" + n) { suivreDefilement(); apparitions(cible); }
+    if (ongletCourant === "m" + n) { suivreDefilement(); apparitions(cible); if (iA !== iB) rappelerAffichage(n); }
   }
 
   /* ==========================================================================
@@ -1143,7 +1156,7 @@ const Application = (function () {
      ========================================================================== */
   function demarrer(config) {
     A = config;
-    EPURE = !!A.epure && !/[?&]classique\b/.test(location.search);
+    EPURE = A.epure !== false && !/[?&]classique\b/.test(location.search);
     if (EPURE) document.documentElement.classList.add("epure");
     const info = infosCatalogue();
     document.title = info.titre + " — Révision BTS Audiovisuel";
