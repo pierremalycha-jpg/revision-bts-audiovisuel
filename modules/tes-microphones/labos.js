@@ -1750,6 +1750,279 @@ labo(5, function () {
 });
 
 /* ==========================================================================
+   MODULE 6 — TYPES DE MICROS ET PRISE DE SON
+   ========================================================================== */
+
+/* --- Labo 1 : distance critique ---------------------------------------------
+   Champ direct : −20 log d (référence : son direct à 1 m).
+   Champ réverbéré capté : constant, égal au direct à la distance critique
+   d_c = √DF × r_H, avec r_H ≈ 0,057 √(V/T) (source omnidirectionnelle).
+   Total : somme des énergies. Proportions de la salle supposées 1,6 × 1,2 × 1. */
+labo(6, function () {
+  const cv = O.el("m6a-cv"), c = cv.getContext("2d");
+  const cV = O.el("m6a-v"), cT = O.el("m6a-t"), cD = O.el("m6a-d"), sel = O.el("m6a-dir");
+  const VMIN = 5, VMAX = 20000, DMIN = 0.05, DMAX = 20;
+  O.options(sel, DIRECTIVITES.map(d => [d.id, d.nom]), "cardio");
+  cV.value = O.posLog(200, VMIN, VMAX); cD.value = O.posLog(0.5, DMIN, DMAX);
+  let temps = 0;
+  const alea = n => { const x = Math.sin(n * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };
+  const grains = Array.from({ length: 110 }, (_, i) => [alea(i), alea(i + 300), alea(i + 600) * 6.3]);
+
+  // Graphique
+  const GX0 = 80, GX1 = 600, GY0 = 70, GY1 = 450, VHAUT = 30, VBAS = -35;
+  const gx = d => O.log(d, DMIN, DMAX, GX0, GX1);
+  const gy = v => GY0 + (VHAUT - O.borne(v, VBAS, VHAUT)) / (VHAUT - VBAS) * (GY1 - GY0);
+
+  function dessiner() {
+    const V = O.valLog(+cV.value, VMIN, VMAX), T = +cT.value, d = O.valLog(+cD.value, DMIN, DMAX), D = DIR(sel.value);
+    const rH = MICRO.rayonReverberation(V, T), df = MICRO.df(D.A), dc = Math.sqrt(df) * rH, dr = 20 * Math.log10(dc / d);
+    const LR = -20 * Math.log10(dc), LRomni = -20 * Math.log10(rH), LD = x => -20 * Math.log10(x);
+    const total = x => 10 * Math.log10(Math.pow(10, LD(x) / 10) + Math.pow(10, LR / 10));
+
+    Application.afficher("#m6a-vo", O.nb(V < 100 ? V : Math.round(V / 10) * 10, 0) + " m³");
+    Application.afficher("#m6a-to", O.nb(T, 2) + " s");
+    Application.afficher("#m6a-do", O.metres(d));
+    Application.afficher("#m6a-rh", O.metres(rH));
+    Application.afficher("#m6a-dc", O.metres(dc));
+    Application.afficher("#m6a-dr", O.signe(dr, 1) + " dB");
+    Application.afficher("#m6a-champ", dr >= 6 ? "Direct" : dr <= -6 ? "Réverbéré" : "Mélange");
+
+    O.fond(c);
+    // --- Graphique ---
+    O.ecrire(c, "Niveau capté (dB, par rapport au son direct à 1 m)", GX0 - 50, 34, { s: 16 });
+    c.fillStyle = "rgba(10,132,255,.07)"; c.fillRect(GX0, GY0, gx(dc) - GX0, GY1 - GY0);
+    c.fillStyle = "rgba(255,159,10,.07)"; c.fillRect(gx(dc), GY0, GX1 - gx(dc), GY1 - GY0);
+    for (let v = -30; v <= 30; v += 10) { c.fillStyle = v === 0 ? "rgba(255,255,255,.22)" : COUL.grille; c.fillRect(GX0, gy(v), GX1 - GX0, 1); O.ecrire(c, O.signe(v, 0), GX0 - 8, gy(v), { s: 14, g: false, c: COUL.doux, a: "right", b: "middle" }); }
+    [0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20].forEach(x => { c.fillStyle = COUL.grille; c.fillRect(gx(x), GY0, 1, GY1 - GY0); O.ecrire(c, O.nb(x, 2), gx(x), GY1 + 20, { s: 14, g: false, c: COUL.doux, a: "center" }); });
+    O.ecrire(c, "distance source – micro (m)", GX1, GY1 + 42, { s: 14, g: false, c: COUL.doux, a: "right" });
+    O.ecrire(c, "direct dominant", GX0 + 8, GY1 - 10, { s: 14, c: COUL.ciel });
+    O.ecrire(c, "réverbéré dominant", GX1 - 8, GY1 - 10, { s: 14, c: COUL.orange, a: "right" });
+    c.save(); c.beginPath(); c.rect(GX0, GY0, GX1 - GX0, GY1 - GY0); c.clip();
+    if (D.id !== "omni") {
+      c.strokeStyle = COUL.doux; c.setLineDash([6, 5]); c.lineWidth = 1.5;
+      c.beginPath(); c.moveTo(GX0, gy(LRomni)); c.lineTo(GX1, gy(LRomni)); c.stroke(); c.setLineDash([]);
+    }
+    c.strokeStyle = COUL.orange; c.lineWidth = 3; c.beginPath(); c.moveTo(GX0, gy(LR)); c.lineTo(GX1, gy(LR)); c.stroke();
+    c.strokeStyle = COUL.bleu; c.beginPath(); c.moveTo(gx(DMIN), gy(LD(DMIN))); c.lineTo(gx(DMAX), gy(LD(DMAX))); c.stroke();
+    c.strokeStyle = COUL.texte; c.lineWidth = 2; c.beginPath();
+    for (let i = 0; i <= 200; i++) { const x = DMIN * Math.pow(DMAX / DMIN, i / 200); i ? c.lineTo(gx(x), gy(total(x))) : c.moveTo(gx(x), gy(total(x))); }
+    c.stroke();
+    c.restore();
+    // étiquettes des courbes
+    O.ecrire(c, "champ direct (−6 dB / doublement)", gx(0.07), gy(LD(0.07)) - 6, { s: 14, c: COUL.ciel });
+    O.ecrire(c, "réverbéré capté par ce micro", GX1 - 4, gy(LR) - 8, { s: 14, c: COUL.orange, a: "right" });
+    if (D.id !== "omni" && Math.abs(LRomni - LR) > 2) O.ecrire(c, "réverbéré capté par un omni", GX1 - 4, gy(LRomni) - 8, { s: 13, g: false, c: COUL.doux, a: "right" });
+    // distance critique
+    if (dc > DMIN && dc < DMAX) {
+      c.strokeStyle = COUL.orange; c.setLineDash([4, 4]); c.lineWidth = 1.5; c.beginPath(); c.moveTo(gx(dc), GY0); c.lineTo(gx(dc), GY1); c.stroke(); c.setLineDash([]);
+      O.ecrire(c, "dc = " + O.metres(dc), gx(dc) + 6, GY0 + 16, { s: 14, c: COUL.orange });
+    }
+    // le micro
+    const xm = gx(d);
+    c.strokeStyle = COUL.jaune; c.lineWidth = 2; c.beginPath(); c.moveTo(xm, GY0); c.lineTo(xm, GY1); c.stroke();
+    if (Math.abs(dr) > 1.2) { O.fleche(c, xm + 14, gy(LR), xm + 14, gy(LD(d)), COUL.jaune, 2); O.ecrire(c, "D/R " + O.signe(dr, 1) + " dB", xm + 22, (gy(LR) + gy(LD(d))) / 2, { s: 15, c: COUL.jaune, b: "middle" }); }
+    c.fillStyle = COUL.jaune; c.beginPath(); c.arc(xm, gy(total(d)), 6, 0, 7); c.fill();
+
+    // --- La salle vue de dessus ---
+    const k = Math.cbrt(V / 1.92), L = 1.6 * k, l = 1.2 * k;
+    const s = Math.min(330 / L, 290 / l), rw = L * s, rh = l * s, rx = 650 + (330 - rw) / 2, ry = 100 + (290 - rh) / 2;
+    O.ecrire(c, "La salle, vue de dessus", 815, 34, { s: 16, a: "center" });
+    O.ecrire(c, "≈ " + O.metres(L) + " × " + O.metres(l) + " × " + O.metres(k) + " de haut", 815, 56, { s: 14, g: false, c: COUL.doux, a: "center" });
+    c.fillStyle = COUL.panneau; c.fillRect(rx, ry, rw, rh);
+    c.strokeStyle = "rgba(255,255,255,.45)"; c.lineWidth = 2; c.strokeRect(rx, ry, rw, rh);
+    const sx = rx + 0.2 * rw, sy = ry + rh / 2;
+    let mx = sx + d * s; const dehors = mx > rx + rw - 10; if (dehors) mx = rx + rw - 10;
+    c.save(); c.beginPath(); c.rect(rx, ry, rw, rh); c.clip();
+    // champ réverbéré : des reflets partout, de même intensité
+    grains.forEach(g => {
+      const a = 0.18 + 0.18 * Math.sin(g[2] + temps * 2.2 * (0.6 + g[1]));
+      c.fillStyle = "rgba(255,159,10," + a.toFixed(3) + ")"; c.beginPath(); c.arc(rx + g[0] * rw, ry + g[1] * rh, 2, 0, 7); c.fill();
+    });
+    // champ direct : des fronts d'onde qui s'affaiblissent avec la distance
+    const pasOnde = 46, vit = 70;
+    for (let i = 0; i < 12; i++) {
+      const r = ((temps * vit) % pasOnde) + i * pasOnde;
+      const a = Math.min(0.9, 14 / Math.max(r, 1));
+      c.strokeStyle = "rgba(100,210,255," + a.toFixed(3) + ")"; c.lineWidth = 2; c.beginPath(); c.arc(sx, sy, r, 0, 7); c.stroke();
+    }
+    // cercles r_H et d_c
+    c.setLineDash([5, 5]); c.lineWidth = 1.5;
+    c.strokeStyle = COUL.doux; c.beginPath(); c.arc(sx, sy, rH * s, 0, 7); c.stroke();
+    c.strokeStyle = COUL.orange; c.beginPath(); c.arc(sx, sy, dc * s, 0, 7); c.stroke();
+    c.setLineDash([]);
+    c.restore();
+    if (rH * s < rw) O.ecrire(c, "rH", sx, sy - rH * s - 6, { s: 13, c: COUL.doux, a: "center" });
+    if (dc * s < rw * 0.8 && Math.abs(dc - rH) * s > 14) O.ecrire(c, "dc", sx, sy + dc * s + 16, { s: 13, c: COUL.orange, a: "center" });
+    // la source
+    c.fillStyle = COUL.ciel; c.beginPath(); c.arc(sx, sy, 8, 0, 7); c.fill();
+    O.ecrire(c, "source", sx, sy - 16, { s: 13, c: COUL.ciel, a: "center" });
+    // le micro et sa directivité (axe tourné vers la source)
+    c.strokeStyle = D.couleur; c.lineWidth = 2; c.beginPath();
+    for (let a = 0; a <= 360; a += 4) { const r = Math.abs(MICRO.gain(D.A, a)) * 30, t = a * Math.PI / 180; const x = mx - r * Math.cos(t), y = sy + r * Math.sin(t); a ? c.lineTo(x, y) : c.moveTo(x, y); }
+    c.stroke();
+    O.microDessus(c, mx, sy, -90, COUL.jaune, 0.8);
+    O.ecrire(c, dehors ? "micro (hors de la salle !)" : "micro", mx, sy + 46, { s: 13, c: dehors ? COUL.rouge : COUL.jaune, a: "center" });
+    O.ecrire(c, "ondes directes : s’affaiblissent en s’éloignant", 650, 420, { s: 13, g: false, c: COUL.ciel });
+    O.ecrire(c, "reflets : le champ réverbéré, partout le même", 650, 442, { s: 13, g: false, c: COUL.orange });
+
+    // Explication et calcul
+    let cls, msg;
+    if (dr >= 6) { cls = "note ok"; msg = "<b>Champ direct dominant</b> (D/R = " + O.signe(dr, 1) + " dB) : la voix est nette et présente."; }
+    else if (dr > -6) { cls = "note warn"; msg = "<b>Autour de la distance critique</b> (D/R = " + O.signe(dr, 1) + " dB) : direct et réverbération se mélangent. Pour une voix nette, rapprochez-vous à moins de " + O.metres(dc / 2) + ", ou prenez un micro plus directif."; }
+    else { cls = "note bad"; msg = "<b>Champ réverbéré dominant</b> (D/R = " + O.signe(dr, 1) + " dB) : la voix paraît lointaine, noyée dans la salle. Monter le gain n’y changerait rien : il amplifie aussi la réverbération."; }
+    msg += D.id === "omni" ? " Avec un omni, la distance critique est le rayon de réverbération de la salle." : " Ce micro " + D.nom.toLowerCase() + " (DF = " + O.nb(df, 2) + ") repousse la distance critique de √DF = " + O.nb(Math.sqrt(df), 2) + " fois.";
+    if (dehors) msg += " Attention : à cette distance, le micro serait hors de la salle.";
+    O.note("m6a-msg", cls, msg);
+    O.html("m6a-calc",
+      '<div><span class="c">rH = 0,057 × √(V / T)</span> = 0,057 × √(' + O.nb(V, 0) + " / " + O.nb(T, 2) + ") = " + O.metres(rH) + "</div>" +
+      '<div><span class="c">dc = √DF × rH</span> = √' + O.nb(df, 2) + " × " + O.nb(rH, 2) + " = <b>" + O.metres(dc) + "</b></div>" +
+      '<div><span class="c">D/R = 20 log(dc / d)</span> = 20 log(' + O.nb(dc, 2) + " / " + O.nb(d, 2) + ") = " + O.signe(dr, 1) + " dB</div>");
+  }
+
+  const boucle = O.boucle(cv, (dt, t) => { temps = t; dessiner(); });
+  O.boutonPause("m6a-pause", boucle);
+  [cV, cT, cD].forEach(el => el.addEventListener("input", dessiner));
+  sel.addEventListener("change", dessiner);
+  const SALLES = { cabine: [10, 0.25], classe: [200, 0.8], plateau: [1500, 0.7], eglise: [8000, 4] };
+  O.situations("m6a-situ", s => { cV.value = O.posLog(SALLES[s][0], VMIN, VMAX); O.curseur(cT, SALLES[s][1]); });
+  dessiner();
+});
+
+/* --- Labo 2 : filtre en peigne et micro de surface --------------------------
+   Méthode de la source image : la réflexion sur la table semble venir d'une
+   source symétrique sous la table. Δ = r_réfléchi − r_direct, τ = Δ / c.
+   Réponse : |1 + a·e^(−j2πfτ)| avec a = ρ × r_direct / r_réfléchi
+   (ρ : réflexion de la table, r_d / r_r : la réflexion a fait plus de chemin).
+   L'animation est ralentie d'environ 300 fois. */
+labo(6, function () {
+  const cv = O.el("m6b-cv"), c = cv.getContext("2d");
+  const cH = O.el("m6b-h"), cD = O.el("m6b-d"), cHs = O.el("m6b-hs"), cR = O.el("m6b-r");
+  const HMIN = 0.002, HMAX = 0.6;
+  cH.value = O.posLog(0.25, HMIN, HMAX);
+  let temps = 0;
+  const S = 250, YT = 360, XB = 80, VANIM = 1.1; // px par mètre, hauteur de la table, x de la bouche, m/s du ralenti
+
+  // Point à la distance u (m) le long d'une ligne brisée de points [x, y] en mètres réels
+  function lePlong(pts, u) {
+    for (let i = 1; i < pts.length; i++) {
+      const dx = pts[i][0] - pts[i - 1][0], dy = pts[i][1] - pts[i - 1][1], l = Math.hypot(dx, dy);
+      if (u <= l) return [pts[i - 1][0] + dx * u / l, pts[i - 1][1] + dy * u / l];
+      u -= l;
+    }
+    return null;
+  }
+
+  function dessiner() {
+    const h = O.valLog(+cH.value, HMIN, HMAX), d = +cD.value, hs = +cHs.value, rho = +cR.value;
+    const rd = Math.hypot(d, hs - h), rr = Math.hypot(d, hs + h), delta = rr - rd, tau = delta / MICRO.c, a = rho * rd / rr, f1 = 1 / (2 * tau);
+    const rep = f => 10 * Math.log10(1 + a * a + 2 * a * Math.cos(2 * Math.PI * f * tau));
+    const creux = a > 0 ? 20 * Math.log10(Math.max(1 - a, 1e-4)) : 0, bosse = 20 * Math.log10(1 + a);
+
+    Application.afficher("#m6b-ho", O.metres(h));
+    Application.afficher("#m6b-do", O.metres(d));
+    Application.afficher("#m6b-hso", O.metres(hs));
+    Application.afficher("#m6b-ro", O.nb(rho * 100, 0) + " %");
+    Application.afficher("#m6b-delta", O.metres(delta));
+    Application.afficher("#m6b-tau", tau >= 1e-3 ? O.nb(tau * 1000, 2) + " ms" : O.nb(tau * 1e6, 0) + " µs");
+    Application.afficher("#m6b-f1", O.hz(f1));
+    Application.afficher("#m6b-prof", a < 0.01 ? "aucune" : O.db(creux, 1));
+
+    O.fond(c);
+    // --- Vue de côté ---
+    const P = (x, y) => [XB + x * S, YT - y * S]; // mètres → pixels
+    const bouche = P(0, hs), micro = P(d, h), image = P(0, -hs), reflet = P(d * hs / (hs + h), 0);
+    O.ecrire(c, "Vue de côté (animation ralentie ≈ 300 ×)", 24, 34, { s: 16 });
+    // table
+    c.fillStyle = "#6b4a2b"; c.fillRect(24, YT, 456, 12);
+    c.fillStyle = "rgba(107,74,43,.25)"; c.fillRect(24, YT + 12, 456, 520 - YT - 12);
+    O.ecrire(c, "table" + (rho < 0.5 ? " (couverte de feutre)" : ""), 470, YT + 34, { s: 13, c: "#c9a27a", a: "right" });
+    // tête
+    c.fillStyle = "#3a3d44"; c.beginPath(); c.arc(bouche[0] - 24, bouche[1] - 10, 26, 0, 7); c.fill();
+    c.fillRect(bouche[0] - 44, bouche[1] + 12, 40, YT - bouche[1] - 12);
+    c.fillStyle = COUL.ciel; c.beginPath(); c.arc(bouche[0], bouche[1], 5, 0, 7); c.fill();
+    // source image
+    c.strokeStyle = "rgba(255,159,10,.5)"; c.setLineDash([4, 4]); c.lineWidth = 1.5;
+    c.beginPath(); c.arc(image[0], image[1], 6, 0, 7); c.stroke();
+    c.beginPath(); c.moveTo(image[0], image[1]); c.lineTo(reflet[0], reflet[1]); c.stroke(); c.setLineDash([]);
+    O.ecrire(c, "source image", image[0] + 12, Math.min(image[1], 505), { s: 13, c: "rgba(255,159,10,.8)", b: "middle" });
+    // trajets
+    c.lineWidth = 2.5;
+    c.strokeStyle = COUL.ciel; c.beginPath(); c.moveTo(bouche[0], bouche[1]); c.lineTo(micro[0], micro[1]); c.stroke();
+    c.strokeStyle = COUL.orange; c.beginPath(); c.moveTo(bouche[0], bouche[1]); c.lineTo(reflet[0], reflet[1]); c.lineTo(micro[0], micro[1]); c.stroke();
+    // le micro
+    if (h < 0.012) {
+      c.fillStyle = COUL.texte; O.rect(c, micro[0] - 22, YT - 7, 44, 7, 3); c.fill();
+      c.fillStyle = COUL.jaune; c.beginPath(); c.arc(micro[0], YT - 7, 4, 0, 7); c.fill();
+      O.ecrire(c, "micro de surface", micro[0], YT - 18, { s: 13, c: COUL.jaune, a: "center" });
+    } else {
+      c.strokeStyle = COUL.doux; c.lineWidth = 3; c.beginPath(); c.moveTo(micro[0] + 8, micro[1] + 6); c.lineTo(micro[0] + 8, YT); c.stroke();
+      c.fillStyle = COUL.panneau; c.fillRect(micro[0] - 4, YT - 4, 24, 4);
+      O.microDessus(c, micro[0], micro[1], -90 + Math.atan2(bouche[1] - micro[1], micro[0] - bouche[0]) * 180 / Math.PI * -1, COUL.jaune, 0.8);
+      O.ecrire(c, "micro", micro[0] + 18, micro[1] - 14, { s: 13, c: COUL.jaune });
+    }
+    // impulsions qui voyagent (même départ, la réflexion arrive plus tard)
+    const periode = (rr + 0.25) / VANIM + 0.7, u = (temps % periode) * VANIM;
+    [[[[0, hs], [d, h]], COUL.ciel, rd], [[[0, hs], [d * hs / (hs + h), 0], [d, h]], COUL.orange, rr]].forEach(t => {
+      const q = lePlong(t[0], u);
+      if (q) {
+        const px = P(q[0], q[1]);
+        const g = c.createRadialGradient(px[0], px[1], 0, px[0], px[1], 14);
+        g.addColorStop(0, t[1]); g.addColorStop(1, "rgba(0,0,0,0)");
+        c.fillStyle = g; c.beginPath(); c.arc(px[0], px[1], 14, 0, 7); c.fill();
+      } else if (u - t[2] < 0.12) {
+        c.strokeStyle = t[1]; c.lineWidth = 2; c.beginPath(); c.arc(micro[0], micro[1], 10 + (u - t[2]) * 160, 0, 7); c.stroke();
+      }
+    });
+    O.ecrire(c, "direct : " + O.metres(rd), 24, 64, { s: 14, c: COUL.ciel });
+    O.ecrire(c, "réfléchi : " + O.metres(rr) + "  (+ " + O.metres(delta) + ")", 24, 86, { s: 14, c: COUL.orange });
+
+    // --- Courbe de réponse ---
+    const X0 = 540, X1 = 975, Y0 = 70, Y1 = 330, VH = 8, VB = -24;
+    const xf = f => O.log(f, 20, 20000, X0, X1), yv = v => Y0 + (VH - O.borne(v, VB, VH)) / (VH - VB) * (Y1 - Y0);
+    O.ecrire(c, "Réponse du micro (dB, Hz)", X0, 34, { s: 16 });
+    [6, 0, -6, -12, -18].forEach(v => { c.fillStyle = v === 0 ? "rgba(255,255,255,.25)" : v === 6 ? "rgba(48,209,88,.35)" : COUL.grille; c.fillRect(X0, yv(v), X1 - X0, 1); O.ecrire(c, O.signe(v, 0), X0 - 8, yv(v), { s: 13, g: false, c: COUL.doux, a: "right", b: "middle" }); });
+    [[20, "20"], [100, "100"], [500, "500"], [1000, "1 k"], [5000, "5 k"], [20000, "20 k"]].forEach(q => { c.fillStyle = COUL.grille; c.fillRect(xf(q[0]), Y0, 1, Y1 - Y0); O.ecrire(c, q[1], xf(q[0]), Y1 + 18, { s: 13, g: false, c: COUL.doux, a: "center" }); });
+    O.ecrire(c, "+6 dB : pression doublée", X1 - 4, yv(6) - 6, { s: 13, c: COUL.vert, a: "right" });
+    O.ecrire(c, "0 dB : son direct seul", X1 - 4, yv(0) + 16, { s: 13, g: false, c: COUL.doux, a: "right" });
+    c.strokeStyle = COUL.jaune; c.lineWidth = 2.4; c.beginPath();
+    for (let i = 0; i <= 700; i++) { const f = 20 * Math.pow(1000, i / 700), y = yv(rep(f)); i ? c.lineTo(xf(f), y) : c.moveTo(xf(f), y); }
+    c.stroke();
+    // repères des creux
+    const liste = [];
+    for (let k = 0; k < 40; k++) { const f = (2 * k + 1) * f1; if (f > 20000) break; liste.push(f); }
+    liste.forEach((f, i) => { if (i < 14) { c.fillStyle = COUL.orange; c.beginPath(); c.moveTo(xf(f), Y1 - 2); c.lineTo(xf(f) - 5, Y1 + 6); c.lineTo(xf(f) + 5, Y1 + 6); c.closePath(); c.fill(); } });
+    // calcul écrit sous la courbe
+    O.ecrire(c, "Δ = " + O.metres(rr) + " − " + O.metres(rd) + " = " + O.metres(delta), X0, 380, { s: 15 });
+    O.ecrire(c, "τ = Δ / c = " + (tau >= 1e-3 ? O.nb(tau * 1000, 2) + " ms" : O.nb(tau * 1e6, 0) + " µs"), X0, 408, { s: 15 });
+    O.ecrire(c, liste.length ? "creux : " + liste.slice(0, 4).map(O.hz).join(" · ") + (liste.length > 4 ? " …" : "") : "premier creux : " + O.hz(f1) + " (inaudible)", X0, 436, { s: 15, c: COUL.orange });
+    O.ecrire(c, "réflexion : a = ρ × rd / rr = " + O.nb(a, 2) + "  →  de " + O.db(creux, 0) + " à " + O.db(bosse, 1), X0, 464, { s: 15, g: false });
+
+    // Explication et calcul
+    let cls, msg;
+    if (f1 > 20000) { cls = "note ok"; msg = "<b>Aucun creux audible.</b> Le premier creux tombe à " + O.hz(f1) + ", au-delà de 20 kHz : le direct et la réflexion s’additionnent en phase sur toute la bande, d’où " + O.db(bosse, 1) + (rho > 0.95 ? " (le doublement de pression d’un micro de surface)." : "."); }
+    else if (a < 0.45) { cls = "note ok"; msg = "<b>Réflexion faible</b> (a = " + O.nb(a, 2) + ") : les creux ne descendent qu’à " + O.db(creux, 1) + ". Un revêtement absorbant sur la table atténue le filtre en peigne."; }
+    else { cls = "note warn"; msg = "<b>Filtre en peigne.</b> Creux à " + O.hz(f1) + ", " + O.hz(3 * f1) + ", " + O.hz(5 * f1) + "… profonds de " + O.db(creux, 0) + " : la voix sonne creuse, métallique. Solutions : un micro de surface posé sur la table, ou une table absorbante."; }
+    O.note("m6b-msg", cls, msg);
+    O.html("m6b-calc",
+      '<div><span class="c">rd = √(d² + (hs − h)²)</span> = ' + O.metres(rd) + "</div>" +
+      '<div><span class="c">rr = √(d² + (hs + h)²)</span> = ' + O.metres(rr) + "</div>" +
+      '<div><span class="c">τ = (rr − rd) / c</span> = ' + O.nb(delta, 4) + " / 343 = " + (tau >= 1e-3 ? O.nb(tau * 1000, 3) + " ms" : O.nb(tau * 1e6, 1) + " µs") + "</div>" +
+      '<div><span class="c">f0 = 1 / (2τ)</span> = <b>' + O.hz(f1) + "</b></div>");
+  }
+
+  const boucle = O.boucle(cv, (dt, t) => { temps = t; dessiner(); });
+  O.boutonPause("m6b-pause", boucle);
+  [cH, cD, cHs, cR].forEach(el => el.addEventListener("input", dessiner));
+  O.situations("m6b-situ", s => {
+    if (s === "pied") { cR.value = 0.9; O.curseur(cH, O.posLog(0.25, HMIN, HMAX)); }
+    else if (s === "bas") { cR.value = 0.9; O.curseur(cH, O.posLog(0.06, HMIN, HMAX)); }
+    else if (s === "surface") { cR.value = 1; O.curseur(cH, O.posLog(0.003, HMIN, HMAX)); }
+    else if (s === "tapis") O.curseur(cR, 0.3);
+  });
+  dessiner();
+});
+
+/* ==========================================================================
    MODULE 7 — LIAISONS ET ALIMENTATIONS
    ========================================================================== */
 
@@ -2085,7 +2358,8 @@ labo(7, function () {
       resistance(720, yy[2], 70, COUL.orange, "180 Ω"); resistance(720, yy[3], 70, COUL.orange, "180 Ω");
       c.strokeStyle = COUL.orange; c.lineWidth = 3; c.beginPath(); c.moveTo(790, yy[2]); c.lineTo(880, yy[2]); c.lineTo(880, 214); c.moveTo(880, 246); c.lineTo(880, yy[3]); c.lineTo(790, yy[3]); c.stroke();
       c.lineWidth = 4; c.beginPath(); c.moveTo(860, 214); c.lineTo(900, 214); c.stroke(); c.lineWidth = 2; c.beginPath(); c.moveTo(868, 246); c.lineTo(892, 246); c.stroke();
-      O.ecrire(c, "12 V entre 2 et 3", 905, 234, { s: 13, c: COUL.orange });
+      O.ecrire(c, "12 V", 908, 234, { s: 14, c: COUL.orange });
+      O.ecrire(c, "entre 2 et 3", 812, 300, { s: 12, g: false, c: COUL.orange, a: "center" });
     } else if (alim === "pip") {
       fil(220, COUL.rose, xc0, 720); resistance(720, 220, 80, COUL.jaune, "quelques kΩ");
       c.strokeStyle = COUL.jaune; c.lineWidth = 3; c.beginPath(); c.moveTo(800, 220); c.lineTo(880, 220); c.stroke();
@@ -2475,7 +2749,7 @@ labo(8, function () {
     let cl = "note ok", txt;
     if (g === 0) { cl = "note warn"; txt = "<b>S est coupé : G = D = M.</b> Les deux voies sont identiques, l’image est mono, au centre. Montez le niveau de S."; }
     else if (AM === 0 && Math.abs(g - 1) < 0.02) txt = "<b>Équivalent Blumlein.</b> M en huit et S au même niveau : deux huit virtuels croisés à ±45°.";
-    else txt = "<b>Deux micros virtuels " + (AM === 0 ? "en huit" : "proches de : " + proche.nom.toLowerCase()) + " (A ≈ " + O.nb(Aeq, 2) + "), orientés à ±" + O.nb(thmax, 0) + "°.</b> " + (thmax > 60 ? "L’image est très large ; les lobes arrière, en polarité inversée, grandissent." : thmax < 30 ? "L’image est étroite : peu de différence entre G et D." : "Une largeur courante.") + " En mono, G + D = 2M : S disparaît, rien ne s’annule.";
+    else txt = "<b>Deux micros virtuels " + (AM === 0 ? "en huit" : "proches de : " + proche.nom.toLowerCase()) + " (A ≈ " + O.nb(Aeq, 2) + "), orientés à ±" + O.nb(thmax, 0) + "°.</b> " + (thmax > 60 ? "L’image est très large." + (Aeq < 0.49 ? " Les lobes arrière, en polarité inversée, grandissent." : "") : thmax < 30 ? "L’image est étroite : peu de différence entre G et D." : "Une largeur courante.") + " En mono, G + D = 2M : S disparaît, rien ne s’annule.";
     O.note("m8b-msg", cl, txt);
   }
   Application.segment("#m8b-m", [["1", "Omni"], ["0.5", "Cardioïde"], ["0", "En huit"]], "0.5", v => { AM = +v; dessiner(); });
