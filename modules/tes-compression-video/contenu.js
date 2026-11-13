@@ -334,6 +334,13 @@ const MODULE_1 = {
   nav: "Débit et taux",
   resume: "Débit, taux, redondances",
   intro: "Un signal HD non compressé produit plus d’un <b>gigabit par seconde</b> : une carte de 128 Go serait pleine en un quart d’heure. Ce module montre <b>combien</b> il faut compresser, et <b>où</b> se cache l’information que les codecs suppriment sans que l’œil s’en aperçoive.",
+  // Le film du module (source : films/compression-video-module-1/). Chapitres : [seconde, titre].
+  film: {
+    src: "films/module-1.mp4",
+    affiche: "films/module-1.jpg",
+    duree: "2 min 23",
+    chapitres: [[6.4, "Le problème"], [18.4, "Le débit"], [33.4, "Bit ou octet"], [42.4, "Le taux de compression"], [57.4, "Sans perte, avec perte"], [66.4, "Les quatre redondances"], [69.4, "Spatiale"], [78.4, "Temporelle"], [87.4, "Statistique"], [96.4, "Psychovisuelle"], [105.4, "La place occupée"], [117.4, "Codec ≠ conteneur"], [123.4, "À retenir"]]
+  },
   notions: {
     titre: "Les mots du débit et de la compression",
     intro: "Compresser, c’est réduire le <b>débit</b>. Le <b>taux de compression</b> dit de combien. Les <b>redondances</b> disent ce qu’on peut enlever.",

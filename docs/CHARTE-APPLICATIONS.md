@@ -41,6 +41,19 @@ La barre du haut les affiche et suit le défilement. L'élève sait toujours où
 | **Retenir** | L'essentiel avant l'évaluation. | Quatre questions : définitions, formules, repères, **pièges**. Court : ce qui tombe à l'évaluation, rien de plus. |
 | **S'évaluer** | 10 questions, 2 points chacune, note sur 20. | Les valeurs changent à chaque tentative. Correction détaillée. **12/20** ouvre le module suivant. |
 
+### Le film du module (avant les quatre étapes)
+
+Sous le titre du module, une **vidéo courte** (deux à trois minutes) résume l'essentiel : en musique, **sans voix**, avec des animations qui expliquent les notions pas à pas. L'élève la regarde en arrivant, puis y revient pour réviser.
+
+| Règle | Pourquoi |
+|---|---|
+| Tout est écrit à l'écran, une idée par plan | Pas de voix : le film se comprend aussi sans le son, en classe comme dans le bus. |
+| Les mêmes exemples chiffrés que le cours | L'élève retrouve dans « Comprendre » et dans l'évaluation ce qu'il a vu dans le film. |
+| Un chapitre par notion, un plan « À retenir » à la fin | Les chapitres sont cliquables sous la vidéo. |
+| Elle ne démarre jamais seule | Elle a du son ; l'élève appuie sur lecture. Elle se met en pause quand il change de module. |
+
+Le film se déclare dans `contenu.js` (champ `film` du module) ; ses sources et sa fabrication sont décrites dans `films/README.md`. Un module sans champ `film` s'affiche comme avant.
+
 ### L'évaluation
 
 Les cinq familles de questions, chacune avec sa couleur, sont tirées au sort dans les banques de `contenu.js` :
@@ -136,6 +149,7 @@ Règles de code (dans `labos.js`) :
 
 - [ ] L'`id` est identique dans `contenu.js` et `js/catalogue.js` ; `modules` du catalogue = nombre de modules.
 - [ ] Chaque module a ses quatre étapes (le labo peut manquer s'il n'apporte rien).
+- [ ] Si le module a un film : la vidéo se lit, les chapitres tombent au bon moment, ses chiffres sont ceux du cours.
 - [ ] Chaque mot a une comparaison ; chaque formule se lit à voix haute et a un exemple chiffré.
 - [ ] Chaque banque de questions contient plus de questions que le tirage n'en prend.
 - [ ] Les questions « Calculer » ont des valeurs tirées au sort et une explication avec le calcul.

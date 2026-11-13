@@ -13,6 +13,8 @@ Chaque notion a sa propre **application de révision**. La page d'accueil prése
 
 Les applications d'apport de connaissances suivent le modèle de l'application **Photométrie**, qui sert de référence : un parcours de modules, et dans chaque module quatre étapes — **Comprendre**, **Manipuler**, **Retenir**, **S'évaluer** (évaluation sur 20, 12/20 pour ouvrir le module suivant).
 
+Un module peut commencer par un **film** : une vidéo de deux à trois minutes, en musique et sans voix, qui résume l'essentiel du module avec des animations (premier film : module 1 de « Compression vidéo »). Les sources des films sont dans `films/` ; voir [films/README.md](films/README.md).
+
 La progression des étudiants est enregistrée avec Firebase. Le site est hébergé gratuitement avec GitHub Pages.
 
 **Site en ligne :** <https://pierremalycha-jpg.github.io/revision-bts-audiovisuel/>
@@ -71,6 +73,8 @@ revision-bts-audiovisuel/
 │   ├── page-accueil.js         Construit les catégories (sous-catégories en menus déroulants) de index.html
 │   ├── page-connexion.js       Fait fonctionner connexion.html
 │   └── page-tableau-de-bord.js Fait fonctionner tableau-de-bord.html
+├── films/                      Sources des films des modules (voir films/README.md)
+│   └── compression-video-module-1/   Partition, musique et scènes du premier film
 └── modules/
     ├── modele/                 MODÈLE à dupliquer pour créer une application
     │   ├── index.html          Les labos (un <template> par module)
@@ -78,10 +82,13 @@ revision-bts-audiovisuel/
     │   └── labos.js            Le code des labos
     ├── tes-photometrie/        Application de référence (fichier unique)
     │   └── index.html
-    └── tes-signal-video-numerique/   Application construite avec le kit
-        ├── index.html
-        ├── contenu.js
-        └── labos.js
+    ├── tes-signal-video-numerique/   Application construite avec le kit
+    │   ├── index.html
+    │   ├── contenu.js
+    │   └── labos.js
+    └── tes-compression-video/        Application avec un film de module
+        ├── index.html, contenu.js, labos.js
+        └── films/                    Les vidéos terminées (module-1.mp4 et son affiche)
 ```
 
 ## Tester le site sur ton ordinateur

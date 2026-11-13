@@ -255,6 +255,33 @@ html.side-open .scrim { opacity: 1; pointer-events: auto; }
 .etape-hd .lead3 b { color: var(--text); }
 .qa-tip { margin: 10px 0 0; font-size: .86rem; color: var(--faint); }
 
+/* Le film du module : la vidéo qui résume l'essentiel, sous le titre du module.
+   Cadre sombre dans les deux thèmes, comme toutes les scènes. */
+.film { margin: -8px 0 56px; }
+.film-hd { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin-bottom: 12px; }
+.film-note { font-size: .92rem; color: var(--muted); }
+/* La vidéo à gauche, la liste des chapitres à droite (elle prend la hauteur de la vidéo). */
+.film-corps { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 14px; max-width: 1180px; }
+.film.sans-chapitres .film-corps { grid-template-columns: minmax(0, 880px); }
+.film-stg { padding: 10px; }
+.film-v { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: var(--stage); border-radius: 14px; }
+.film-chap { display: flex; flex-direction: column; gap: 2px; height: 0; min-height: 100%; overflow-y: auto; background: var(--panel); border: 1px solid var(--cardline); border-radius: var(--radius); padding: 12px 10px; }
+.film-chap-t { font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 2px 8px 8px; }
+.film-chap .chip { display: flex; align-items: baseline; gap: 10px; text-align: left; background: none; border-radius: 10px; padding: 7px 8px; line-height: 1.25; }
+.film-chap .chip:hover { background: var(--panel2); }
+.film-chap .chip.on { background: var(--text); color: var(--bg); }
+.film-chap .chip small { flex: none; width: 2.5em; font-size: .8em; font-variant-numeric: tabular-nums; color: var(--faint); }
+.film-chap .chip.on small { color: inherit; opacity: .7; }
+@media (max-width: 1100px) {
+  /* Petit écran : les chapitres passent sous la vidéo, en pastilles. */
+  .film-corps { grid-template-columns: minmax(0, 1fr); }
+  .film-chap { flex-direction: row; flex-wrap: wrap; gap: 6px; height: auto; min-height: 0; overflow: visible; background: none; border: 0; padding: 0; }
+  .film-chap-t { display: none; }
+  .film-chap .chip { background: var(--panel); box-shadow: inset 0 0 0 1px var(--cardline); border-radius: 980px; padding: 6px 12px; gap: 6px; }
+  .film-chap .chip.on { box-shadow: none; }
+  .film-chap .chip small { width: auto; }
+}
+
 /* Les questions dépliables (balise <details>) */
 .lesson-cols { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); gap: 22px; align-items: start; }
 .qa-h { display: flex; align-items: baseline; gap: 10px; margin: 0 0 10px; padding: 0 4px; font-size: 1.02rem; }
