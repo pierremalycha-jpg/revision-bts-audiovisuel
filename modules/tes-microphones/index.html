@@ -18,7 +18,702 @@
      Identifiants : m + numéro du module + lettre du labo (m1a-…, m2b-…). -->
 <body data-racine="../../">
 
+  <!-- =================== MODULE 1 : DU SON AU SIGNAL =================== -->
+  <template data-labo="1">
+    <div class="sous-labo"><span class="eyebrow">Labo 1 · L’onde de pression</span><h3>Des molécules qui oscillent, une pression qui voyage</h3><p class="muted">Chaque point est une « tranche » d’air. Les points se serrent (<b>compression</b>, en orange) puis s’écartent (<b>dépression</b>, en bleu) : la pression varie, et la membrane du micro la suit. Le temps est ralenti et le mouvement exagéré pour être visible.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Onde sonore plane → membrane du micro</span><button class="btn small" id="m1a-pause" type="button">⏸ Pause</button></div>
+          <canvas id="m1a-cv" class="cv" width="1000" height="520" role="img" aria-label="Une rangée de molécules d’air traversée par une onde sonore : zones de compression et de dépression, courbe de la pression en fonction de la distance avec la longueur d’onde repérée sur une règle, membrane d’un micro qui suit la pression et tension de sortie du micro en fonction du temps"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Pression</small><b class="acc" id="m1a-p">—</b></div>
+          <div><small>Niveau</small><b id="m1a-l">—</b></div>
+          <div><small>Longueur d’onde</small><b id="m1a-lam">—</b></div>
+          <div><small>Période</small><b id="m1a-t">—</b></div>
+          <div><small>Déplacement air</small><b id="m1a-x">—</b></div>
+          <div><small>Tension 20 mV/Pa</small><b id="m1a-u">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Fréquence</span><input type="range" id="m1a-f" min="0" max="1000" step="1" value="500"><output id="m1a-fo"></output></label>
+          <label class="ctl"><span>Niveau</span><input type="range" id="m1a-niv" min="0" max="140" step="1" value="60"><output id="m1a-nivo"></output></label>
+          <p class="muted small" style="margin:10px 0 8px">Niveaux typiques :</p>
+          <div class="btnrow" id="m1a-situ">
+            <button class="chip" type="button" data-s="seuil">Seuil d’audition</button>
+            <button class="chip" type="button" data-s="chuchot">Chuchotement</button>
+            <button class="chip" type="button" data-s="conv">Conversation à 1 m</button>
+            <button class="chip" type="button" data-s="pa">1 Pa</button>
+            <button class="chip" type="button" data-s="cc">Caisse claire de près</button>
+          </div>
+          <p class="muted small" style="margin:10px 0 8px">Fréquences :</p>
+          <div class="btnrow" id="m1a-freq">
+            <button class="chip" type="button" data-s="20">20 Hz</button>
+            <button class="chip" type="button" data-s="100">100 Hz</button>
+            <button class="chip" type="button" data-s="1000">1 kHz</button>
+            <button class="chip" type="button" data-s="10000">10 kHz</button>
+          </div>
+        </div>
+        <div class="card"><h3>Calcul pas à pas</h3><div class="calc" id="m1a-calc" aria-live="polite"></div></div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m1a-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
 
+    <div class="sous-labo"><span class="eyebrow">Labo 2 · Niveau et distance</span><h3>−6 dB chaque fois que la distance double</h3><p class="muted">Éloignez le micro de la source : en champ libre, la pression est divisée par deux à chaque doublement de distance. Ajoutez une seconde source identique : le niveau ne gagne que <b>3 dB</b>.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Source, micro et échelle des niveaux</span><button class="btn small" id="m1b-pause" type="button">⏸ Pause</button></div>
+          <canvas id="m1b-cv" class="cv" width="1000" height="470" role="img" aria-label="Une source sonore et un micro sur un axe gradué en mètres sur une échelle logarithmique, avec les doublements de distance repérés ; à droite, une échelle verticale des niveaux en dB SPL avec des repères et le niveau reçu par le micro"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Distance</small><b id="m1b-d">—</b></div>
+          <div><small>Niveau reçu</small><b class="acc" id="m1b-l">—</b></div>
+          <div><small>Pression reçue</small><b id="m1b-p">—</b></div>
+          <div><small>Écart par rapport à 1 m</small><b id="m1b-e">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Niveau à 1 m</span><input type="range" id="m1b-l1" min="40" max="120" step="1" value="80"><output id="m1b-l1o"></output></label>
+          <label class="ctl"><span>Distance</span><input type="range" id="m1b-dist" min="0" max="1000" step="1" value="435"><output id="m1b-disto"></output></label>
+          <div class="ctl"><span>Sources</span><div id="m1b-n" aria-label="Nombre de sources"></div></div>
+          <p class="muted small" style="margin:10px 0 8px">Situations toutes prêtes :</p>
+          <div class="btnrow" id="m1b-situ">
+            <button class="chip" type="button" data-s="voix">Voix, micro à 30 cm</button>
+            <button class="chip" type="button" data-s="voix4">Voix, micro à 4 m</button>
+            <button class="chip" type="button" data-s="ampli">Ampli guitare à 10 cm</button>
+            <button class="chip" type="button" data-s="double">Deux doublements</button>
+          </div>
+        </div>
+        <div class="card"><h3>Calcul pas à pas</h3><div class="calc" id="m1b-calc" aria-live="polite"></div></div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m1b-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- =================== MODULE 2 : TECHNOLOGIES DE MICRO =================== -->
+  <template data-labo="2">
+    <div class="sous-labo"><span class="eyebrow">Labo 1 · Quatre capsules ouvertes</span><h3>Même son, quatre façons de produire une tension</h3><p class="muted">Choisissez une technologie : l’onde arrive par la gauche, la membrane bouge, une tension sort. L’oscillogramme garde <b>la même échelle</b> pour toutes les technologies : comparez les tensions au même niveau sonore. Le temps est ralenti et les mouvements exagérés.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Coupe de la capsule et tension de sortie</span><button class="btn small" id="m2a-pause" type="button">⏸ Pause</button></div>
+          <canvas id="m2a-cv" class="cv" width="1000" height="520" role="img" aria-label="Coupe animée de la capsule choisie (dynamique, ruban, électrostatique ou électret) traversée par une onde sonore, oscillogramme de la tension de sortie à échelle commune et comparaison des tensions délivrées par les quatre technologies au même niveau sonore"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Grandeur captée</small><b id="m2a-gr">—</b></div>
+          <div><small>Sensibilité (exemple)</small><b id="m2a-sex">—</b></div>
+          <div><small>Pression</small><b id="m2a-p">—</b></div>
+          <div><small>Tension délivrée</small><b class="acc" id="m2a-u">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <div class="ctl"><span>Technologie</span><div id="m2a-tech" aria-label="Technologie de transduction"></div></div>
+          <label class="ctl"><span>Fréquence</span><input type="range" id="m2a-f" min="0" max="1000" step="1" value="565"><output id="m2a-fo"></output></label>
+          <label class="ctl"><span>Niveau</span><input type="range" id="m2a-niv" min="40" max="130" step="1" value="94"><output id="m2a-nivo"></output></label>
+          <p class="muted small" style="margin:10px 0 8px">Situations toutes prêtes :</p>
+          <div class="btnrow" id="m2a-situ">
+            <button class="chip" type="button" data-s="voix">Voix à 30 cm (74 dB)</button>
+            <button class="chip" type="button" data-s="pa">1 Pa à 1 kHz</button>
+            <button class="chip" type="button" data-s="grave">Grave à 100 Hz</button>
+            <button class="chip" type="button" data-s="caisse">Caisse claire (125 dB)</button>
+          </div>
+        </div>
+        <div class="card"><h3>Fiche de la technologie</h3><div class="calc" id="m2a-fiche" aria-live="polite"></div></div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m2a-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 2 · Le condensateur à charge constante</span><h3>Pourquoi la tension suit le déplacement de la membrane</h3><p class="muted">La charge Q est fixée par la polarisation et ne varie pas au rythme du son (résistance de l’ordre du GΩ). Quand la membrane se rapproche, la capacité augmente et la tension <b>baisse</b> en proportion : U = Q/C = Q·d/(ε<sub>0</sub>S).</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Membrane, contre-électrode et tension</span><button class="btn small" id="m2b-pause" type="button">⏸ Pause</button></div>
+          <canvas id="m2b-cv" class="cv" width="1000" height="470" role="img" aria-label="Vue de côté de la membrane et de la contre-électrode d’un micro électrostatique, avec leurs charges, l’écart qui varie et la tension mesurée ; à droite, la droite tension en fonction de la distance à charge constante"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Surface</small><b id="m2b-s">—</b></div>
+          <div><small>Capacité au repos</small><b id="m2b-c">—</b></div>
+          <div><small>Charge Q</small><b id="m2b-q">—</b></div>
+          <div><small>Tension du signal ΔU</small><b class="acc" id="m2b-du">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Diamètre</span><input type="range" id="m2b-dia" min="6" max="34" step="1" value="20"><output id="m2b-diao"></output></label>
+          <label class="ctl"><span>Distance d₀</span><input type="range" id="m2b-d0" min="10" max="60" step="1" value="25"><output id="m2b-d0o"></output></label>
+          <label class="ctl"><span>Polarisation U₀</span><input type="range" id="m2b-u0" min="20" max="80" step="1" value="48"><output id="m2b-u0o"></output></label>
+          <label class="ctl"><span>Déplacement Δd</span><input type="range" id="m2b-dd" min="0" max="50" step="1" value="10"><output id="m2b-ddo"></output></label>
+          <p class="muted small" style="margin:10px 0 8px">Situations toutes prêtes :</p>
+          <div class="btnrow" id="m2b-situ">
+            <button class="chip" type="button" data-s="cours">Exemple du cours</button>
+            <button class="chip" type="button" data-s="petite">Petite membrane</button>
+            <button class="chip" type="button" data-s="grande">Grande membrane</button>
+            <button class="chip" type="button" data-s="serre">Écart réduit de moitié</button>
+          </div>
+        </div>
+        <div class="card"><h3>Calcul pas à pas</h3><div class="calc" id="m2b-calc" aria-live="polite"></div></div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m2b-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 3 · L’induction</span><h3>e = B·l·v : un fil qui coupe un champ magnétique</h3><p class="muted">Un fil (vu en coupe) oscille entre les pôles d’un aimant, comme la bobine d’un micro dynamique. La tension est maximale quand le fil va le plus <b>vite</b>, et nulle quand il s’arrête pour repartir.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Conducteur dans l’entrefer</span><button class="btn small" id="m2c-pause" type="button">⏸ Pause</button></div>
+          <canvas id="m2c-cv" class="cv" width="1000" height="450" role="img" aria-label="Un fil vu en coupe oscille de haut en bas entre un pôle nord et un pôle sud ; à droite, la position, la vitesse et la tension induite en fonction du temps"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Vitesse maximale</small><b id="m2c-v">—</b></div>
+          <div><small>Tension maximale</small><b class="acc" id="m2c-e">—</b></div>
+          <div><small>Tension efficace</small><b id="m2c-eff">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Champ B</span><input type="range" id="m2c-b" min="0.2" max="1.5" step="0.1" value="1"><output id="m2c-bo"></output></label>
+          <label class="ctl"><span>Longueur l</span><input type="range" id="m2c-l" min="0.5" max="10" step="0.5" value="2"><output id="m2c-lo"></output></label>
+          <label class="ctl"><span>Vitesse max v</span><input type="range" id="m2c-vit" min="0.1" max="5" step="0.1" value="1"><output id="m2c-vito"></output></label>
+        </div>
+        <div class="card"><h3>Calcul pas à pas</h3><div class="calc" id="m2c-calc" aria-live="polite"></div></div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m2c-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- =================== MODULE 3 : LES CAPSULES =================== -->
+  <template data-labo="3">
+    <div class="sous-labo"><span class="eyebrow">Labo 1 · Ce que voit la membrane</span><h3>Mesurer une directivité, angle par angle</h3><p class="muted">Une onde plane arrive sur la capsule. Faites <b>glisser la source</b> autour d’elle (ou utilisez le curseur) : la pression devant et derrière la membrane s’affiche à droite, et chaque angle visité ajoute un point au diagramme polaire.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Vue de dessus : la capsule et l’onde qui arrive</span><button class="btn small" id="m3a-pause" type="button">⏸ Pause</button></div>
+          <canvas id="m3a-cv" class="cv" width="1000" height="520" role="img" aria-label="Vue de dessus d’une capsule de micro frappée par une onde plane venant d’un angle réglable. À droite, la pression sur la face avant, la pression sur la face arrière et la force résultante sur la membrane ; en bas, le diagramme polaire construit point par point avec les mesures."></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Angle de la source</small><b class="acc" id="m3a-th">—</b></div>
+          <div><small>Niveau capté</small><b id="m3a-amp">—</b></div>
+          <div><small>Polarité</small><b id="m3a-pol">—</b></div>
+          <div><small>Capsule</small><b id="m3a-nom">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <div class="ctl"><span>Capsule</span><div id="m3a-type" aria-label="Type de capsule"></div></div>
+          <label class="ctl"><span>Angle θ</span><input type="range" id="m3a-ang" min="0" max="359" step="1" value="40"><output id="m3a-ango"></output></label>
+          <div class="btnrow" style="margin-top:10px">
+            <button class="btn small primary" id="m3a-balai" type="button">Balayer 360°</button>
+            <button class="btn small" id="m3a-eff" type="button">Effacer les mesures</button>
+          </div>
+          <p class="muted small" style="margin:10px 0 8px">Placer la source :</p>
+          <div class="btnrow" id="m3a-situ">
+            <button class="chip" type="button" data-s="0">De face (0°)</button>
+            <button class="chip" type="button" data-s="90">De côté (90°)</button>
+            <button class="chip" type="button" data-s="180">De l’arrière (180°)</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Ce qu’il faut observer</h3>
+          <div id="m3a-msg" class="note" aria-live="polite"></div>
+          <p class="muted small" style="margin-top:8px">L’écart entre l’avant et l’arrière de la membrane est agrandi pour être visible ; les directivités obtenues sont celles du cours.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 2 · Effet de proximité</span><h3>Approcher la voix, voir les graves monter</h3><p class="muted">La courbe montre le <b>renforcement</b> sur l’axe par rapport à une source lointaine, calculé avec G = 10 log(1 + (B/kr)²). Changez la distance et la directivité, puis essayez le coupe-bas.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Réponse en fréquence d’un micro proche de la source</span><span id="m3b-titre"></span></div>
+          <canvas id="m3b-cv" class="cv" width="1000" height="470" role="img" aria-label="En haut, une bouche et un micro à la distance choisie ; en dessous, la courbe de réponse de 20 Hz à 20 kHz montrant le renforcement des graves dû à l’effet de proximité, et l’effet du coupe-bas."></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Distance</small><b id="m3b-dist">—</b></div>
+          <div><small>À 100 Hz</small><b class="acc" id="m3b-g100">—</b></div>
+          <div><small>À 50 Hz</small><b id="m3b-g50">—</b></div>
+          <div><small>+3 dB sous</small><b id="m3b-f3">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <div class="ctl"><span>Directivité</span><div id="m3b-dir" aria-label="Directivité"></div></div>
+          <label class="ctl"><span>Distance</span><input type="range" id="m3b-d" min="0" max="1000" step="1" value="300"><output id="m3b-do"></output></label>
+          <div class="ctl"><span>Coupe-bas</span><div id="m3b-hp" aria-label="Coupe-bas"></div></div>
+          <p class="muted small" style="margin:10px 0 8px">Situations toutes prêtes :</p>
+          <div class="btnrow" id="m3b-situ">
+            <button class="chip" type="button" data-s="radio">Voix radio à 3 cm</button>
+            <button class="chip" type="button" data-s="chant">Chant à 10 cm</button>
+            <button class="chip" type="button" data-s="perche">Perche à 1 m</button>
+            <button class="chip" type="button" data-s="huit">Huit à 5 cm</button>
+            <button class="chip" type="button" data-s="omni">Omni à 3 cm</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Ce qu’il faut observer</h3>
+          <div id="m3b-msg" class="note" aria-live="polite"></div>
+        </div>
+        <div class="card"><h3>Calcul pas à pas (100 Hz)</h3><div class="calc" id="m3b-calc" aria-live="polite"></div></div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 3 · Double membrane</span><h3>Une capsule, toutes les directivités</h3><p class="muted">Deux membranes cardioïdes dos à dos. Dosez la polarisation de la <b>membrane arrière</b> de −1 à +1 : la directivité passe du huit au cardio, puis à l’omni.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Avant + m × arrière = directivité obtenue</span></div>
+          <canvas id="m3c-cv" class="cv" width="1000" height="460" role="img" aria-label="Coupe d’une capsule à double membrane avec la polarisation de chaque membrane, les diagrammes polaires de la membrane avant et de la membrane arrière pondérée, et le diagramme polaire résultant."></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Dosage m</small><b class="acc" id="m3c-m">—</b></div>
+          <div><small>A = (1 + m) / 2</small><b id="m3c-A">—</b></div>
+          <div><small>Directivité</small><b id="m3c-nom">—</b></div>
+          <div><small>Annulation</small><b id="m3c-nul">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Dosage m</span><input type="range" id="m3c-r" min="-100" max="100" step="1" value="0"><output id="m3c-ro"></output></label>
+          <p class="muted small" style="margin:10px 0 8px">Positions du commutateur :</p>
+          <div class="btnrow" id="m3c-situ">
+            <button class="chip" type="button" data-s="100">Omni</button>
+            <button class="chip" type="button" data-s="40">Infracardio</button>
+            <button class="chip" type="button" data-s="0">Cardio</button>
+            <button class="chip" type="button" data-s="-27">Supercardio</button>
+            <button class="chip" type="button" data-s="-50">Hypercardio</button>
+            <button class="chip" type="button" data-s="-100">Huit</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Ce qu’il faut observer</h3>
+          <div id="m3c-msg" class="note" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- =================== MODULE 4 : LA DIRECTIVITÉ =================== -->
+  <template data-labo="4">
+    <div class="sous-labo"><span class="eyebrow">Labo 1 · Le diagramme polaire</span><h3>Modeler une directivité, placer la voix et la gêne</h3><p class="muted">Réglez <b>A</b> de 0 (huit) à 1 (omni). Faites glisser la <b>voix</b> et la <b>source gênante</b> (retour de scène, public…) autour du micro : le labo calcule ce que chacune perd en entrant dans le micro.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>r(θ) = A + B·cos θ</span><div id="m4a-echelle" aria-label="Échelle du diagramme"></div></div>
+          <canvas id="m4a-cv" class="cv" width="1000" height="520" role="img" aria-label="Diagramme polaire d’un micro dont la directivité est réglable, avec une voix et une source gênante placées autour. À droite, la distance à laquelle ce micro capte autant de salle qu’un omni, et les niveaux de la voix et de la gêne dans le micro."></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>A · B</small><b class="acc" id="m4a-ab">—</b></div>
+          <div><small>DF · DI</small><b id="m4a-di">—</b></div>
+          <div><small>√DF (distance)</small><b id="m4a-dist">—</b></div>
+          <div><small>Annulation</small><b id="m4a-nul">—</b></div>
+          <div><small>À 90° · à 180°</small><b id="m4a-att">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>A (pression)</span><input type="range" id="m4a-a" min="0" max="1000" step="1" value="500"><output id="m4a-ao"></output></label>
+          <div class="btnrow" id="m4a-dirs" style="margin:6px 0 10px">
+            <button class="chip" type="button" data-s="omni">Omni</button>
+            <button class="chip" type="button" data-s="infra">Infracardio</button>
+            <button class="chip" type="button" data-s="cardio">Cardio</button>
+            <button class="chip" type="button" data-s="super">Super</button>
+            <button class="chip" type="button" data-s="hyper">Hyper</button>
+            <button class="chip" type="button" data-s="huit">Huit</button>
+          </div>
+          <div class="ctl"><span>Comparer avec</span><div id="m4a-comp" aria-label="Courbe de comparaison"></div></div>
+          <p class="muted small" style="margin:10px 0 8px">Situations toutes prêtes :</p>
+          <div class="btnrow" id="m4a-situ">
+            <button class="chip" type="button" data-s="retour">Retour derrière le chanteur</button>
+            <button class="chip" type="button" data-s="deux">Retours à ±125°</button>
+            <button class="chip" type="button" data-s="cotes">Bruit sur les côtés</button>
+            <button class="chip" type="button" data-s="piege">Hyper, retour à 180°</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Ce qu’il faut observer</h3>
+          <div id="m4a-msg" class="note" aria-live="polite"></div>
+        </div>
+        <div class="card"><h3>Calcul pas à pas</h3><div class="calc" id="m4a-calc" aria-live="polite"></div></div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 2 · Le micro canon</span><h3>Quand le tube à interférences devient-il efficace ?</h3><p class="muted">Le son qui entre par chaque fente arrive à la capsule avec un <b>décalage</b> qui dépend de l’angle. Les flèches de droite additionnent ces contributions : si elles tournent en rond, elles s’annulent. Changez la fréquence et la longueur du tube.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Directivité du canon (échelle en dB) et addition des fentes</span><span id="m4b-titre"></span></div>
+          <canvas id="m4b-cv" class="cv" width="1000" height="520" role="img" aria-label="À gauche, le diagramme polaire en dB d’un micro canon comparé à sa capsule seule. À droite, le tube vu de côté avec le son qui entre par les fentes, l’addition des contributions de chaque fente sous forme de flèches, et l’atténuation hors axe en fonction de la fréquence."></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>λ</small><b id="m4b-lam">—</b></div>
+          <div><small>Tube efficace</small><b id="m4b-fc">—</b></div>
+          <div><small>Canon à θ</small><b class="acc" id="m4b-tot">—</b></div>
+          <div><small>Capsule à θ</small><b id="m4b-cap">—</b></div>
+          <div><small>Ouverture −6 dB</small><b id="m4b-ouv">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Fréquence</span><input type="range" id="m4b-f" min="0" max="1000" step="1" value="600"><output id="m4b-fo"></output></label>
+          <label class="ctl"><span>Longueur du tube</span><input type="range" id="m4b-l" min="15" max="60" step="1" value="25"><output id="m4b-lo"></output></label>
+          <label class="ctl"><span>Angle de la source θ</span><input type="range" id="m4b-t" min="0" max="180" step="1" value="90"><output id="m4b-to"></output></label>
+          <div class="ctl"><span>Capsule</span><div id="m4b-cap-s" aria-label="Directivité de la capsule"></div></div>
+          <p class="muted small" style="margin:10px 0 8px">Situations toutes prêtes :</p>
+          <div class="btnrow" id="m4b-situ">
+            <button class="chip" type="button" data-s="grave">Canon court, 300 Hz</button>
+            <button class="chip" type="button" data-s="voix">Canon court, 4 kHz</button>
+            <button class="chip" type="button" data-s="long">Canon long, 2 kHz</button>
+            <button class="chip" type="button" data-s="lobe">Un lobe secondaire</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Ce qu’il faut observer</h3>
+          <div id="m4b-msg" class="note" aria-live="polite"></div>
+          <p class="muted small" style="margin-top:8px">Modèle simplifié (ligne d’Olson) : il exagère la profondeur des annulations, un vrai canon rejette un peu moins.</p>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- =================== MODULE 5 : SENSIBILITÉ ET FICHE TECHNIQUE =================== -->
+  <template data-labo="5">
+    <div class="sous-labo"><span class="eyebrow">Labo 1 · La chaîne des niveaux</span><h3>Du son dans l’air au niveau ligne</h3><p class="muted">La pression de la source est multipliée par la <b>sensibilité</b> du micro, puis amplifiée par le préampli. Suivez le signal, le bruit et les zones de saturation sur les trois échelles.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Pression (dB SPL) → micro (dBu) → préampli (dBu)</span><button class="btn small" id="m5a-pause" type="button">⏸ Pause</button></div>
+          <canvas id="m5a-cv" class="cv" width="1000" height="520" role="img" aria-label="Trois échelles de niveaux côte à côte : la pression acoustique en dB SPL avec le bruit propre et le niveau maximal du micro, la tension de sortie du micro en dBu, puis la sortie du préampli en dBu avec le niveau visé de +4 dBu et la saturation, et un vumètre animé"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Pression</small><b id="m5a-p">—</b></div>
+          <div><small>Tension du micro</small><b id="m5a-u">—</b></div>
+          <div><small>Niveau du micro</small><b id="m5a-lm">—</b></div>
+          <div><small>Sortie du préampli</small><b class="acc" id="m5a-ls">—</b></div>
+          <div><small>Signal / bruit de la chaîne</small><b id="m5a-sb">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Le micro</h3>
+          <label class="ctl"><span>Modèle</span><select id="m5a-mic"></select></label>
+          <div class="calc" id="m5a-fiche"></div>
+          <div class="ctl" style="margin-top:10px"><span>Atténuateur</span><div id="m5a-pad" aria-label="Atténuateur du micro"></div></div>
+        </div>
+        <div class="card">
+          <h3>La source et le préampli</h3>
+          <label class="ctl"><span>Source</span><input type="range" id="m5a-l" min="20" max="145" step="1" value="74"><output id="m5a-lo"></output></label>
+          <label class="ctl"><span>Gain</span><input type="range" id="m5a-g" min="0" max="80" step="1" value="50"><output id="m5a-go"></output></label>
+          <div class="btnrow" style="margin-top:6px"><button class="btn small" type="button" id="m5a-auto">Régler le gain pour +4 dBu</button></div>
+          <p class="muted small" style="margin:10px 0 8px">Situations toutes prêtes :</p>
+          <div class="btnrow" id="m5a-situ">
+            <button class="chip" type="button" data-s="calme">Ambiance calme</button>
+            <button class="chip" type="button" data-s="voix">Voix parlée à 30 cm</button>
+            <button class="chip" type="button" data-s="guitare">Guitare acoustique</button>
+            <button class="chip" type="button" data-s="chant">Chant fort à 5 cm</button>
+            <button class="chip" type="button" data-s="caisse">Caisse claire à 5 cm</button>
+          </div>
+        </div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m5a-msg" class="note" aria-live="polite"></div></div>
+        <div class="card"><h3>Calcul pas à pas</h3><div class="calc" id="m5a-calc"></div></div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 2 · Lire une fiche</span><h3>Chaque ligne de la fiche, expliquée</h3><p class="muted">Touchez une ligne de la fiche (ou choisissez-la à droite) : le schéma correspondant s’affiche. Modifiez les valeurs, la fiche et les calculs suivent.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Fiche technique · touchez une ligne</span><span id="m5b-titre"></span></div>
+          <canvas id="m5b-cv" class="cv" width="1000" height="500" role="img" aria-label="Une fiche technique de micro à gauche, dont une ligne est surlignée ; à droite, le schéma qui l’explique : échelle des sensibilités, bruit propre et rapport signal sur bruit, dynamique, diviseur de tension des impédances ou courbe de réponse en fréquence"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Sensibilité</small><b id="m5b-dbv">—</b></div>
+          <div><small>Signal / bruit</small><b id="m5b-sb">—</b></div>
+          <div><small>Dynamique</small><b id="m5b-dyn">—</b></div>
+          <div><small>Perte à l’entrée</small><b id="m5b-perte">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>La ligne étudiée</h3>
+          <div id="m5b-ligne" aria-label="Ligne de la fiche"></div>
+        </div>
+        <div class="card">
+          <h3>Les valeurs de la fiche</h3>
+          <label class="ctl"><span>Sensibilité</span><input type="range" id="m5b-s" min="0" max="1000" step="1" value="700"><output id="m5b-so"></output></label>
+          <label class="ctl"><span>Bruit propre</span><input type="range" id="m5b-b" min="4" max="32" step="1" value="14"><output id="m5b-bo"></output></label>
+          <label class="ctl"><span>SPL max</span><input type="range" id="m5b-m" min="110" max="150" step="1" value="135"><output id="m5b-mo"></output></label>
+          <label class="ctl"><span>Impédance du micro</span><input type="range" id="m5b-zs" min="50" max="600" step="10" value="200"><output id="m5b-zso"></output></label>
+          <label class="ctl"><span>Entrée du préampli</span><input type="range" id="m5b-zc" min="0" max="1000" step="1" value="500"><output id="m5b-zco"></output></label>
+          <label class="ctl"><span>Bosse de présence</span><input type="range" id="m5b-pr" min="0" max="8" step="1" value="3"><output id="m5b-pro"></output></label>
+          <div class="ctl"><span>Coupe-bas</span><div id="m5b-cb" aria-label="Coupe-bas"></div></div>
+          <p class="muted small" style="margin:10px 0 8px">Fiches toutes prêtes :</p>
+          <div class="btnrow" id="m5b-situ">
+            <button class="chip" type="button" data-s="studio">Statique de studio</button>
+            <button class="chip" type="button" data-s="pm">Petite membrane</button>
+            <button class="chip" type="button" data-s="cravate">Cravate électret</button>
+            <button class="chip" type="button" data-s="adapt">Adaptation d’impédance (erreur)</button>
+          </div>
+        </div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m5b-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- =================== MODULE 6 : TYPES DE MICROS ET PRISE DE SON =================== -->
+  <template data-labo="6">
+    <div class="sous-labo"><span class="eyebrow">Labo 1 · Distance critique</span><h3>Quand la salle prend le dessus</h3><p class="muted">Le son direct baisse de <b>6 dB</b> à chaque doublement de distance ; la réverbération, elle, reste la même partout. Éloignez le micro, changez de salle et de directivité.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Niveaux captés selon la distance · la salle vue de dessus</span><button class="btn small" id="m6a-pause" type="button">⏸ Pause</button></div>
+          <canvas id="m6a-cv" class="cv" width="1000" height="520" role="img" aria-label="À gauche, un graphique du niveau capté en fonction de la distance : champ direct qui décroît, champ réverbéré constant, leur somme et la distance critique ; à droite, la salle vue de dessus avec la source, le micro et son diagramme de directivité, des ondes directes et des réflexions"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Rayon de réverbération</small><b id="m6a-rh">—</b></div>
+          <div><small>Distance critique du micro</small><b class="acc" id="m6a-dc">—</b></div>
+          <div><small>Direct / réverbéré</small><b id="m6a-dr">—</b></div>
+          <div><small>Champ dominant</small><b id="m6a-champ">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>La salle</h3>
+          <label class="ctl"><span>Volume</span><input type="range" id="m6a-v" min="0" max="1000" step="1" value="500"><output id="m6a-vo"></output></label>
+          <label class="ctl"><span>Réverbération T</span><input type="range" id="m6a-t" min="0.2" max="6" step="0.05" value="0.8"><output id="m6a-to"></output></label>
+          <p class="muted small" style="margin:10px 0 8px">Salles toutes prêtes :</p>
+          <div class="btnrow" id="m6a-situ">
+            <button class="chip" type="button" data-s="cabine">Cabine speaker</button>
+            <button class="chip" type="button" data-s="classe">Salle de classe</button>
+            <button class="chip" type="button" data-s="plateau">Plateau TV</button>
+            <button class="chip" type="button" data-s="eglise">Église</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Le micro</h3>
+          <label class="ctl"><span>Directivité</span><select id="m6a-dir"></select></label>
+          <label class="ctl"><span>Distance à la source</span><input type="range" id="m6a-d" min="0" max="1000" step="1" value="400"><output id="m6a-do"></output></label>
+        </div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m6a-msg" class="note" aria-live="polite"></div></div>
+        <div class="card"><h3>Calcul pas à pas</h3><div class="calc" id="m6a-calc"></div></div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 2 · Filtre en peigne</span><h3>Un micro au-dessus d’une table</h3><p class="muted">Le micro reçoit la voix deux fois : en <b>direct</b>, et réfléchie par la table, un peu plus tard. Les deux s’annulent à certaines fréquences. Posez le micro sur la table : les creux disparaissent.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Les deux trajets · la courbe de réponse</span><button class="btn small" id="m6b-pause" type="button">⏸ Pause</button></div>
+          <canvas id="m6b-cv" class="cv" width="1000" height="520" role="img" aria-label="À gauche, vue de côté d’une personne qui parle devant un micro placé au-dessus d’une table, avec le trajet direct, le trajet réfléchi par la table et la source image ; à droite, la courbe de réponse en fréquence du micro avec les creux du filtre en peigne"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Différence de trajet</small><b id="m6b-delta">—</b></div>
+          <div><small>Retard</small><b id="m6b-tau">—</b></div>
+          <div><small>Premier creux</small><b class="acc" id="m6b-f1">—</b></div>
+          <div><small>Profondeur des creux</small><b id="m6b-prof">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Hauteur du micro</span><input type="range" id="m6b-h" min="0" max="1000" step="1" value="780"><output id="m6b-ho"></output></label>
+          <label class="ctl"><span>Distance bouche – micro</span><input type="range" id="m6b-d" min="0.2" max="1.4" step="0.01" value="0.6"><output id="m6b-do"></output></label>
+          <label class="ctl"><span>Hauteur de la bouche</span><input type="range" id="m6b-hs" min="0.2" max="0.55" step="0.01" value="0.4"><output id="m6b-hso"></output></label>
+          <label class="ctl"><span>Réflexion de la table</span><input type="range" id="m6b-r" min="0" max="1" step="0.05" value="0.9"><output id="m6b-ro"></output></label>
+          <p class="muted small" style="margin:10px 0 8px">Situations toutes prêtes :</p>
+          <div class="btnrow" id="m6b-situ">
+            <button class="chip" type="button" data-s="pied">Micro sur pied</button>
+            <button class="chip" type="button" data-s="bas">Micro bas sur la table</button>
+            <button class="chip" type="button" data-s="surface">Micro de surface</button>
+            <button class="chip" type="button" data-s="tapis">Table couverte de feutre</button>
+          </div>
+        </div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m6b-msg" class="note" aria-live="polite"></div></div>
+        <div class="card"><h3>Calcul pas à pas</h3><div class="calc" id="m6b-calc"></div></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- =================== MODULE 7 : LIAISONS ET ALIMENTATIONS =================== -->
+  <template data-labo="7">
+    <div class="sous-labo"><span class="eyebrow">Labo 1 · Symétrique contre asymétrique</span><h3>Où passe le parasite ?</h3><p class="muted">Un câble micro longe un transformateur qui rayonne un champ à 50 Hz. Comparez les deux liaisons : en <b>symétrique</b>, le parasite est le même sur les deux conducteurs, et la soustraction l’efface.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Câble, parasite et oscilloscopes</span><button class="btn small" id="m7a-pause" type="button">⏸ Pause</button></div>
+          <canvas id="m7a-cv" class="cv" width="1000" height="540" role="img" aria-label="Un micro relié à une console par un câble qui passe près d’une source de parasite. Trois oscilloscopes montrent la tension sur chaque conducteur et la tension de sortie de l’entrée"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Signal</small><b id="m7a-sig">—</b></div>
+          <div><small>Parasite capté</small><b id="m7a-par">—</b></div>
+          <div><small>Parasite en sortie</small><b id="m7a-res">—</b></div>
+          <div><small>Signal / parasite</small><b class="acc" id="m7a-sb">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <div class="ctl"><span>Liaison</span><div id="m7a-type" aria-label="Type de liaison"></div></div>
+          <label class="ctl"><span>Parasite (10 m)</span><input type="range" id="m7a-p" min="-90" max="-30" step="1" value="-55"><output id="m7a-po"></output></label>
+          <label class="ctl"><span>Longueur</span><input type="range" id="m7a-l" min="0" max="1000" step="1" value="500"><output id="m7a-lo"></output></label>
+          <label class="ctl" id="m7a-ligne-t"><span>TRMC</span><input type="range" id="m7a-t" min="20" max="90" step="1" value="70"><output id="m7a-to"></output></label>
+          <p class="muted small" style="margin:10px 0 8px">Situations toutes prêtes :</p>
+          <div class="btnrow" id="m7a-situ">
+            <button class="chip" type="button" data-s="court">Câble micro de 5 m</button>
+            <button class="chip" type="button" data-s="scene">Multipaire de 80 m près d’un gradateur</button>
+            <button class="chip" type="button" data-s="jack">Jack instrument de 10 m</button>
+            <button class="chip" type="button" data-s="abime">Entrée symétrique médiocre</button>
+          </div>
+        </div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m7a-msg" class="note" aria-live="polite"></div></div>
+        <div class="card"><h3>Calcul pas à pas</h3><div class="calc" id="m7a-calc" aria-live="polite"></div></div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 2 · XLR et alimentations</span><h3>Quelle tension sur chaque broche ?</h3><p class="muted">Choisissez une alimentation et un micro. Les tensions continues de chaque broche sont mesurées par rapport à la broche 1 (masse). Touchez une broche du connecteur pour connaître son rôle.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Console → câble → micro</span><button class="btn small" id="m7b-pause" type="button">⏸ Pause</button></div>
+          <canvas id="m7b-cv" class="cv" width="1000" height="520" role="img" aria-label="Schéma d’une alimentation de micro : la console, ses résistances d’alimentation, les trois conducteurs du câble XLR et le micro, avec la tension de chaque broche et le trajet du courant"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Broche 2 / 1</small><b id="m7b-u2">—</b></div>
+          <div><small>Broche 3 / 1</small><b id="m7b-u3">—</b></div>
+          <div><small>Entre 2 et 3</small><b id="m7b-u23">—</b></div>
+          <div><small>Au micro</small><b class="acc" id="m7b-um">—</b></div>
+          <div><small>Courant</small><b id="m7b-i">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <div class="ctl"><span>Alimentation</span><div id="m7b-alim" aria-label="Alimentation"></div></div>
+          <div class="ctl"><span>Micro</span><div id="m7b-micro" aria-label="Type de micro"></div></div>
+          <label class="ctl" id="m7b-ligne-i"><span>Consommation</span><input type="range" id="m7b-c" min="1" max="10" step="0.5" value="4"><output id="m7b-co"></output></label>
+          <label class="ctl"><span>Câble défectueux</span><input type="checkbox" id="m7b-def"></label>
+        </div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m7b-msg" class="note" aria-live="polite"></div></div>
+        <div class="card"><h3>La broche touchée</h3><div id="m7b-pin" class="note" aria-live="polite">Touchez une broche du connecteur XLR dessiné à gauche.</div></div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 3 · Niveaux</span><h3>Du niveau micro au niveau ligne</h3><p class="muted">Placez une tension sur l’échelle des niveaux : les dBu, les dBV et les volts disent la même chose avec des références différentes.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Échelle des niveaux</span></div>
+          <canvas id="m7c-cv" class="cv" width="1000" height="450" role="img" aria-label="Une échelle de niveaux de −80 à +24 dBu avec les zones du niveau micro et du niveau ligne, les repères +4 dBu et −10 dBV, et le niveau choisi"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Niveau</small><b class="acc" id="m7c-dbu">—</b></div>
+          <div><small>En dBV</small><b id="m7c-dbv">—</b></div>
+          <div><small>Tension</small><b id="m7c-v">—</b></div>
+          <div><small>Écart avec +4 dBu</small><b id="m7c-ecart">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <label class="ctl"><span>Niveau (dBu)</span><input type="range" id="m7c-l" min="-80" max="24" step="0.1" value="4"><output id="m7c-lo"></output></label>
+          <p class="muted small" style="margin:10px 0 8px">Situations toutes prêtes :</p>
+          <div class="btnrow" id="m7c-situ">
+            <button class="chip" type="button" data-s="dyn">Micro dynamique, voix</button>
+            <button class="chip" type="button" data-s="stat">Micro statique, voix</button>
+            <button class="chip" type="button" data-s="gp">Ligne grand public −10 dBV</button>
+            <button class="chip" type="button" data-s="pro">Ligne pro +4 dBu</button>
+          </div>
+        </div>
+        <div class="card"><h3>Calcul pas à pas</h3><div class="calc" id="m7c-calc" aria-live="polite"></div></div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m7c-msg" class="note" aria-live="polite"></div></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- =================== MODULE 8 : COUPLES STÉRÉOPHONIQUES =================== -->
+  <template data-labo="8">
+    <div class="sous-labo"><span class="eyebrow">Labo 1 · Plan de scène</span><h3>De la scène aux enceintes</h3><p class="muted">Choisissez un couple, puis faites glisser le <b>soliste</b> (point jaune) sur la scène. Le labo calcule la différence de niveau et la différence de temps entre les deux micros, et place la source fantôme entre les enceintes. Le secteur jaune est l’<b>angle de prise de son</b>.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>La scène vue de dessus · l’écoute</span><button class="btn small" id="m8a-pause" type="button">⏸ Pause</button></div>
+          <canvas id="m8a-cv" class="cv" width="1000" height="540" role="img" aria-label="À gauche, une scène vue de dessus avec des instruments, un soliste déplaçable et le couple de micros avec son angle de prise de son. À droite, le triangle d’écoute stéréo et la position perçue de chaque instrument entre les deux enceintes"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>ΔL (soliste)</small><b id="m8a-dl">—</b></div>
+          <div><small>Δt (soliste)</small><b id="m8a-dt">—</b></div>
+          <div><small>Décalage</small><b id="m8a-dec">—</b></div>
+          <div><small>Angle de prise</small><b class="acc" id="m8a-apds">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Le couple</h3>
+          <div class="ctl"><span>Couple</span><div id="m8a-couple" aria-label="Type de couple"></div></div>
+          <label class="ctl"><span>Directivité</span><select id="m8a-dir"></select></label>
+          <label class="ctl"><span>Angle entre axes</span><input type="range" id="m8a-ang" min="0" max="180" step="1" value="110"><output id="m8a-ango"></output></label>
+          <label class="ctl"><span>Écartement</span><input type="range" id="m8a-d" min="0" max="200" step="1" value="17"><output id="m8a-do"></output></label>
+        </div>
+        <div class="card">
+          <h3>La scène</h3>
+          <label class="ctl"><span>Largeur vue du couple</span><input type="range" id="m8a-w" min="20" max="170" step="1" value="100"><output id="m8a-wo"></output></label>
+          <p class="muted small" style="margin:10px 0 8px">Situations toutes prêtes :</p>
+          <div class="btnrow" id="m8a-situ">
+            <button class="chip" type="button" data-s="orch">Grand orchestre de près (140°)</button>
+            <button class="chip" type="button" data-s="quat">Quatuor (60°)</button>
+            <button class="chip" type="button" data-s="bord">Soliste au bord</button>
+          </div>
+        </div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m8a-msg" class="note" aria-live="polite"></div></div>
+        <div class="card"><h3>Calcul pas à pas</h3><div class="calc" id="m8a-calc" aria-live="polite"></div></div>
+      </div>
+    </div>
+
+    <div class="sous-labo"><span class="eyebrow">Labo 2 · Le couple MS</span><h3>Deux micros réels, deux micros virtuels</h3><p class="muted">Le micro M regarde la scène, le bidirectionnel S regarde les côtés. Le dématriçage <b>G = M + S</b> et <b>D = M − S</b> fabrique deux micros virtuels. Montez le niveau de S : ils s’écartent, l’image s’élargit.</p></div>
+    <div class="lab">
+      <div class="lab-stage">
+        <div class="stg">
+          <div class="vt"><span>Micros réels · micros virtuels</span><button class="btn small" id="m8b-pause" type="button">⏸ Pause</button></div>
+          <canvas id="m8b-cv" class="cv" width="1000" height="520" role="img" aria-label="À gauche, les directivités des micros M et S. À droite, les directivités des micros virtuels gauche et droite obtenus par dématriçage, et une source qui tourne autour du couple avec les niveaux de chaque voie"></canvas>
+        </div>
+        <div class="readouts">
+          <div><small>Axes virtuels</small><b class="acc" id="m8b-axes">—</b></div>
+          <div><small>Directivité (A)</small><b id="m8b-dir">—</b></div>
+          <div><small>Niveau de S</small><b id="m8b-gdb">—</b></div>
+          <div><small>Somme mono</small><b id="m8b-mono">—</b></div>
+        </div>
+      </div>
+      <div class="lab-ctl">
+        <div class="card">
+          <h3>Réglages</h3>
+          <div class="ctl"><span>Micro M</span><div id="m8b-m" aria-label="Directivité du micro M"></div></div>
+          <label class="ctl"><span>Niveau de S</span><input type="range" id="m8b-g" min="0" max="1.5" step="0.01" value="0.5"><output id="m8b-go"></output></label>
+          <p class="muted small" style="margin:10px 0 8px">Situations toutes prêtes :</p>
+          <div class="btnrow" id="m8b-situ">
+            <button class="chip" type="button" data-s="etroit">Étroit</button>
+            <button class="chip" type="button" data-s="xy">Axes virtuels à ±45°</button>
+            <button class="chip" type="button" data-s="blum">Équivalent Blumlein</button>
+            <button class="chip" type="button" data-s="large">Large</button>
+          </div>
+        </div>
+        <div class="card"><h3>Ce qu’il faut observer</h3><div id="m8b-msg" class="note" aria-live="polite"></div></div>
+        <div class="card"><h3>Calcul pas à pas</h3><div class="calc" id="m8b-calc" aria-live="polite"></div></div>
+      </div>
+    </div>
+  </template>
 
   <!-- Scripts communs : ne pas modifier, ne pas changer l'ordre -->
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
