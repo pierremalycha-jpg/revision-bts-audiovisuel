@@ -27,19 +27,22 @@
       </h1>
       <span class="eyebrow">Révision TES et TMO</span>
       <p class="display">Réviser.<br><span class="grad">Notion par notion.</span></p>
-      <p class="lead">Des <b>applications interactives</b> pour comprendre, manipuler et retenir les notions des épreuves TES et TMO. Chaque application se parcourt module par module, et chaque module se termine par une <b>évaluation sur 20</b>.</p>
+      <p class="lead">Des <b>applications interactives</b> pour comprendre les notions des épreuves TES et TMO, des <b>outils</b> pour préparer vos projets et des <b>simulateurs</b> pour vous entraîner comme sur le terrain.</p>
       <p class="credit">Applications basées sur les cours de <b>Pierre MALYCHA</b>, du <b>BTS Audiovisuel</b> du <b>Lycée Henri Martin de Saint-Quentin</b>.</p>
     </section>
 
-    <!-- Toutes les applications, dans une seule grille : les notions concernent
-         tout le monde. La grille est construite par js/page-accueil.js à partir
-         de js/catalogue.js. Pour ajouter une application, on ne touche pas à
-         cette page : on complète le catalogue. -->
+    <!-- Les applications, rangées en trois catégories (Apport de connaissances,
+         Outils, Applications pratiques). Tout est construit par
+         js/page-accueil.js à partir de js/catalogue.js (CATALOGUE et CATEGORIES).
+         Pour ajouter une application, on ne touche pas à cette page : on
+         complète le catalogue. -->
     <section class="toutes-apps" id="applications">
       <div class="sec-hd">
         <h2 class="sec-t">Les applications</h2>
         <div class="resume-option" id="resume-applications"></div>
       </div>
+      <!-- Les trois catégories, en raccourci -->
+      <nav class="cat-nav" id="nav-categories" aria-label="Catégories d'applications"></nav>
       <div id="liste-applications">
         <p class="discret">Chargement des applications…</p>
       </div>
@@ -47,7 +50,7 @@
 
     <div class="sec-hd rv">
       <h2 class="sec-t">Quatre temps par module</h2>
-      <p class="muted">Toutes les applications suivent le même parcours : une fois qu'on l'a pris en main, on le retrouve partout.</p>
+      <p class="muted">Toutes les applications d'apport de connaissances suivent le même parcours : une fois qu'on l'a pris en main, on le retrouve partout.</p>
     </div>
     <ol class="etapes">
       <li class="rv">

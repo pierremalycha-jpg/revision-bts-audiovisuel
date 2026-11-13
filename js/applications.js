@@ -1,8 +1,9 @@
 /* ==========================================================================
    applications.js — outils communs pour présenter les applications
    --------------------------------------------------------------------------
-   Utilisé par l'accueil, les pages d'option et le tableau de bord :
+   Utilisé par l'accueil, le tableau de bord et les applications :
      - Applications.icone(app)           fabrique l'icône (carré arrondi + dégradé)
+     - Applications.rubrique(app)        la catégorie et la sous-catégorie d'une application
      - Applications.progression(app, p)  résume la progression d'une application
      - Applications.anneau(f, taille, e) dessine un anneau de progression (SVG)
    Pourquoi ici et pas dans catalogue.js ? Le catalogue ne contient que des
@@ -19,6 +20,15 @@ const Applications = {
     icone.style.setProperty("--app-grad", "linear-gradient(160deg, " + couleurs.join(", ") + ")");
     icone.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + (ICONES[app.icone] || ICONES.plus) + "</svg>";
     return icone;
+  },
+
+  /* La catégorie et la sous-catégorie d'une application (voir CATEGORIES dans
+     js/catalogue.js). Une application sans catégorie connue est rangée dans
+     la première. Renvoie { categorie, sousCategorie } (sousCategorie peut être null). */
+  rubrique(app) {
+    const categorie = CATEGORIES.find(function (c) { return c.id === app.categorie; }) || CATEGORIES[0];
+    const sousCategorie = (categorie.sousCategories || []).find(function (s) { return s.id === app.sousCategorie; }) || null;
+    return { categorie: categorie, sousCategorie: sousCategorie };
   },
 
   /* Résume la progression d'une application, quelle que soit sa façon de

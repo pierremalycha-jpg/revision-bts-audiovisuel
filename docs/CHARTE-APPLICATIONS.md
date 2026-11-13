@@ -11,7 +11,7 @@ Cette charte dit ce qu'il faut respecter, et pourquoi.
 1. **Duplique** `modules/modele/` et renomme la copie `epreuve-nom-de-la-notion` (minuscules, tirets, sans accent). Exemple : `tmo-reglage-camera`.
 2. **Écris le contenu** dans `contenu.js` : pour chaque module, les notions, l'essentiel et les questions. Le format est expliqué ligne par ligne dans le fichier.
 3. **Écris les labos** : leur HTML dans `index.html` (un `<template data-labo="n">` par module qui en a un), leur code dans `labos.js`.
-4. **Déclare l'application** dans `js/catalogue.js` (id, épreuve, titre, icône, couleurs, nombre de modules). Son icône apparaît alors dans la grille de l'accueil et dans « Ma progression ».
+4. **Déclare l'application** dans `js/catalogue.js` (id, catégorie et sous-catégorie, épreuve, titre, icône, couleurs, nombre de modules). Son icône apparaît alors dans sa rubrique de l'accueil et dans « Ma progression ». Si elle figurait dans la liste `aVenir` de sa catégorie (`CATEGORIES`), retire-la de cette liste.
 5. **Teste** : ouvre `index.html` de l'application, ajoute `?enseignant` à l'adresse pour ouvrir tous les modules sans passer les évaluations, vérifie chaque étape en clair, en sombre et sur téléphone.
 
 

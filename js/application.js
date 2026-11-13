@@ -202,7 +202,9 @@ const Application = (function () {
       accroche: A.accroche || c.accroche || "",
       icone: A.icone || c.icone || "plus",
       teinte: A.teinte || c.teinte,
-      epreuve: A.epreuve || c.epreuve || ""
+      epreuve: A.epreuve || c.epreuve || "",
+      // L'ancre de l'accueil où se trouve l'application (sous-catégorie ou catégorie)
+      rayon: c.sousCategorie || c.categorie || "applications"
     };
   }
 
@@ -213,7 +215,7 @@ const Application = (function () {
       '  <div class="side-hd"><button class="brand" data-go="accueil" data-tip="Accueil de l’application"><span class="bt">' + echapper(info.titre) + "</span></button></div>" +
       '  <div class="side-sc">' +
       '    <button class="si" data-go="accueil" id="navAccueil" data-tip="Accueil"><span class="si-ic">' + PICTO.accueil + '</span><span class="lb"><b>Accueil</b></span></button>' +
-      '    <a class="si" href="' + RACINE + 'index.html#applications" data-tip="Retour à toutes les applications"><span class="si-ic">' + PICTO.grille + '</span><span class="lb"><b>Les applications</b><small>Retour à l’accueil</small></span></a>' +
+      '    <a class="si" href="' + RACINE + 'index.html#' + info.rayon + '" data-tip="Retour à toutes les applications"><span class="si-ic">' + PICTO.grille + '</span><span class="lb"><b>Les applications</b><small>Retour à l’accueil</small></span></a>' +
       '    <div class="side-lb"><span>Parcours</span></div>' +
       '    <nav id="navModules" aria-label="Modules"></nav>' +
       '    <div class="side-lb"><span>Outils</span></div>' +

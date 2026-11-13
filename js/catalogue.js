@@ -10,6 +10,12 @@
      id          identifiant unique, sans espace ni accent. Il sert de nom dans
                  la base de données : NE LE CHANGE PLUS une fois l'application
                  en ligne, sinon les notes déjà enregistrées seraient perdues.
+     categorie   la grande famille de l'application (voir CATEGORIES plus bas) :
+                   "connaissances" apport de connaissances (comprendre une notion) ;
+                   "outils"        outil pour préparer un projet (plan de feu…) ;
+                   "pratique"      application pratique, simulateur (régie…).
+     sousCategorie  (catégorie « connaissances » seulement) le rayon où ranger
+                 l'application : "camera-eclairage" ou "numerique".
      epreuve     "TES" ou "TMO"
      titre       le nom affiché sous l'icône (court : un ou deux mots)
      accroche    une ligne sous le nom
@@ -38,6 +44,8 @@ const TOUT_DEBLOQUER = true;
 const CATALOGUE = [
   {
     id: "tes-photometrie",
+    categorie: "connaissances",
+    sousCategorie: "camera-eclairage",
     epreuve: "TES",
     titre: "Photométrie",
     accroche: "La lumière, mesurée.",
@@ -51,6 +59,8 @@ const CATALOGUE = [
   },
   {
     id: "tes-signal-video-numerique",
+    categorie: "connaissances",
+    sousCategorie: "numerique",
     epreuve: "TES",
     titre: "Signal vidéo numérique",
     accroche: "Du signal aux bits.",
@@ -64,6 +74,8 @@ const CATALOGUE = [
   },
   {
     id: "tes-capteurs",
+    categorie: "connaissances",
+    sousCategorie: "camera-eclairage",
     epreuve: "TES",
     titre: "Capteurs d’image",
     accroche: "De la lumière aux électrons.",
@@ -77,6 +89,8 @@ const CATALOGUE = [
   },
   {
     id: "tes-eclairage",
+    categorie: "connaissances",
+    sousCategorie: "camera-eclairage",
     epreuve: "TES",
     titre: "Éclairage",
     accroche: "LED, gélatines et ombres.",
@@ -90,6 +104,8 @@ const CATALOGUE = [
   },
   {
     id: "tes-compression-video",
+    categorie: "connaissances",
+    sousCategorie: "numerique",
     epreuve: "TES",
     titre: "Compression vidéo",
     accroche: "Moins de bits, même image.",
@@ -107,6 +123,8 @@ const CATALOGUE = [
   //
   // ,{
   //   id: "tmo-nom-de-la-notion",
+  //   categorie: "connaissances",
+  //   sousCategorie: "camera-eclairage",
   //   epreuve: "TMO",
   //   titre: "Nom court",
   //   accroche: "Une ligne d'accroche.",
@@ -118,6 +136,70 @@ const CATALOGUE = [
   //   page: "modules/tmo-nom-de-la-notion/index.html",
   //   disponible: true
   // }
+];
+
+/* LES CATÉGORIES — l'organisation de l'accueil, dans cet ordre.
+   Chaque catégorie a :
+     id             le nom utilisé par le champ « categorie » des applications
+                    (et l'ancre de l'accueil : index.html#outils…)
+     numero, nom, accroche, description   ce qu'affiche l'accueil
+     icone, teinte  le pictogramme (clé de ICONES) et son dégradé
+     sousCategories (facultatif) des rayons pour ne pas tout mélanger ;
+                    une application y est rangée par son champ « sousCategorie ».
+     aVenir         (facultatif) les applications prévues, montrées grisées
+                    « Bientôt disponible ». Quand l'une d'elles est publiée
+                    dans CATALOGUE, retire-la de cette liste. */
+const CATEGORIES = [
+  {
+    id: "connaissances",
+    numero: 1,
+    nom: "Apport de connaissances",
+    accroche: "Comprendre les notions techniques.",
+    description: "Des notions expliquées simplement, des simulations à manipuler, l'essentiel à retenir et une évaluation sur 20 à la fin de chaque module.",
+    icone: "livre",
+    teinte: ["#5ac8fa", "#007aff", "#5856d6"],
+    sousCategories: [
+      {
+        id: "camera-eclairage",
+        nom: "Caméra, éclairage, filtres",
+        description: "La lumière, sa mesure, les projecteurs, les filtres et le capteur qui la reçoit."
+      },
+      {
+        id: "numerique",
+        nom: "Le numérique",
+        description: "Le signal vidéo numérique, son débit et sa compression."
+      }
+    ]
+  },
+  {
+    id: "outils",
+    numero: 2,
+    nom: "Outils",
+    accroche: "Préparer ses projets.",
+    description: "Des applications pour préparer un tournage ou une émission : plans de feu, schémas de câblage, synoptiques de régie, workflows.",
+    icone: "outil",
+    teinte: ["#ffb340", "#ff9500", "#ff6a3d"],
+    aVenir: [
+      { titre: "Plan de feu", accroche: "Placer projecteurs et réflecteurs.", icone: "projecteur" },
+      { titre: "Schéma de câblage", accroche: "Relier les équipements.", icone: "liaison" },
+      { titre: "Synoptique de régie", accroche: "Le chemin du signal en régie.", icone: "synoptique" },
+      { titre: "Workflow", accroche: "Du tournage à la diffusion.", icone: "workflow" }
+    ]
+  },
+  {
+    id: "pratique",
+    numero: 3,
+    nom: "Applications pratiques",
+    accroche: "S'entraîner en situation.",
+    description: "Des simulateurs pour s'exercer comme sur le terrain : une régie, une caméra, un car régie.",
+    icone: "simulateur",
+    teinte: ["#30d158", "#00c7be", "#0a84ff"],
+    aVenir: [
+      { titre: "Régie", accroche: "Mélangeur, sources et grille.", icone: "regie" },
+      { titre: "Caméra", accroche: "Régler exposition, balance et mise au point.", icone: "camera" },
+      { titre: "Car régie", accroche: "Une captation en extérieur.", icone: "car" }
+    ]
+  }
 ];
 
 // Présentation des épreuves (TES, TMO).
@@ -164,5 +246,19 @@ const ICONES = {
   // Une image découpée en blocs, serrée entre deux flèches (compression)
   compression: '<rect x="7" y="5.5" width="10" height="13" rx="2.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 5.8v12.4M7.3 12h9.4" stroke="currentColor" stroke-width="1.3" opacity=".7"/><rect x="8.6" y="7.2" width="2.6" height="3.4" rx=".6" fill="currentColor"/><path d="M1.8 12h3.4M3.6 9.9 5.6 12l-2 2.1M22.2 12h-3.4M20.4 9.9 18.4 12l2 2.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
   // Le signe « plus » (emplacement de la prochaine application)
+  // Un livre ouvert (catégorie « Apport de connaissances »)
+  livre: '<path d="M12 6.2C10 4.8 7.3 4.3 3.8 4.6v13.2c3.5-.3 6.2.2 8.2 1.6 2-1.4 4.7-1.9 8.2-1.6V4.6c-3.5-.3-6.2.2-8.2 1.6zM12 6.2v13.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
+  // Une clé plate (catégorie « Outils »)
+  outil: '<path d="M14.6 3.4a5 5 0 0 0-5.4 6.6l-6 6a1.9 1.9 0 0 0 2.7 2.7l6-6a5 5 0 0 0 6.6-5.4l-3 3-2.7-.6-.6-2.7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
+  // Un bouton « lecture » dans un écran (catégorie « Applications pratiques »)
+  simulateur: '<rect x="2.6" y="4.2" width="18.8" height="12.6" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 7.8v5.4l4.6-2.7z" fill="currentColor"/><path d="M8 20h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+  // Des blocs reliés (synoptique)
+  synoptique: '<rect x="2.6" y="4" width="6" height="5" rx="1.2" fill="currentColor"/><rect x="2.6" y="15" width="6" height="5" rx="1.2" fill="currentColor"/><rect x="15.4" y="9.5" width="6" height="5" rx="1.2" fill="currentColor"/><path d="M8.6 6.5h3.2v11H8.6M11.8 12h3.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>',
+  // Des étapes qui s'enchaînent (workflow)
+  workflow: '<circle cx="5" cy="12" r="2.6" fill="currentColor"/><circle cx="12" cy="12" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="19" cy="12" r="2.6" fill="currentColor"/><path d="M7.8 12h1.4M14.8 12h1.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+  // Des curseurs de pupitre (régie)
+  regie: '<path d="M5 4v16M12 4v16M19 4v16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".6"/><rect x="2.8" y="12" width="4.4" height="3.2" rx=".9" fill="currentColor"/><rect x="9.8" y="6.6" width="4.4" height="3.2" rx=".9" fill="currentColor"/><rect x="16.8" y="14.4" width="4.4" height="3.2" rx=".9" fill="currentColor"/>',
+  // Un camion (car régie)
+  car: '<path d="M2.6 6.5h11.6v9.8H2.6zM14.2 9.5h4l3.2 3.4v3.4h-7.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="6.4" cy="17.6" r="1.9" fill="currentColor"/><circle cx="17.4" cy="17.6" r="1.9" fill="currentColor"/><path d="M5 9.4h6.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
   plus: '<path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
 };
