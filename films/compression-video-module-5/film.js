@@ -105,12 +105,12 @@
     ctx.fillStyle = K.rgba(C.rouge, 0.07); ctx.fillRect(GX + CHARGE[0] * GW, YD - 8, (CHARGE[1] - CHARGE[0]) * GW, YQ + HG - YD + 16);
     // les axes
     [YD, YQ].forEach((y) => { ctx.strokeStyle = C.ligne; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(GX, y); ctx.lineTo(GX, y + HG); ctx.lineTo(GX + GW, y + HG); ctx.stroke(); });
-    K.t(ctx, 'Débit', GX + 14, YD + 30, { s: 28, w: 800, c: C.bleu });
-    K.t(ctx, 'Qualité', GX + 14, YQ + 30, { s: 28, w: 800, c });
+    K.t(ctx, 'Débit', GX + 14, YD + HG - 14, { s: 28, w: 800, c: C.bleu });
+    K.t(ctx, 'Qualité', GX + 14, YQ + HG - 14, { s: 28, w: 800, c });
     K.t(ctx, 'temps →', GX + GW, 808, { s: 22, c: C.mut, a: 'right' });
     // ce que les images réclament (en pointillé)
     trace(ctx, besoin, GX, YD, GW, HG, 1, { c: 'rgba(255,255,255,.45)', lw: 3, tirets: [4, 9] });
-    K.t(ctx, 'besoin des images', GX + GW - 8, YD + HG - besoin(0.9) * HG - 16, { s: 22, c: C.mut, a: 'right' });
+    K.t(ctx, 'besoin des images', GX + GW - 8, YD + HG - besoin(0.9) * HG + 34, { s: 22, c: C.txt2, a: 'right' });
     ctx.restore();
 
     if (!vbr) {
@@ -182,9 +182,9 @@
     // la taille du fichier : c'est la moyenne qui compte
     K.entre(ctx, t, e.formule, () => K.riche(ctx, ['V = D', ['moyen', { s: 32, c: C.bleu }], ' × t ÷ 8'], MX, 912, { s: 62, w: 800, c: C.txt }), { dx: -24, dy: 0 });
     K.entre(ctx, t, e.exemple, () => K.t(ctx, '2 h à 20 Mbit/s de moyenne : 20 × 7 200 ÷ 8 = 18 000 Mo', MX, 974, { s: 34, c: C.txt2 }), { dx: -24, dy: 0 });
-    K.entre(ctx, t, e.resultat, () => K.t(ctx, '= 18 Go', 1066, 976, { s: 52, w: 800, c: C.vert }), { zoom: 0.4, cx: 1160, cy: 958, d: 0.4 });
+    K.entre(ctx, t, e.resultat, () => K.t(ctx, '= 18 Go', 1066, 978, { s: 50, w: 800, c: C.vert }), { zoom: 0.4, cx: 1160, cy: 958, d: 0.4 });
     K.onde(ctx, 1160, 958, t, e.resultat, { c: C.vert, r: 200 });
-    K.entre(ctx, t, e.piege, () => K.piege(ctx, ['La ', ['moyenne', { c: C.jaune }], ', pas le plafond !'], W - MX, 902, { s: 36, a: 'right' }), { dy: 24 });
+    K.entre(ctx, t, e.piege, () => K.piege(ctx, ['La ', ['moyenne', { c: C.jaune }], ', pas le plafond !'], W - MX, 890, { s: 36, a: 'right' }), { dy: 24 });
   }
 
   /* ==========================================================================
@@ -195,7 +195,7 @@
     K.fond(ctx, t, C.azur); K.habillage(ctx, t, S);
     K.entete(ctx, t, e.debut, 4, 'Une ou deux passes ?', C.bleu);
     const volet = (i, t0, o) => K.entre(ctx, t, t0, () => {
-      const x = MX + i * 580, y = 262, w = 540, h = 590, gx = x + 36, gw = w - 72, gy = y + 150, gh = 150;
+      const x = MX + i * 580, y = 258, w = 540, h = 612, gx = x + 36, gw = w - 72, gy = y + 150, gh = 150;
       K.carte(ctx, x, y, w, h, { s: K.rgba(o.c, 0.5), f: K.rgba(o.c, 0.06) });
       K.t(ctx, o.titre, x + 36, y + 74, { s: 46, w: 800, c: o.c });
       K.t(ctx, o.sous, x + 36, y + 116, { s: 26, c: C.mut });
@@ -204,14 +204,14 @@
       trace(ctx, besoin, gx, gy, gw, gh, 1, { c: 'rgba(255,255,255,.4)', lw: 2.5, tirets: [3, 7] });
       o.graphe(gx, gy, gw, gh, ((t - t0) % 3) / 3);
       lignes(ctx, o.phrase, x + 36, y + 362, 40, { s: 29, c: C.txt });
-      (o.plus || []).forEach((l, k) => K.t(ctx, l, x + 36, y + 448 + k * 34, { s: 25, c: C.txt2 }));
-      if (o.bilan) K.t(ctx, o.bilan, x + 36, y + 462, { s: 27, w: 800, c: o.c });
+      (o.plus || []).forEach((l, k) => K.t(ctx, l, x + 36, y + 452 + k * 34, { s: 25, c: C.txt2 }));
+      if (o.bilan) K.t(ctx, o.bilan, x + 36, y + 470, { s: 27, w: 800, c: o.c });
       K.puce(ctx, o.tag, x + 36, y + h - 46, { s: 26, c: o.tagC || o.c, plein: !!o.plein });
     }, { dy: 40 });
 
     volet(0, e.a, {
       c: C.bleu, titre: '1 passe', sous: 'le codeur décide au fil de l’eau',
-      phrase: ['Il ne connaît pas la suite :', [['il réagit en retard', { c: C.bleu, w: 800 }], ' aux plans difficiles.']],
+      phrase: ['Il ne connaît pas la suite :', [['il réagit en retard', { c: C.bleu, w: 800 }]], 'aux plans difficiles.'],
       tag: 'possible en direct', tagC: C.vert,
       graphe: (x, y, w, h, u) => trace(ctx, (v) => Math.min(PLAFOND, besoin(Math.max(0, v - 0.085)) + 0.04), x, y, w, h, clamp(u * 1.5), { c: C.bleu }),
     });
@@ -234,7 +234,7 @@
       tag: 'taille du fichier imprévisible', tagC: C.jaune,
       graphe: (x, y, w, h, u) => { trace(ctx, () => 0.72, x, y, w, h, clamp(u * 1.5), { c: C.ora }); K.t(ctx, 'qualité', x + 10, y + h - 0.72 * h - 14, { s: 22, w: 800, c: C.ora }); },
     });
-    K.entre(ctx, t, e.piege, () => K.piege(ctx, ['Piège : le codage en ', ['2 passes', { c: C.jaune }], ' est impossible en ', ['direct', { c: C.jaune }], '.'], 960, 925, { s: 38, a: 'center' }), { dy: 24 });
+    K.entre(ctx, t, e.piege, () => K.piege(ctx, ['Piège : le codage en ', ['2 passes', { c: C.jaune }], ' est impossible en ', ['direct', { c: C.jaune }], '.'], 960, 936, { s: 38, a: 'center' }), { dy: 24 });
   }
 
   /* ==========================================================================
@@ -327,7 +327,7 @@
     K.entre(ctx, t, e.garanties, () => {
       [[ty + 26, 'jamais plein'], [ty + th - 26, 'jamais vide']].forEach(([y, s]) => {
         ctx.strokeStyle = C.rouge; ctx.lineWidth = 3; ctx.setLineDash([10, 8]); ctx.beginPath(); ctx.moveTo(tx - 14, y); ctx.lineTo(tx + tw + 14, y); ctx.stroke(); ctx.setLineDash([]);
-        K.t(ctx, s, tx - 26, y + 9, { s: 26, w: 800, c: C.rouge, a: 'right' });
+        K.t(ctx, s, tx + tw + 28, y + 9, { s: 26, w: 800, c: C.rouge });
       });
     }, { dy: 0 });
 
@@ -428,13 +428,13 @@
         K.t(ctx, 'niveau', x + 24, y + 42, { s: 24, c: C.mut });
         K.t(ctx, n[0], x + 24, y + 100, { s: 60, w: 800, c });
         K.t(ctx, n[1], x + w - 24, y + 96, { s: 30, w: 700, c: C.txt2, a: 'right' });
-        K.t(ctx, K.nb(n[2]) + ' MB/s', x + 24, y + 158, { s: 31, w: 800 });
-        K.riche(ctx, [K.nb(n[3]) + ' Mbit/s', [' en Main', { c: C.mut }]], x + 24, y + 206, { s: 27, c: i === 1 && t >= e.dmax ? C.txt : C.txt2, w: i === 1 && t >= e.dmax ? 800 : 400 });
+        K.t(ctx, 'MB/s, au plus', x + 24, y + 138, { s: 22, c: C.mut });
+        K.riche(ctx, [K.nb(n[2]), [trop ? '  < 408 000' : ok ? '  ≥ 408 000' : '', { c, s: 25 }]], x + 24, y + 178, { s: 32, w: 800, c: C.txt });
+        K.riche(ctx, [K.nb(n[3]) + ' Mbit/s', [' en Main', { c: C.mut }]], x + 24, y + 222, { s: 27, c: i === 1 && t >= e.dmax ? C.txt : C.txt2, w: i === 1 && t >= e.dmax ? 800 : 400 });
         if (trop) verdict(ctx, x + w - 44, y + 44, 22, false);
         if (ok) verdict(ctx, x + w - 44, y + 44, 22, true);
       }, { dy: 30, d: 0.4 });
     });
-    K.entre(ctx, t, e.trop, () => K.t(ctx, 'trop peu', MX + 340 + 24, 650 + 238, { s: 24, w: 800, c: C.rouge }), { dy: 0, d: 0.2 });
     K.onde(ctx, MX + 340 + 160, 775, t, e.trop, { c: C.rouge, r: 200 });
     K.entre(ctx, t, e.ok, () => K.riche(ctx, ['→ ', ['niveau 4.2', { c: C.vert }]], 1180, 614, { s: 68, w: 800, c: C.mut }), { zoom: 0.4, cx: 1400, cy: 592, d: 0.4 });
     K.eclair(ctx, t, e.ok);

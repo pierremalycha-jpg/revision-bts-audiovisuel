@@ -283,7 +283,7 @@
       images(ctx, 700 + 54, y0 + 256, 'IIIIIII', t, e.montageImages[0], 0.1875);
       K.entre(ctx, t, e.montageImages[6] + 0.1, () => K.t(ctx, 'chaque image est indépendante', 960, y0 + 362, { s: 26, c: C.txt2, a: 'center' }), { dy: 0 });
     });
-    lignes(700, e.montageDetail, ['intra · 10 bits · peu compressés', 'légers à décoder', 'supportent plusieurs réencodages']);
+    lignes(700, e.montageDetail, ['intra · 10 bits · peu compressés', 'légers à décoder', 'résistent aux réencodages']);
     // diffusion : un GOP long
     volet(1290, e.diffusion, C.bleu, 'Diffusion', 'la livraison au public', [['H.264', 'HEVC', 'AV1']], () => {
       const x = 1290 + 54, y = y0 + 256;
@@ -292,7 +292,7 @@
       K.entre(ctx, t, e.gop + 0.5, () => {
         ctx.strokeStyle = IPB.P; ctx.lineWidth = 3;
         [[0, 3], [3, 6]].forEach(([a, b]) => { ctx.beginPath(); ctx.moveTo(x + a * 60 + 26, y - 4); ctx.quadraticCurveTo(x + (a + b) * 30 + 26, y - 40, x + b * 60 + 26, y - 6); ctx.stroke(); ctx.fillStyle = IPB.P; ctx.beginPath(); ctx.arc(x + b * 60 + 26, y - 6, 5, 0, 7); ctx.fill(); });
-        K.t(ctx, 'les images dépendent les unes des autres', 1550, y0 + 362, { s: 26, c: C.txt2, a: 'center' });
+        K.t(ctx, 'chaque image dépend des autres', 1550, y0 + 362, { s: 26, c: C.txt2, a: 'center' });
       }, { dy: 0 });
     });
     lignes(1290, e.diffusionDetail, ['GOP long · très efficaces', 'mais lourds à monter', 'web, TNT, Blu-ray, plateformes']);
@@ -357,20 +357,20 @@
 
     // --- le proxy : monter avec une copie légère, exporter avec les originaux ---
     K.entre(ctx, t, e.originaux, () => {
-      K.carte(ctx, MX, 250, 430, 150, { s: K.rgba(C.ora, 0.6), f: K.rgba(C.ora, 0.07) });
+      K.carte(ctx, MX, 250, 410, 150, { s: K.rgba(C.ora, 0.6), f: K.rgba(C.ora, 0.07) });
       K.t(ctx, 'Rushes originaux', 140, 306, { s: 38, w: 800, c: C.ora });
       K.t(ctx, 'les fichiers de la caméra', 140, 348, { s: 28, c: C.txt2 });
-      K.rr(ctx, 140, 366, 370, 14, 7); ctx.fillStyle = C.ora; ctx.fill();
+      K.rr(ctx, 140, 366, 350, 14, 7); ctx.fillStyle = C.ora; ctx.fill();
     }, { dy: 24 });
-    K.entre(ctx, t, e.copie, () => { K.fleche(ctx, 556, 325, 670, 325, { c: C.vert, lw: 6 }); K.t(ctx, 'copie légère', 610, 300, { s: 26, w: 700, c: C.vert, a: 'center' }); }, { dx: -20, dy: 0, d: 0.3 });
+    K.entre(ctx, t, e.copie, () => { K.fleche(ctx, 540, 325, 704, 325, { c: C.vert, lw: 6 }); K.t(ctx, 'copie légère', 618, 300, { s: 26, w: 700, c: C.vert, a: 'center' }); }, { dx: -20, dy: 0, d: 0.3 });
     K.entre(ctx, t, e.proxys, () => {
-      K.carte(ctx, 690, 262, 330, 126, { s: K.rgba(C.vert, 0.7), f: K.rgba(C.vert, 0.09) });
-      K.t(ctx, 'Proxys', 720, 318, { s: 38, w: 800, c: C.vert });
-      K.rr(ctx, 720, 346, 74, 14, 7); ctx.fillStyle = C.vert; ctx.fill();
-      K.t(ctx, 'ProRes Proxy · DNxHR LB · H.264', 855, 426, { s: 26, c: C.txt2, a: 'center' });
-    }, { zoom: 0.35, cx: 855, cy: 325, d: 0.4 });
+      K.carte(ctx, 724, 262, 310, 126, { s: K.rgba(C.vert, 0.7), f: K.rgba(C.vert, 0.09) });
+      K.t(ctx, 'Proxys', 754, 318, { s: 38, w: 800, c: C.vert });
+      K.rr(ctx, 754, 346, 74, 14, 7); ctx.fillStyle = C.vert; ctx.fill();
+      K.t(ctx, 'ProRes Proxy · DNxHR LB · H.264', 879, 426, { s: 26, c: C.txt2, a: 'center' });
+    }, { zoom: 0.35, cx: 879, cy: 325, d: 0.4 });
     K.entre(ctx, t, e.montage, () => {
-      K.fleche(ctx, 1040, 325, 1150, 325, { c: C.vert, lw: 6 });
+      K.fleche(ctx, 1052, 325, 1154, 325, { c: C.vert, lw: 6 });
       K.carte(ctx, 1170, 250, 470, 150, { s: K.rgba(C.bleu, 0.6), f: K.rgba(C.bleu, 0.07) });
       K.t(ctx, 'Montage', 1200, 306, { s: 38, w: 800, c: C.bleu });
       K.t(ctx, 'fluide, même sur une', 1200, 346, { s: 28, c: C.txt2 }); K.t(ctx, 'machine modeste', 1200, 380, { s: 28, c: C.txt2 });
@@ -415,7 +415,7 @@
     K.entre(ctx, t, e.audio, () => {
       K.riche(ctx, [['D', { c: C.vert }], ['audio', { s: 44, c: C.vert }], ' = f', ['e', { s: 44 }], ' × q × n'], MX, 326, { s: 88, w: 800, c: C.txt });
       const legende = [[[['f', { c: C.txt, w: 800 }], ['e', { c: C.txt, w: 800, s: 22 }]], 'la fréquence d’échantillonnage : 48 000 Hz en vidéo'], [[['q', { c: C.txt, w: 800 }]], 'la quantification : 16 ou 24 bits'], [[['n', { c: C.txt, w: 800 }]], 'le nombre de voies : 2 en stéréo, 8 sur un PAD']];
-      legende.forEach((l, k) => K.riche(ctx, [...l[0], '   ' + l[1]], 990, 262 + k * 42, { s: 30, c: C.txt2 }));
+      legende.forEach((l, k) => K.riche(ctx, [...l[0], '   ' + l[1]], 990, 254 + k * 42, { s: 30, c: C.txt2 }));
     });
     K.entre(ctx, t, e.exemple, () => K.t(ctx, '48 000 × 24 × 2 = 2 304 000 bit/s', MX, 420, { s: 52, w: 700, c: C.txt2 }), { dx: -24, dy: 0 });
     K.entre(ctx, t, e.audioResultat, () => {

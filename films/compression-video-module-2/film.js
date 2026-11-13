@@ -119,7 +119,7 @@
       // le quadrillage se pose, colonne après colonne
       const g = clamp((t - e.grille) / 0.9);
       if (g > 0) {
-        ctx.save(); K.rr(ctx, ix, iy, iw, ih, 14); ctx.clip(); ctx.strokeStyle = K.rgba(C.jaune, 0.55); ctx.lineWidth = 1.5;
+        ctx.save(); K.rr(ctx, ix, iy, iw, ih, 14); ctx.clip(); ctx.strokeStyle = K.rgba(C.jaune, 0.32); ctx.lineWidth = 1.5;
         for (let k = 1; k < 40 * g; k++) { ctx.beginPath(); ctx.moveTo(ix + k * pasB, iy); ctx.lineTo(ix + k * pasB, iy + ih); ctx.stroke(); }
         for (let k = 1; k < 23 * g; k++) { ctx.beginPath(); ctx.moveTo(ix, iy + k * pasB); ctx.lineTo(ix + iw, iy + k * pasB); ctx.stroke(); }
         ctx.restore();
@@ -188,8 +188,9 @@
       const l = K.puce(ctx, 'AC', x, 800, { s: 34, c: C.ora, plein: true });
       K.t(ctx, 'les 63 variations', x + l + 18, 813, { s: 40, w: 700 });
       K.t(ctx, 'l’énergie se concentre en haut à gauche', x, 868, { s: 30, c: C.txt2 });
-      etiquette(ctx, '↖ basses fréquences', gc, gy + cote * 8 + 42, C.ora);
-      etiquette(ctx, 'hautes ↘', gc + cote * 8, gy + cote * 8 + 42, C.mut, 'right');
+      etiquette(ctx, '↖ basses', gc, gy + cote * 8 + 42, C.ora);
+      etiquette(ctx, 'fréquences', gc + cote * 4, gy + cote * 8 + 42, C.mut, 'center');
+      etiquette(ctx, 'hautes ↘', gc + cote * 8, gy + cote * 8 + 42, C.txt2, 'right');
     }, { dx: 30, dy: 0 });
     K.entre(ctx, t, e.piege, () => K.piege(ctx, ['Piège : en haut à gauche, ce n’est pas un pixel : c’est ', ['la moyenne', { c: C.jaune }], '.'], MX, 950, { s: 36 }), { dy: 24 });
   }
@@ -208,7 +209,7 @@
       grille(ctx, gx[0], gy, cote, (i, x, y, c) => {
         const a = Math.log10(1 + Math.abs(DCT[i])) / DCT_MAX;
         K.rr(ctx, x + 1.5, y + 1.5, c - 3, c - 3, 6); ctx.fillStyle = K.rgba(C.ora, 0.07 + 0.5 * a); ctx.fill();
-        nombre(DCT[i], x, y, c, DCT[i] ? C.txt : '#6e6e73');
+        nombre(DCT[i], x, y, c, DCT[i] ? C.txt : '#8e8e93');
       });
     }, { dy: 24 });
     // la table : petits pas en haut à gauche, grands pas en bas à droite
@@ -238,11 +239,11 @@
         if (p <= 0) { K.rr(ctx, x + 1.5, y + 1.5, c - 3, c - 3, 6); ctx.fillStyle = 'rgba(255,255,255,.03)'; ctx.fill(); return; }
         ctx.save(); ctx.globalAlpha *= p;
         K.rr(ctx, x + 1.5, y + 1.5, c - 3, c - 3, 6); ctx.fillStyle = FQ[i] ? C.ora : 'rgba(255,255,255,.05)'; ctx.fill();
-        nombre(FQ[i], x, y, c, FQ[i] ? '#0b0c0e' : '#6e6e73');
+        nombre(FQ[i], x, y, c, FQ[i] ? '#0b0c0e' : '#8e8e93');
         ctx.restore();
       });
     }
-    K.entre(ctx, t, e.zeros, () => K.riche(ctx, [[NB_ZEROS + ' coefficients sur 64', { c: C.ora, w: 800 }], ' deviennent 0'], gx[2] + L / 2, gy + L + 46, { s: 32, w: 700, c: C.txt, a: 'center' }), { zoom: 0.25, cx: gx[2] + L / 2, cy: gy + L + 36, d: 0.4 });
+    K.entre(ctx, t, e.zeros, () => K.riche(ctx, [[NB_ZEROS + ' coefficients sur 64', { c: C.ora, w: 800 }], ' → 0'], gx[2] + L / 2, gy + L + 46, { s: 32, w: 800, c: C.txt, a: 'center' }), { zoom: 0.25, cx: gx[2] + L / 2, cy: gy + L + 36, d: 0.4 });
     K.onde(ctx, gx[2] + L / 2, gy + L / 2, t, e.zeros, { c: C.ora, r: 380 });
     K.eclair(ctx, t, e.zeros);
     // la formule et les deux exemples du cours
@@ -300,12 +301,12 @@
         K.carte(ctx, q.x, y, w, h, { s: K.rgba(q.c, 0.5), f: K.rgba(q.c, 0.07) });
         K.t(ctx, 'Qualité ' + q.q, q.x + 32, y + 60, { s: 44, w: 800 });
         K.t(ctx, 'S = ' + q.s + ' %', q.x + w - 32, y + 58, { s: 30, c: C.txt2, a: 'right' });
-        K.t(ctx, q.effet, q.x + 32, y + 116, { s: 40, w: 800, c: q.c });
-        K.t(ctx, 'pas du DC : ' + q.dc, q.x + w - 32, y + 114, { s: 30, w: 700, c: C.txt, a: 'right' });
+        K.t(ctx, q.effet, q.x + 32, y + 112, { s: 40, w: 800, c: q.c });
+        K.t(ctx, 'pas du DC : ' + q.dc, q.x + 32, y + 156, { s: 28, w: 700, c: C.txt2 });
         // la règle : des graduations d'autant plus espacées que le pas est grand
         ctx.strokeStyle = q.c; ctx.lineWidth = 3; ctx.lineCap = 'round';
-        ctx.beginPath(); ctx.moveTo(q.x + 32, y + 178); ctx.lineTo(q.x + w - 32, y + 178); ctx.stroke();
-        for (let gx = q.x + 32; gx <= q.x + w - 32 + 0.5; gx += q.dc * 1.86) { ctx.beginPath(); ctx.moveTo(gx, y + 160); ctx.lineTo(gx, y + 196); ctx.stroke(); }
+        ctx.beginPath(); ctx.moveTo(q.x + 32, y + 190); ctx.lineTo(q.x + w - 32, y + 190); ctx.stroke();
+        for (let gx = q.x + 32; gx <= q.x + w - 32 + 0.5; gx += q.dc * 1.86) { ctx.beginPath(); ctx.moveTo(gx, y + 176); ctx.lineTo(gx, y + 204); ctx.stroke(); }
       }, { zoom: 0.25, cx: q.x + w / 2, cy: y + h / 2, d: 0.4 });
       K.onde(ctx, q.x + w / 2, y + h / 2, t, e.cartes[i], { c: q.c, r: 300 });
     });
@@ -325,9 +326,10 @@
       etiquette(ctx, 'coefficients quantifiés', gx, gy - 16);
       grille(ctx, gx, gy, cote, (i, x, y, c) => {
         K.rr(ctx, x + 1.5, y + 1.5, c - 3, c - 3, 6); ctx.fillStyle = FQ[i] ? C.ora : 'rgba(255,255,255,.06)'; ctx.fill();
-        K.t(ctx, moins(FQ[i]), x + c / 2, y + c / 2 + 2, { s: 25, w: 700, c: FQ[i] ? '#0b0c0e' : '#6e6e73', a: 'center', b: 'middle' });
+        K.t(ctx, moins(FQ[i]), x + c / 2, y + c / 2 + 2, { s: 25, w: 700, c: FQ[i] ? '#0b0c0e' : '#8e8e93', a: 'center', b: 'middle' });
       });
-      K.t(ctx, 'lecture en zigzag : du DC vers les hautes fréquences', gx, gy + cote * 8 + 40, { s: 26, c: C.txt2 });
+      K.t(ctx, 'lecture en zigzag :', gx, gy + cote * 8 + 40, { s: 26, w: 700, c: C.bleu });
+      K.t(ctx, 'du DC vers les hautes fréquences', gx, gy + cote * 8 + 76, { s: 26, c: C.txt2 });
     }, { dy: 24 });
     // le trajet
     if (t >= e.trajet0) {
@@ -338,6 +340,12 @@
       let tete = centre(k0);
       if (k0 < 63) { const a = centre(k0), b = centre(k0 + 1), f = n - k0; tete = [lerp(a[0], b[0], f), lerp(a[1], b[1], f)]; ctx.lineTo(...tete); }
       ctx.stroke(); ctx.restore();
+      // les valeurs non nulles repassent par-dessus le trajet : elles restent lisibles
+      grille(ctx, gx, gy, cote, (i, x, y, c) => {
+        if (!FQ[i]) return;
+        K.rr(ctx, x + 1.5, y + 1.5, c - 3, c - 3, 6); ctx.fillStyle = C.ora; ctx.fill();
+        K.t(ctx, moins(FQ[i]), x + c / 2, y + c / 2 + 2, { s: 25, w: 700, c: '#0b0c0e', a: 'center', b: 'middle' });
+      });
       ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(tete[0], tete[1], 9, 0, 7); ctx.fill();
     }
     // la suite lue, dans l'ordre : les valeurs utiles d'abord, les zéros à la fin
@@ -390,14 +398,14 @@
       for (let a = 0; a < 9; a++) for (let b = 0; b < 6; b++) { const v = 44 + a * 17 + b * 5 + (K.alea(a * 7 + b) - 0.5) * 22; ctx.fillStyle = `rgb(${Math.round(v * 0.55)},${Math.round(v * 0.75)},${Math.round(v)})`; ctx.fillRect(x + a * 40, y + b * 40, 40, 40); }
     } else if (i === 1) { // des oscillations autour d'un bord net
       ctx.fillStyle = '#101216'; ctx.fillRect(x, y, w, h);
-      const x0 = x + 30, xb = x + 150, yh = y + 56, yb = y + 150;
-      ctx.strokeStyle = C.mut; ctx.lineWidth = 2.5; ctx.setLineDash([8, 8]); ctx.beginPath(); ctx.moveTo(x0, yb); ctx.lineTo(xb, yb); ctx.lineTo(xb, yh); ctx.lineTo(x + w - 20, yh); ctx.stroke(); ctx.setLineDash([]);
+      const x0 = x + 24, xb = x + 170, yh = y + 62, yb = y + 146;
+      ctx.strokeStyle = '#c7c7cc'; ctx.lineWidth = 3; ctx.setLineDash([8, 8]); ctx.beginPath(); ctx.moveTo(x0, yb); ctx.lineTo(xb, yb); ctx.lineTo(xb, yh); ctx.lineTo(x + w - 20, yh); ctx.stroke(); ctx.setLineDash([]);
       ctx.strokeStyle = C.ora; ctx.lineWidth = 4; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(x0, yb);
       const vague = 1 + 0.12 * Math.sin(t * 2.2);
-      for (let px = x0; px <= x + w - 20; px += 2) { const d = px - xb; const yy = d < 0 ? yb + 16 * vague * Math.sin(d / 7) * Math.exp(d / 22) : yh + 18 * vague * Math.sin(d / 7) * Math.exp(-d / 22); ctx.lineTo(px, yy); }
+      for (let px = x0; px <= x + w - 20; px += 2) { const d = px - xb; const yy = d < 0 ? yb + 30 * vague * Math.sin(d / 8) * Math.exp(d / 34) : yh + 34 * vague * Math.sin(d / 8) * Math.exp(-d / 34); ctx.lineTo(px, yy); }
       ctx.stroke();
     } else if (i === 2) { // la luminance reste nette, la couleur (très sous-échantillonnée) déborde
-      ctx.drawImage(K.imageCanevas('mixte:24'), 330, 120, 420, 236, x, y, w, h);
+      ctx.drawImage(K.imageCanevas('mixte:24'), 300, 110, 400, 224, x, y, w, h);
     } else { // en haut le dégradé, en bas ses marches d'escalier
       for (let px = 0; px < w; px += 2) { const u = px / w; ctx.fillStyle = `rgb(${Math.round(20 + 60 * u)},${Math.round(50 + 110 * u)},${Math.round(110 + 140 * u)})`; ctx.fillRect(x + px, y, 2, h / 2); }
       for (let k = 0; k < 6; k++) { const u = (k + 0.5) / 6; ctx.fillStyle = `rgb(${Math.round(20 + 60 * u)},${Math.round(50 + 110 * u)},${Math.round(110 + 140 * u)})`; ctx.fillRect(x + (k * w) / 6, y + h / 2, w / 6 + 1, h / 2); }
@@ -462,7 +470,7 @@
   K.monter({
     chaine: scChaine, preparer: scPreparer, dct: scDct, quantif: scQuantif, qualite: scQualite, zigzag: scZigzag, artefacts: scArtefacts, intra: scIntra,
     retenir: K.scRetenir([
-      ['La chaîne JPEG', 'Y′CbCr + 4:2:0 · blocs 8 × 8 · DCT · quantification · zigzag + RLE · Huffman', C.bleu],
+      ['La chaîne JPEG', 'Y′CbCr · blocs 8 × 8 · DCT · quantification · zigzag · Huffman', C.bleu],
       ['DCT : 64 pixels → 64 coefficients', 'elle range, elle ne perd rien', C.vio],
       ['DC = la moyenne du bloc', '63 AC : des basses aux hautes fréquences', C.jaune],
       ['Fq = arrondi(F ÷ Q)', 'la quantification : seule étape irréversible', C.ora],

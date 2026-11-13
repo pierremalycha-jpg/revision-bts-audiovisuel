@@ -178,7 +178,7 @@
       K.entre(ctx, t, e.cartes[i], () => {
         K.carte(ctx, x, 770, 546, 170, {});
         K.riche(ctx, c[0], x + 36, 828, { s: 36, w: 700, c: C.txt2 });
-        K.riche(ctx, c[1], x + 36, 900, { s: 46, w: 700, c: C.txt });
+        K.riche(ctx, c[1], x + 36, 900, { s: 42, w: 700, c: C.txt });
       }, { dy: 30 });
     });
     K.eclair(ctx, t, e.cartes[2]);
@@ -246,7 +246,7 @@
     K.entre(ctx, t, e.vecteur, () => {
       K.fleche(ctx, xr + bx + bs / 2, y + by + bs / 2, xr + mx + bs / 2, y + my + bs / 2, { c: C.jaune, lw: 6 });
       K.carte(ctx, xt, 790, 520, 160, { s: K.rgba(C.jaune, 0.55), f: K.rgba(C.jaune, 0.08) });
-      K.t(ctx, 'Vecteur de mouvement (dx ; dy)', xt + 28, 842, { s: 31, w: 800, c: C.jaune });
+      K.riche(ctx, ['Vecteur de mouvement ', ['(dx ; dy)', { s: 27, w: 700 }]], xt + 28, 842, { s: 31, w: 800, c: C.jaune });
       K.t(ctx, 'Aucun pixel : il dit seulement', xt + 28, 886, { s: 28, c: C.txt }); K.t(ctx, 'où aller chercher le bloc.', xt + 28, 922, { s: 28, c: C.txt });
     }, { dy: 20 });
 
